@@ -57,11 +57,12 @@ export function EmployeesPage() {
     }
   };
 
-  useEffect(() => {
-    if (employees.length === 0) {
-      addSampleEmployees();
-    }
-  }, [employees.length]);
+  // Entfernt: Automatische Hinzufügung von Beispieldaten
+  // useEffect(() => {
+  //   if (employees.length === 0) {
+  //     addSampleEmployees();
+  //   }
+  // }, [employees.length]);
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Mitarbeiter...</div>;

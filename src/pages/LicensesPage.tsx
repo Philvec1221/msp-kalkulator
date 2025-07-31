@@ -69,11 +69,12 @@ export function LicensesPage() {
     }
   };
 
-  useEffect(() => {
-    if (licenses.length === 0) {
-      addSampleLicenses();
-    }
-  }, [licenses.length]);
+  // Entfernt: Automatische Hinzufügung von Beispieldaten
+  // useEffect(() => {
+  //   if (licenses.length === 0) {
+  //     addSampleLicenses();
+  //   }
+  // }, [licenses.length]);
 
   const filteredLicenses = licenses.filter(license => {
     const billingType = getBillingType(license.name);
