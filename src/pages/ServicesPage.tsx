@@ -9,6 +9,7 @@ import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { ServiceForm } from "@/components/forms/ServiceForm";
+import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,7 +95,10 @@ export function ServicesPage() {
             Erstellen und verwalten Sie Ihre Service-Angebote.
           </p>
         </div>
-        <ServiceForm onSubmit={addService} />
+        <div className="flex gap-2">
+          <BulkImportDialog onImportComplete={() => window.location.reload()} />
+          <ServiceForm onSubmit={addService} />
+        </div>
       </div>
 
       {services.length > 0 && (
