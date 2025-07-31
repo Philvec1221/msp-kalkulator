@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Settings, Edit, Trash, Search, Filter, Clock } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
+import { useLicenses } from "@/hooks/useLicenses";
+import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { ServiceForm } from "@/components/forms/ServiceForm";
 import {
   AlertDialog,
@@ -21,6 +23,8 @@ import {
 
 export function ServicesPage() {
   const { services, loading, addService, updateService, deleteService } = useServices();
+  const { licenses } = useLicenses();
+  const { getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("");
 
@@ -162,10 +166,25 @@ export function ServicesPage() {
                       {service.description && (
                         <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
                       )}
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-muted-foreground">
-                          Produkt: {service.product_name || 'Nicht angegeben'}
-                        </span>
+                      <div className="flex flex-col gap-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">Lizenzen:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {(() => {
+                              const serviceLicenseIds = getLicensesByServiceId(service.id);
+                              const serviceLicenses = licenses.filter(license => serviceLicenseIds.includes(license.id));
+                              return serviceLicenses.length > 0 ? (
+                                serviceLicenses.map(license => (
+                                  <Badge key={license.id} variant="outline" className="text-xs">
+                                    {license.name}
+                                  </Badge>
+                                ))
+                              ) : (
+                                <span className="text-muted-foreground italic">Keine Lizenzen zugeordnet</span>
+                              );
+                            })()}
+                          </div>
+                        </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">

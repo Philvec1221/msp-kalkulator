@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit } from "lucide-react";
 import { Service } from "@/hooks/useServices";
+import { useLicenses } from "@/hooks/useLicenses";
+import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { MultiSelect } from "@/components/ui/multi-select";
 
 interface ServiceFormProps {
   service?: Service;
@@ -26,17 +29,44 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
     package_level: service?.package_level || 'basis',
     active: service?.active ?? true,
   });
+  const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  
+  const { licenses } = useLicenses();
+  const { updateServiceLicenses, getLicensesByServiceId } = useServiceLicenses();
+
+  // Lade bestehende Lizenzen wenn Service bearbeitet wird
+  useEffect(() => {
+    if (service && service.id) {
+      const existingLicenses = getLicensesByServiceId(service.id);
+      setSelectedLicenses(existingLicenses);
+    }
+  }, [service, getLicensesByServiceId]);
+
+  // Bereite Lizenzoptionen für MultiSelect vor
+  const licenseOptions = licenses.map(license => ({
+    value: license.id,
+    label: license.name
+  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     
     try {
-      await onSubmit(formData);
+      const result = await onSubmit(formData);
+      
+      // Nach erfolgreichem Speichern die Lizenzen verknüpfen
+      if (result && result.id) {
+        await updateServiceLicenses(result.id, selectedLicenses);
+      } else if (service && service.id) {
+        await updateServiceLicenses(service.id, selectedLicenses);
+      }
+      
       setOpen(false);
       if (!service) {
         setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'basis', active: true });
+        setSelectedLicenses([]);
       }
     } catch (error) {
       // Error handling is done in the hook
@@ -91,12 +121,12 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="product_name">Produkt</Label>
-            <Input
-              id="product_name"
-              value={formData.product_name}
-              onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
-              placeholder="z.B. Monitoring Suite"
+            <Label htmlFor="licenses">Lizenzen</Label>
+            <MultiSelect
+              options={licenseOptions}
+              selected={selectedLicenses}
+              onChange={setSelectedLicenses}
+              placeholder="Lizenzen auswählen..."
             />
           </div>
 
