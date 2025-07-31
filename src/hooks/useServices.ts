@@ -1,0 +1,133 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+export interface Service {
+  id: string;
+  name: string;
+  description: string | null;
+  time_in_minutes: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useServices() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchServices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setServices(data || []);
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      toast({
+        title: "Fehler",
+        description: "Services konnten nicht geladen werden.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .insert([service])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setServices(prev => [data, ...prev]);
+      toast({
+        title: "Erfolg",
+        description: "Service wurde hinzugefügt.",
+      });
+      return data;
+    } catch (error) {
+      console.error('Error adding service:', error);
+      toast({
+        title: "Fehler",
+        description: "Service konnte nicht hinzugefügt werden.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const updateService = async (id: string, updates: Partial<Service>) => {
+    try {
+      const { data, error } = await supabase
+        .from('services')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setServices(prev => prev.map(svc => svc.id === id ? data : svc));
+      toast({
+        title: "Erfolg",
+        description: "Service wurde aktualisiert.",
+      });
+      return data;
+    } catch (error) {
+      console.error('Error updating service:', error);
+      toast({
+        title: "Fehler",
+        description: "Service konnte nicht aktualisiert werden.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const deleteService = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('services')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setServices(prev => prev.filter(svc => svc.id !== id));
+      toast({
+        title: "Erfolg",
+        description: "Service wurde gelöscht.",
+      });
+    } catch (error) {
+      console.error('Error deleting service:', error);
+      toast({
+        title: "Fehler",
+        description: "Service konnte nicht gelöscht werden.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  return {
+    services,
+    loading,
+    addService,
+    updateService,
+    deleteService,
+    refetch: fetchServices
+  };
+}

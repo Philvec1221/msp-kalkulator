@@ -6,6 +6,7 @@ import { LicensesPage } from "@/pages/LicensesPage";
 import { ServicesPage } from "@/pages/ServicesPage";
 import { PackagesPage } from "@/pages/PackagesPage";
 import { CalculatorPage } from "@/pages/CalculatorPage";
+import { BackupPage } from "@/pages/BackupPage";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("employees");
@@ -26,6 +27,9 @@ const Index = () => {
       </TabsContent>
       <TabsContent value="calculator">
         <CalculatorPage />
+      </TabsContent>
+      <TabsContent value="backup">
+        <BackupPage />
       </TabsContent>
     </MainLayout>
   );

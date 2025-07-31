@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FileText, Settings, Calculator, Package } from "lucide-react";
+import { Users, FileText, Settings, Calculator, Package, Database } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,7 +25,7 @@ export function MainLayout({ children, activeTab, onTabChange }: MainLayoutProps
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="employees" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Mitarbeiter</span>
@@ -45,6 +45,10 @@ export function MainLayout({ children, activeTab, onTabChange }: MainLayoutProps
             <TabsTrigger value="calculator" className="flex items-center gap-2">
               <Calculator className="h-4 w-4" />
               <span className="hidden sm:inline">Kalkulation</span>
+            </TabsTrigger>
+            <TabsTrigger value="backup" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              <span className="hidden sm:inline">Backup</span>
             </TabsTrigger>
           </TabsList>
           
