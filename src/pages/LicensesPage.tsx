@@ -84,8 +84,8 @@ export function LicensesPage() {
     return matchesSearch && matchesCategory && matchesBillingType;
   });
 
-  const uniqueCategories = [...new Set(licenses.map(license => license.category))];
-  const uniqueBillingTypes = [...new Set(licenses.map(license => license.billing_unit))];
+  const uniqueCategories = [...new Set(licenses.map(license => license.category).filter(Boolean))];
+  const uniqueBillingTypes = [...new Set(licenses.map(license => license.billing_unit).filter(Boolean))];
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Lizenzen...</div>;
