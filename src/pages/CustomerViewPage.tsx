@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, Users, Server, Monitor } from "lucide-react";
+import { useServices } from "@/hooks/useServices";
+import { useLicenses } from "@/hooks/useLicenses";
+import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { useEmployees } from "@/hooks/useEmployees";
 
 interface PackageData {
   name: string;
@@ -21,37 +25,67 @@ export function CustomerViewPage() {
     users: 10
   });
 
-  const packages: PackageData[] = [
-    {
-      name: "Basis",
-      description: "Grundlegende IT-Services für kleine Unternehmen",
-      monthlyPrice: 3417.00,
-      yearlyPrice: 41004.00,
-      services: ["Server Monitoring", "Email Security", "Backup Service", "Endpoint Security"],
-      highlighted: true
-    },
-    {
-      name: "Gold",
-      description: "Erweiterte Services für wachsende Unternehmen",
-      monthlyPrice: 4114.50,
-      yearlyPrice: 49374.00,
-      services: ["Server Monitoring", "Email Security", "Backup Service", "Endpoint Security"]
-    },
-    {
-      name: "Allin",
-      description: "Umfassende IT-Betreuung für professionelle Anforderungen",
-      monthlyPrice: 4114.50,
-      yearlyPrice: 49374.00,
-      services: ["Server Monitoring", "Email Security", "Backup Service", "Endpoint Security"]
-    },
-    {
-      name: "Allin Black",
-      description: "Premium-Services für höchste Ansprüche",
-      monthlyPrice: 4114.50,
-      yearlyPrice: 49374.00,
-      services: ["Server Monitoring", "Email Security", "Backup Service", "Endpoint Security"]
-    }
-  ];
+  // Fetch real data from hooks
+  const { services } = useServices();
+  const { licenses } = useLicenses();
+  const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
+  const { employees } = useEmployees();
+
+  // Calculate average hourly rate per minute
+  const activeEmployees = employees.filter(emp => emp.active);
+  const avgCostPerMinute = activeEmployees.length > 0
+    ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length / 60
+    : 0;
+
+  // Calculate package data from real services and licenses
+  const packages: PackageData[] = useMemo(() => {
+    const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
+    
+    return packageLevels.map((level, index) => {
+      // Get services for this package level
+      const packageServices = services.filter(service => 
+        service.active && service.package_level?.toLowerCase() === level.toLowerCase()
+      );
+
+      // Calculate total cost
+      let totalMonthlyPrice = 0;
+
+      packageServices.forEach(service => {
+        // Add service time cost
+        if (service.billing_type === 'time' && service.time_in_minutes) {
+          totalMonthlyPrice += service.time_in_minutes * avgCostPerMinute;
+        }
+
+        // Add license costs for this service
+        const serviceLicenseIds = getLicensesByServiceId(service.id);
+        serviceLicenseIds.forEach(licenseId => {
+          const license = licenses.find(l => l.id === licenseId && l.active);
+          if (license) {
+            totalMonthlyPrice += Number(license.price_per_month);
+          }
+        });
+      });
+
+      // Apply infrastructure multipliers
+      totalMonthlyPrice *= config.clients * 0.1 + config.servers * 0.2 + config.users * 0.05;
+
+      const descriptions = {
+        'basis': 'Grundlegende IT-Services für kleine Unternehmen',
+        'gold': 'Erweiterte Services für wachsende Unternehmen',
+        'allin': 'Umfassende IT-Betreuung für professionelle Anforderungen',
+        'allin black': 'Premium-Services für höchste Ansprüche'
+      };
+
+      return {
+        name: level.charAt(0).toUpperCase() + level.slice(1),
+        description: descriptions[level as keyof typeof descriptions] || '',
+        monthlyPrice: totalMonthlyPrice,
+        yearlyPrice: totalMonthlyPrice * 12 * 0.9, // 10% discount for yearly
+        services: packageServices.map(s => s.name),
+        highlighted: index === 0 // Highlight first package (Basis)
+      };
+    });
+  }, [services, licenses, serviceLicenses, avgCostPerMinute, config]);
 
   const getPackageVariant = (packageName: string) => {
     switch (packageName.toLowerCase()) {
