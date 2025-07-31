@@ -8,6 +8,7 @@ import { CalculatorPage } from "@/pages/CalculatorPage";
 import { BackupPage } from "@/pages/BackupPage";
 import { ConfigPage } from "@/pages/ConfigPage";
 import { CustomerViewPage } from "@/pages/CustomerViewPage";
+import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
 
 const Index = () => {
   const [activeMainTab, setActiveMainTab] = useState("angebote");
@@ -79,12 +80,15 @@ const Index = () => {
           
           {activeMainTab === "angebote" && (
             <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-transparent h-12">
+              <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
                 <TabsTrigger value="konfig" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Konfig
                 </TabsTrigger>
                 <TabsTrigger value="kalkulation" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Kalkulation
+                </TabsTrigger>
+                <TabsTrigger value="kostenanalyse" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                  Kostenanalyse
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -104,6 +108,7 @@ const Index = () => {
         {/* Angebote Content */}
         {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
         {activeMainTab === "angebote" && activeSubTab === "kalkulation" && <CalculatorPage />}
+        {activeMainTab === "angebote" && activeSubTab === "kostenanalyse" && <CostAnalysisPage />}
         
         {/* Kundenview Content */}
         {activeMainTab === "kundenview" && <CustomerViewPage />}
