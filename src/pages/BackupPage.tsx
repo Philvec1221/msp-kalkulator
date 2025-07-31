@@ -82,10 +82,10 @@ export function BackupPage() {
     await exportData();
   };
 
-  const handleCloudBackup = async () => {
+  const handleCloudBackup = async (isAutomatic: boolean = false) => {
     const backupData = await exportData();
     if (backupData) {
-      const success = await saveBackupToCloud(backupData, backupDescription || undefined);
+      const success = await saveBackupToCloud(backupData, backupDescription || undefined, isAutomatic);
       if (success) {
         setBackupDescription("");
         setCloudBackupDialogOpen(false);
@@ -261,7 +261,7 @@ export function BackupPage() {
                     <Button variant="outline" onClick={() => setCloudBackupDialogOpen(false)}>
                       Abbrechen
                     </Button>
-                    <Button onClick={handleCloudBackup} disabled={loading}>
+                    <Button onClick={() => handleCloudBackup(false)} disabled={loading}>
                       {loading ? 'Erstelle...' : 'Backup erstellen'}
                     </Button>
                   </div>

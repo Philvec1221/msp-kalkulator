@@ -232,10 +232,18 @@ export function useBackup() {
 
   
   // Neue Funktionen für Cloud-Backup
-  const saveBackupToCloud = async (backupData: BackupData, description?: string): Promise<boolean> => {
+  const generateBackupFilename = (isAutomatic: boolean = false) => {
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+    const type = isAutomatic ? 'automatisch' : 'manuell';
+    return `backup-${dateStr}-${timeStr}-${type}.json`;
+  };
+
+  const saveBackupToCloud = async (backupData: BackupData, description?: string, isAutomatic: boolean = false): Promise<boolean> => {
     setLoading(true);
     try {
-      const filename = `backup-${new Date().toISOString().split('T')[0]}-${Date.now()}.json`;
+      const filename = generateBackupFilename(isAutomatic);
       const backupBlob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
       
       // Upload zu Supabase Storage
@@ -253,16 +261,16 @@ export function useBackup() {
           file_path: uploadData.path,
           file_size: backupBlob.size,
           records_count: backupData.metadata.total_records,
-          backup_type: 'manual',
+          backup_type: isAutomatic ? 'automatic' : 'manual',
           description: description || null,
-          created_by: 'user'
+          created_by: isAutomatic ? 'system' : 'user'
         });
 
       if (metadataError) throw metadataError;
 
       toast({
         title: "Cloud-Backup erfolgreich",
-        description: `Backup "${filename}" wurde in der Cloud gespeichert.`,
+        description: `${isAutomatic ? 'Automatisches' : 'Manuelles'} Backup "${filename}" wurde in der Cloud gespeichert.`,
       });
 
       return true;
