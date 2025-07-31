@@ -17,6 +17,14 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Erlaubte E-Mail-Domains
+  const allowedDomains = ["company.com", "example.org"]; // Hier die gewünschten Domains eintragen
+
+  const isEmailDomainAllowed = (email: string) => {
+    const domain = email.split("@")[1]?.toLowerCase();
+    return allowedDomains.includes(domain);
+  };
+
   useEffect(() => {
     // Check if user is already logged in
     const checkAuth = async () => {
@@ -32,6 +40,13 @@ const AuthPage = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    // Domain-Validierung vor der Registrierung
+    if (!isEmailDomainAllowed(email)) {
+      setError("Registrierung ist nur mit erlaubten E-Mail-Domains möglich.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const redirectUrl = `${window.location.origin}/`;
