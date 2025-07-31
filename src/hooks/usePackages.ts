@@ -6,7 +6,6 @@ export interface Package {
   id: string;
   name: string;
   description: string;
-  multiplier: number;
   order_index: number;
   color: string;
   active: boolean;
@@ -25,7 +24,6 @@ export function usePackages() {
       id: '1',
       name: 'Basis',
       description: 'Grundlegende IT-Services für kleine Unternehmen',
-      multiplier: 1.0,
       order_index: 1,
       color: 'default',
       active: true,
@@ -36,7 +34,6 @@ export function usePackages() {
       id: '2', 
       name: 'Gold',
       description: 'Erweiterte Services für wachsende Unternehmen',
-      multiplier: 1.5,
       order_index: 2,
       color: 'warning',
       active: true,
@@ -47,7 +44,6 @@ export function usePackages() {
       id: '3',
       name: 'Allin',
       description: 'Umfassende IT-Betreuung für etablierte Unternehmen',
-      multiplier: 2.0,
       order_index: 3,
       color: 'primary',
       active: true,
@@ -58,7 +54,6 @@ export function usePackages() {
       id: '4',
       name: 'Allin Black',
       description: 'Premium-Services für höchste Ansprüche',
-      multiplier: 3.0,
       order_index: 4,
       color: 'destructive',
       active: true,

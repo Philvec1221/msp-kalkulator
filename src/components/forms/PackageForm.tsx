@@ -20,7 +20,6 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    multiplier: 1.0,
     order_index: 1,
     color: 'default',
     active: true,
@@ -31,7 +30,6 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
       setFormData({
         name: editPackage.name,
         description: editPackage.description,
-        multiplier: editPackage.multiplier,
         order_index: editPackage.order_index,
         color: editPackage.color,
         active: editPackage.active,
@@ -50,7 +48,6 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
         setFormData({
           name: '',
           description: '',
-          multiplier: 1.0,
           order_index: 1,
           color: 'default',
           active: true,
@@ -101,19 +98,6 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               placeholder="Beschreibung des Pakets"
               rows={3}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="multiplier">Multiplikator</Label>
-            <Input
-              id="multiplier"
-              type="number"
-              step="0.1"
-              min="0.1"
-              value={formData.multiplier}
-              onChange={(e) => setFormData(prev => ({ ...prev, multiplier: parseFloat(e.target.value) || 1.0 }))}
-              required
             />
           </div>
 
