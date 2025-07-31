@@ -10,6 +10,7 @@ import { Plus, Edit } from "lucide-react";
 import { Service } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { usePackages } from "@/hooks/usePackages";
 import { MultiSelect } from "@/components/ui/multi-select";
 
 interface ServiceFormProps {
@@ -26,7 +27,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
     product_name: service?.product_name || '',
     time_in_minutes: service?.time_in_minutes || 0,
     billing_type: service?.billing_type || 'fix',
-    package_level: service?.package_level || 'basis',
+    package_level: service?.package_level || 'Basis',
     active: service?.active ?? true,
   });
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
@@ -34,6 +35,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   
   const { licenses, loading: licensesLoading } = useLicenses();
   const { updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
+  const { packages } = usePackages();
 
   // Bereite Lizenzoptionen für MultiSelect vor
   const licenseOptions = (licenses || []).map(license => ({
@@ -65,7 +67,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
       
       setOpen(false);
       if (!service) {
-        setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'basis', active: true });
+        setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'Basis', active: true });
         setSelectedLicenses([]);
       }
     } catch (error) {
@@ -163,10 +165,11 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                   <SelectValue placeholder="Wählen Sie..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basis">ab Basis</SelectItem>
-                  <SelectItem value="gold">ab Gold</SelectItem>
-                  <SelectItem value="allin">ab Allin</SelectItem>
-                  <SelectItem value="allin_black">ab Allin Black</SelectItem>
+                  {packages.map(pkg => (
+                    <SelectItem key={pkg.id} value={pkg.name}>
+                      ab {pkg.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

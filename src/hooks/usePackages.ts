@@ -13,6 +13,17 @@ export interface Package {
   updated_at: string;
 }
 
+// Package hierarchy helper functions
+export const getPackageHierarchy = (minPackageLevel: string): string[] => {
+  const hierarchy = ['Basis', 'Gold', 'Allin', 'Allin Black'];
+  const minIndex = hierarchy.indexOf(minPackageLevel);
+  return minIndex >= 0 ? hierarchy.slice(minIndex) : hierarchy;
+};
+
+export const getAvailablePackagesForService = (packageLevel: string): string[] => {
+  return getPackageHierarchy(packageLevel);
+};
+
 export function usePackages() {
   const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,8 +76,14 @@ export function usePackages() {
   const fetchPackages = async () => {
     try {
       setLoading(true);
-      // Für jetzt verwenden wir Sample-Daten
-      setPackages(samplePackages);
+      const { data, error } = await supabase
+        .from('packages')
+        .select('*')
+        .eq('active', true)
+        .order('order_index');
+      
+      if (error) throw error;
+      setPackages(data || []);
     } catch (error) {
       console.error('Error fetching packages:', error);
       toast({

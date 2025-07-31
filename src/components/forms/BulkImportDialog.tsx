@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Upload, AlertCircle } from 'lucide-react';
 import { useServices } from '@/hooks/useServices';
+import { usePackages, getPackageHierarchy } from '@/hooks/usePackages';
 import { useToast } from '@/hooks/use-toast';
 
 interface BulkImportDialogProps {
@@ -18,12 +19,13 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
   const [open, setOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [defaultBillingType, setDefaultBillingType] = useState('fix');
-  const [defaultPackageLevel, setDefaultPackageLevel] = useState('basis');
+  const [defaultPackageLevel, setDefaultPackageLevel] = useState('Basis');
   const [defaultTime, setDefaultTime] = useState('0');
   const [isImporting, setIsImporting] = useState(false);
   const [previewServices, setPreviewServices] = useState<Array<{name: string, description?: string}>>([]);
   
   const { addService } = useServices();
+  const { packages } = usePackages();
   const { toast } = useToast();
 
   const parseInput = () => {
@@ -107,7 +109,7 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
     setInputText('');
     setPreviewServices([]);
     setDefaultBillingType('fix');
-    setDefaultPackageLevel('basis');
+    setDefaultPackageLevel('Basis');
     setDefaultTime('0');
   };
 
@@ -199,9 +201,11 @@ bei Buchung Managed Total Secure Microsoft 365 Business Premium - EU bereits ent
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="basis">Basis</SelectItem>
-                    <SelectItem value="standard">Standard</SelectItem>
-                    <SelectItem value="premium">Premium</SelectItem>
+                    {packages.map(pkg => (
+                      <SelectItem key={pkg.id} value={pkg.name}>
+                        {pkg.name}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

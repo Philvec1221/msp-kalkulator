@@ -112,6 +112,39 @@ export type Database = {
           },
         ]
       }
+      packages: {
+        Row: {
+          active: boolean
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          order_index: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -172,6 +205,42 @@ export type Database = {
           },
         ]
       }
+      service_packages: {
+        Row: {
+          created_at: string
+          id: string
+          package_name: string
+          service_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          package_name: string
+          service_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          package_name?: string
+          service_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_packages_package_name_fkey"
+            columns: ["package_name"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "service_packages_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           active: boolean
@@ -179,6 +248,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          min_package_level: string | null
           name: string
           package_level: string | null
           product_name: string | null
@@ -191,6 +261,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          min_package_level?: string | null
           name: string
           package_level?: string | null
           product_name?: string | null
@@ -203,6 +274,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          min_package_level?: string | null
           name?: string
           package_level?: string | null
           product_name?: string | null

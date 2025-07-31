@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getPackageHierarchy } from '@/hooks/usePackages';
 
 export interface Service {
   id: string;
@@ -10,6 +11,7 @@ export interface Service {
   time_in_minutes: number;
   billing_type: string;
   package_level: string;
+  min_package_level?: string;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -43,13 +45,38 @@ export function useServices() {
 
   const addService = async (service: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Determine min_package_level from package_level for backward compatibility
+      const minPackageLevel = service.package_level || 'Basis';
+      
+      const serviceData = {
+        ...service,
+        min_package_level: minPackageLevel
+      };
+
       const { data, error } = await supabase
         .from('services')
-        .insert([service])
+        .insert([serviceData])
         .select()
         .single();
 
       if (error) throw error;
+      
+      // Create service_packages entries based on hierarchy
+      const applicablePackages = getPackageHierarchy(minPackageLevel);
+      if (applicablePackages.length > 0) {
+        const servicePackageEntries = applicablePackages.map(packageName => ({
+          service_id: data.id,
+          package_name: packageName
+        }));
+
+        const { error: servicePackagesError } = await supabase
+          .from('service_packages')
+          .insert(servicePackageEntries);
+
+        if (servicePackagesError) {
+          console.error('Error creating service packages:', servicePackagesError);
+        }
+      }
       
       setServices(prev => [data, ...prev]);
       toast({
