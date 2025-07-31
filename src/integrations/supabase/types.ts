@@ -14,7 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employees: {
+        Row: {
+          active: boolean
+          created_at: string
+          hourly_rate: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          hourly_rate: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          hourly_rate?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      licenses: {
+        Row: {
+          active: boolean
+          category: string
+          cost_per_month: number
+          created_at: string
+          id: string
+          name: string
+          price_per_month: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          cost_per_month: number
+          created_at?: string
+          id?: string
+          name: string
+          price_per_month: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          cost_per_month?: number
+          created_at?: string
+          id?: string
+          name?: string
+          price_per_month?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      package_configs: {
+        Row: {
+          created_at: string
+          id: string
+          multiplier: number
+          package_type: string
+          service_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          multiplier?: number
+          package_type: string
+          service_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          multiplier?: number
+          package_type?: string
+          service_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "package_configs_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          time_in_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          time_in_minutes: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          time_in_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
