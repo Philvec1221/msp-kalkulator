@@ -9,6 +9,7 @@ import { Download, Save, Eye, FileText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useLicenses } from "@/hooks/useLicenses";
+import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 
 interface QuoteData {
   customerNumber: string;
@@ -26,6 +27,7 @@ export function CalculatorPage() {
   const { services } = useServices();
   const { employees } = useEmployees();
   const { licenses } = useLicenses();
+  const { getLicensesByServiceId } = useServiceLicenses();
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
@@ -78,8 +80,16 @@ export function CalculatorPage() {
     // Calculate technician costs
     const techCosts = (service.time_in_minutes * averageCostPerMinute * quantity);
     
-    // Calculate license costs (simplified - would need license mapping)
-    const licenseCosts = 0; // This would be calculated based on service-license relationships
+    // Calculate license costs based on service-license relationships
+    let licenseCosts = 0;
+    const serviceLicenseIds = getLicensesByServiceId(service.id);
+    serviceLicenseIds.forEach(licenseId => {
+      const license = licenses.find(l => l.id === licenseId && l.active);
+      if (license) {
+        // Use license cost_per_month for EK calculation
+        licenseCosts += Number(license.cost_per_month) * quantity;
+      }
+    });
     
     const ekTotal = techCosts + licenseCosts;
     const vkTotal = ekTotal * (1 + quoteData.markup / 100);
