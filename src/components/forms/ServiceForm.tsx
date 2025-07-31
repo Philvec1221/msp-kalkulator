@@ -35,19 +35,19 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const { licenses } = useLicenses();
   const { updateServiceLicenses, getLicensesByServiceId } = useServiceLicenses();
 
+  // Bereite Lizenzoptionen für MultiSelect vor
+  const licenseOptions = (licenses || []).map(license => ({
+    value: license.id,
+    label: license.name
+  }));
+
   // Lade bestehende Lizenzen wenn Service bearbeitet wird
   useEffect(() => {
     if (service && service.id) {
       const existingLicenses = getLicensesByServiceId(service.id);
-      setSelectedLicenses(existingLicenses);
+      setSelectedLicenses(existingLicenses || []);
     }
   }, [service, getLicensesByServiceId]);
-
-  // Bereite Lizenzoptionen für MultiSelect vor
-  const licenseOptions = licenses.map(license => ({
-    value: license.id,
-    label: license.name
-  }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

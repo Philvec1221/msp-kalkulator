@@ -171,8 +171,8 @@ export function ServicesPage() {
                           <span className="text-muted-foreground">Lizenzen:</span>
                           <div className="flex flex-wrap gap-1">
                             {(() => {
-                              const serviceLicenseIds = getLicensesByServiceId(service.id);
-                              const serviceLicenses = licenses.filter(license => serviceLicenseIds.includes(license.id));
+                              const serviceLicenseIds = getLicensesByServiceId(service.id) || [];
+                              const serviceLicenses = (licenses || []).filter(license => serviceLicenseIds.includes(license.id));
                               return serviceLicenses.length > 0 ? (
                                 serviceLicenses.map(license => (
                                   <Badge key={license.id} variant="outline" className="text-xs">
