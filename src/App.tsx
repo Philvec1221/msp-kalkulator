@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
+import AdminPage from "./pages/AdminPage";
 import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => {
               element={isAuthenticated ? <Index /> : <AuthPage />} 
             />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
