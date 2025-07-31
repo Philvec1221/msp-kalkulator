@@ -235,7 +235,12 @@ export function LicensesPage() {
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Abrechnungseinheit</p>
                     <Badge 
-                      variant={getBillingType(license.name) === "Fix" ? "secondary" : "default"} 
+                      variant={
+                        getBillingType(license.name) === "Fix" ? "secondary" :
+                        getBillingType(license.name) === "pro User" ? "default" :
+                        getBillingType(license.name) === "pro Client" ? "destructive" :
+                        "outline"
+                      }
                       className="text-xs"
                     >
                       {getBillingType(license.name)}
