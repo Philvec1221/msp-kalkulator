@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { EmployeesPage } from "@/pages/EmployeesPage";
 import { LicensesPage } from "@/pages/LicensesPage";
 import { ServicesPage } from "@/pages/ServicesPage";
@@ -13,15 +16,29 @@ import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
 const Index = () => {
   const [activeMainTab, setActiveMainTab] = useState("angebote");
   const [activeSubTab, setActiveSubTab] = useState("kalkulation");
+  const { signOut } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
-        <div className="container mx-auto px-4 py-6 text-center">
-          <h1 className="text-3xl font-bold">vectano MSP Calculator</h1>
-          <p className="text-teal-100 mt-2">Professionelle Enterprise-Lösung für MSP-Kalkulation</p>
-          <p className="text-teal-200 text-sm mt-1">Version 1.1.0 - Produktionsbereit für Enterprise-Einsatz</p>
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <div className="text-center flex-1">
+              <h1 className="text-3xl font-bold">vectano MSP Calculator</h1>
+              <p className="text-teal-100 mt-2">Professionelle Enterprise-Lösung für MSP-Kalkulation</p>
+              <p className="text-teal-200 text-sm mt-1">Version 1.1.0 - Produktionsbereit für Enterprise-Einsatz</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={signOut}
+              className="text-white hover:bg-white/20"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Abmelden
+            </Button>
+          </div>
         </div>
       </header>
 
