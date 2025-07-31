@@ -7,10 +7,11 @@ import { PackagesPage } from "@/pages/PackagesPage";
 import { CalculatorPage } from "@/pages/CalculatorPage";
 import { BackupPage } from "@/pages/BackupPage";
 import { ConfigPage } from "@/pages/ConfigPage";
+import { CustomerViewPage } from "@/pages/CustomerViewPage";
 
 const Index = () => {
-  const [activeMainTab, setActiveMainTab] = useState("verwaltung");
-  const [activeSubTab, setActiveSubTab] = useState("konfig");
+  const [activeMainTab, setActiveMainTab] = useState("angebote");
+  const [activeSubTab, setActiveSubTab] = useState("kalkulation");
 
   return (
     <div className="min-h-screen bg-background">
@@ -78,15 +79,12 @@ const Index = () => {
           
           {activeMainTab === "angebote" && (
             <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
+              <TabsList className="grid w-full grid-cols-2 bg-transparent h-12">
                 <TabsTrigger value="konfig" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Konfig
                 </TabsTrigger>
-                <TabsTrigger value="vergleich" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Vergleich
-                </TabsTrigger>
-                <TabsTrigger value="angebot" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Angebote
+                <TabsTrigger value="kalkulation" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                  Kalkulation
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -105,11 +103,10 @@ const Index = () => {
         
         {/* Angebote Content */}
         {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
-        {activeMainTab === "angebote" && activeSubTab === "vergleich" && <div>Vergleich Seite - wird implementiert</div>}
-        {activeMainTab === "angebote" && activeSubTab === "angebot" && <div>Angebot Seite - wird implementiert</div>}
+        {activeMainTab === "angebote" && activeSubTab === "kalkulation" && <CalculatorPage />}
         
         {/* Kundenview Content */}
-        {activeMainTab === "kundenview" && <div>Kundenansicht - wird implementiert</div>}
+        {activeMainTab === "kundenview" && <CustomerViewPage />}
       </div>
     </div>
   );
