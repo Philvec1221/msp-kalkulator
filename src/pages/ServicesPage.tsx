@@ -25,7 +25,7 @@ import {
 export function ServicesPage() {
   const { services, loading, addService, updateService, deleteService } = useServices();
   const { licenses } = useLicenses();
-  const { getLicensesByServiceId } = useServiceLicenses();
+  const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
 
@@ -176,13 +176,28 @@ export function ServicesPage() {
                           <div className="flex flex-wrap gap-1">
                             {(() => {
                               const serviceLicenseIds = getLicensesByServiceId(service.id) || [];
-                              const serviceLicenses = (licenses || []).filter(license => serviceLicenseIds.includes(license.id));
-                              return serviceLicenses.length > 0 ? (
-                                serviceLicenses.map(license => (
-                                  <Badge key={license.id} variant="outline" className="text-xs">
-                                    {license.name}
-                                  </Badge>
-                                ))
+                              const filteredLicenses = (licenses || []).filter(license => serviceLicenseIds.includes(license.id));
+                              return filteredLicenses.length > 0 ? (
+                                filteredLicenses.map(license => {
+                                  const serviceLicense = serviceLicenses.find(sl => 
+                                    sl.service_id === service.id && sl.license_id === license.id
+                                  );
+                                  const includeCost = serviceLicense?.include_cost ?? true;
+                                  
+                                  return (
+                                    <Badge 
+                                      key={license.id} 
+                                      variant={includeCost ? "outline" : "secondary"} 
+                                      className={`text-xs ${!includeCost ? 'opacity-60' : ''}`}
+                                      title={includeCost ? 'Kosten werden einbezogen' : 'Kosten werden ausgeschlossen'}
+                                    >
+                                      {license.name}
+                                      {!includeCost && (
+                                        <span className="ml-1 text-muted-foreground">⊘</span>
+                                      )}
+                                    </Badge>
+                                  );
+                                })
                               ) : (
                                 <span className="text-muted-foreground italic">Keine Lizenzen zugeordnet</span>
                               );
