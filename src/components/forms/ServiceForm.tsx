@@ -31,10 +31,11 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
     active: service?.active ?? true,
   });
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
+  const [includeCosts, setIncludeCosts] = useState<{ [licenseId: string]: boolean }>({});
   const [loading, setLoading] = useState(false);
   
   const { licenses, loading: licensesLoading } = useLicenses();
-  const { updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
+  const { serviceLicenses, updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
   const { packages } = usePackages();
 
   // Bereite Lizenzoptionen für MultiSelect vor
@@ -48,8 +49,17 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
     if (service && service.id && !serviceLicensesLoading) {
       const existingLicenses = getLicensesByServiceId(service.id);
       setSelectedLicenses(existingLicenses || []);
+      
+      // Lade include_cost Flags für bestehende Lizenzen
+      const costs: { [licenseId: string]: boolean } = {};
+      serviceLicenses
+        .filter(sl => sl.service_id === service.id)
+        .forEach(sl => {
+          costs[sl.license_id] = sl.include_cost;
+        });
+      setIncludeCosts(costs);
     }
-  }, [service?.id, serviceLicensesLoading]);
+  }, [service?.id, serviceLicensesLoading, serviceLicenses]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,15 +70,16 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
       
       // Nach erfolgreichem Speichern die Lizenzen verknüpfen
       if (result && result.id) {
-        await updateServiceLicenses(result.id, selectedLicenses);
+        await updateServiceLicenses(result.id, selectedLicenses, includeCosts);
       } else if (service && service.id) {
-        await updateServiceLicenses(service.id, selectedLicenses);
+        await updateServiceLicenses(service.id, selectedLicenses, includeCosts);
       }
       
       setOpen(false);
       if (!service) {
         setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'Basis', active: true });
         setSelectedLicenses([]);
+        setIncludeCosts({});
       }
     } catch (error) {
       // Error handling is done in the hook
@@ -133,12 +144,57 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                 Keine Lizenzen verfügbar
               </div>
             ) : (
-              <MultiSelect
-                options={licenseOptions}
-                selected={selectedLicenses}
-                onChange={setSelectedLicenses}
-                placeholder="Lizenzen auswählen..."
-              />
+              <>
+                <MultiSelect
+                  options={licenseOptions}
+                  selected={selectedLicenses}
+                  onChange={(newSelection) => {
+                    setSelectedLicenses(newSelection);
+                    // Für neue Lizenzen include_cost auf true setzen
+                    const newCosts = { ...includeCosts };
+                    newSelection.forEach(licenseId => {
+                      if (!(licenseId in newCosts)) {
+                        newCosts[licenseId] = true;
+                      }
+                    });
+                    // Entfernte Lizenzen aus includeCosts entfernen
+                    Object.keys(newCosts).forEach(licenseId => {
+                      if (!newSelection.includes(licenseId)) {
+                        delete newCosts[licenseId];
+                      }
+                    });
+                    setIncludeCosts(newCosts);
+                  }}
+                  placeholder="Lizenzen auswählen..."
+                />
+                
+                {selectedLicenses.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    <Label className="text-sm font-medium">Kostenkalkulation</Label>
+                    <div className="space-y-2">
+                      {selectedLicenses.map(licenseId => {
+                        const license = licenses.find(l => l.id === licenseId);
+                        return (
+                          <div key={licenseId} className="flex items-center justify-between py-1">
+                            <span className="text-sm">{license?.name}</span>
+                            <div className="flex items-center space-x-2">
+                              <Switch
+                                checked={includeCosts[licenseId] ?? true}
+                                onCheckedChange={(checked) => 
+                                  setIncludeCosts(prev => ({ ...prev, [licenseId]: checked }))
+                                }
+                              />
+                              <Label className="text-xs text-muted-foreground">
+                                {includeCosts[licenseId] ?? true ? 'Kosten einbeziehen' : 'Kosten ausschließen'}
+                              </Label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
