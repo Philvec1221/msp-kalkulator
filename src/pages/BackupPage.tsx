@@ -135,8 +135,14 @@ export function BackupPage() {
 
   const currentDate = new Date();
   const nextBackup = new Date(currentDate);
-  nextBackup.setDate(nextBackup.getDate() + 1);
-  nextBackup.setHours(12, 30, 0, 0);
+  if (currentDate.getHours() >= 18) {
+    nextBackup.setDate(nextBackup.getDate() + 1);
+    nextBackup.setHours(12, 0, 0, 0);
+  } else if (currentDate.getHours() >= 12) {
+    nextBackup.setHours(18, 0, 0, 0);
+  } else {
+    nextBackup.setHours(12, 0, 0, 0);
+  }
 
   return (
     <div className="space-y-6">
@@ -191,7 +197,7 @@ export function BackupPage() {
         <CardContent>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Badge variant="default">Täglich um 12:30 und 18:00 Uhr automatisch</Badge>
+              <Badge variant="default">Täglich um 12:00 und 18:00 Uhr automatisch</Badge>
             </div>
             <p className="text-sm text-muted-foreground">
               Nächstes Backup: {nextBackup.toLocaleDateString('de-DE')} {nextBackup.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
@@ -320,6 +326,9 @@ export function BackupPage() {
                         </span>
                         <span>{formatFileSize(backup.file_size)}</span>
                         <span>{backup.records_count} Datensätze</span>
+                        <Badge variant={backup.backup_type === 'automatic' ? 'default' : 'secondary'} className="text-xs">
+                          {backup.backup_type === 'automatic' ? 'Automatisch' : 'Manuell'}
+                        </Badge>
                       </div>
                       {backup.description && (
                         <p className="text-sm text-muted-foreground italic">
