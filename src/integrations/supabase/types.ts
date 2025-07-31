@@ -187,6 +187,42 @@ export type Database = {
         }
         Relationships: []
       }
+      stored_backups: {
+        Row: {
+          backup_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          file_path: string
+          file_size: number
+          filename: string
+          id: string
+          records_count: number
+        }
+        Insert: {
+          backup_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path: string
+          file_size: number
+          filename: string
+          id?: string
+          records_count: number
+        }
+        Update: {
+          backup_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          file_path?: string
+          file_size?: number
+          filename?: string
+          id?: string
+          records_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
