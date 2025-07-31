@@ -44,6 +44,7 @@ export type Database = {
       licenses: {
         Row: {
           active: boolean
+          billing_unit: string
           category: string
           cost_per_month: number
           created_at: string
@@ -54,6 +55,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          billing_unit?: string
           category: string
           cost_per_month: number
           created_at?: string
@@ -64,6 +66,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          billing_unit?: string
           category?: string
           cost_per_month?: number
           created_at?: string

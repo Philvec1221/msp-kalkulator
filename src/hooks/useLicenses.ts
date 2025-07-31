@@ -8,6 +8,7 @@ export interface License {
   category: string;
   cost_per_month: number;
   price_per_month: number;
+  billing_unit: string;
   active: boolean;
   created_at: string;
   updated_at: string;

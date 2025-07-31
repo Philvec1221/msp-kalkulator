@@ -26,29 +26,29 @@ export function LicensesPage() {
   const [billingTypeFilter, setBillingTypeFilter] = useState("");
 
   const sampleLicenses = [
-    { name: "IT Glue - Network Glue (OI)", category: "Kaseya", cost_per_month: 185.52, price_per_month: 278.28, active: true },
-    { name: "IT Glue - MyGlue", category: "Kaseya", cost_per_month: 62.50, price_per_month: 93.75, active: true },
-    { name: "Dark Web ID Domains", category: "Kaseya", cost_per_month: 4.48, price_per_month: 6.72, active: true },
-    { name: "RMM Advanced Software Management", category: "Datto", cost_per_month: 0.17, price_per_month: 0.26, active: true },
-    { name: "RMM Managed Endpoint", category: "Datto", cost_per_month: 0.77, price_per_month: 1.16, active: true },
-    { name: "Protect Advanced", category: "ESET", cost_per_month: 1.55, price_per_month: 2.33, active: true },
-    { name: "Ultra Subscription", category: "PA File Sight", cost_per_month: 18.00, price_per_month: 27.00, active: true },
-    { name: "AutoElevate 750 Agent Plan Advanced", category: "CyberFox", cost_per_month: 1.65, price_per_month: 2.48, active: true },
-    { name: "EL_Storage pro TB", category: "Wasabi", cost_per_month: 5.80, price_per_month: 8.70, active: true },
-    { name: "Backup Radar", category: "Scalepad", cost_per_month: 0.65, price_per_month: 0.98, active: true },
-    { name: "Cloud Connect", category: "Veeam", cost_per_month: 3.35, price_per_month: 5.03, active: true },
-    { name: "Enterprise Standard", category: "Keeper", cost_per_month: 3.00, price_per_month: 4.50, active: true },
-    { name: "Enterprise Plus", category: "Keeper", cost_per_month: 4.80, price_per_month: 7.20, active: true },
-    { name: "Schwachstellenscan", category: "ConnectSecure", cost_per_month: 0.26, price_per_month: 0.39, active: true },
-    { name: "Legacy Plan (40000 Operations/...)", category: "Make", cost_per_month: 29.00, price_per_month: 43.50, active: true },
-    { name: "Microsoft 365 Business Basic", category: "Microsoft", cost_per_month: 5.60, price_per_month: 8.40, active: true },
-    { name: "Microsoft 365 Business Standard", category: "Microsoft", cost_per_month: 11.70, price_per_month: 17.55, active: true },
-    { name: "Microsoft 365 Business Premium", category: "Microsoft", cost_per_month: 20.60, price_per_month: 30.90, active: true },
-    { name: "Cyber Backup Standard Server", category: "Acronis", cost_per_month: 89.00, price_per_month: 133.50, active: true },
-    { name: "Windows Defender ATP", category: "Microsoft", cost_per_month: 3.50, price_per_month: 5.25, active: true },
-    { name: "Backup & Replication", category: "Veeam", cost_per_month: 150.00, price_per_month: 225.00, active: true },
-    { name: "Endpoint Security", category: "ESET", cost_per_month: 2.80, price_per_month: 4.20, active: true },
-    { name: "Test2", category: "Test", cost_per_month: 2.00, price_per_month: 3.00, active: true }
+    { name: "IT Glue - Network Glue (OI)", category: "Kaseya", cost_per_month: 185.52, price_per_month: 278.28, billing_unit: "Fix", active: true },
+    { name: "IT Glue - MyGlue", category: "Kaseya", cost_per_month: 62.50, price_per_month: 93.75, billing_unit: "pro User", active: true },
+    { name: "Dark Web ID Domains", category: "Kaseya", cost_per_month: 4.48, price_per_month: 6.72, billing_unit: "Fix", active: true },
+    { name: "RMM Advanced Software Management", category: "Datto", cost_per_month: 0.17, price_per_month: 0.26, billing_unit: "pro Client", active: true },
+    { name: "RMM Managed Endpoint", category: "Datto", cost_per_month: 0.77, price_per_month: 1.16, billing_unit: "pro Client", active: true },
+    { name: "Protect Advanced", category: "ESET", cost_per_month: 1.55, price_per_month: 2.33, billing_unit: "pro Client", active: true },
+    { name: "Ultra Subscription", category: "PA File Sight", cost_per_month: 18.00, price_per_month: 27.00, billing_unit: "pro Server", active: true },
+    { name: "AutoElevate 750 Agent Plan Advanced", category: "CyberFox", cost_per_month: 1.65, price_per_month: 2.48, billing_unit: "pro Client", active: true },
+    { name: "EL_Storage pro TB", category: "Wasabi", cost_per_month: 5.80, price_per_month: 8.70, billing_unit: "Fix", active: true },
+    { name: "Backup Radar", category: "Scalepad", cost_per_month: 0.65, price_per_month: 0.98, billing_unit: "pro Client", active: true },
+    { name: "Cloud Connect", category: "Veeam", cost_per_month: 3.35, price_per_month: 5.03, billing_unit: "pro Server", active: true },
+    { name: "Enterprise Standard", category: "Keeper", cost_per_month: 3.00, price_per_month: 4.50, billing_unit: "pro User", active: true },
+    { name: "Enterprise Plus", category: "Keeper", cost_per_month: 4.80, price_per_month: 7.20, billing_unit: "pro User", active: true },
+    { name: "Schwachstellenscan", category: "ConnectSecure", cost_per_month: 0.26, price_per_month: 0.39, billing_unit: "pro Client", active: true },
+    { name: "Legacy Plan (40000 Operations/...)", category: "Make", cost_per_month: 29.00, price_per_month: 43.50, billing_unit: "Fix", active: true },
+    { name: "Microsoft 365 Business Basic", category: "Microsoft", cost_per_month: 5.60, price_per_month: 8.40, billing_unit: "pro User", active: true },
+    { name: "Microsoft 365 Business Standard", category: "Microsoft", cost_per_month: 11.70, price_per_month: 17.55, billing_unit: "pro User", active: true },
+    { name: "Microsoft 365 Business Premium", category: "Microsoft", cost_per_month: 20.60, price_per_month: 30.90, billing_unit: "pro User", active: true },
+    { name: "Cyber Backup Standard Server", category: "Acronis", cost_per_month: 89.00, price_per_month: 133.50, billing_unit: "pro Server", active: true },
+    { name: "Windows Defender ATP", category: "Microsoft", cost_per_month: 3.50, price_per_month: 5.25, billing_unit: "pro Client", active: true },
+    { name: "Backup & Replication", category: "Veeam", cost_per_month: 150.00, price_per_month: 225.00, billing_unit: "Fix", active: true },
+    { name: "Endpoint Security", category: "ESET", cost_per_month: 2.80, price_per_month: 4.20, billing_unit: "pro Client", active: true },
+    { name: "Test2", category: "Test", cost_per_month: 2.00, price_per_month: 3.00, billing_unit: "pro Client", active: true }
   ];
 
   // Mapping für Abrechnungseinheiten basierend auf den Bildern
@@ -77,16 +77,15 @@ export function LicensesPage() {
   // }, [licenses.length]);
 
   const filteredLicenses = licenses.filter(license => {
-    const billingType = getBillingType(license.name);
     const matchesSearch = license.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          license.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || categoryFilter === "all" || license.category === categoryFilter;
-    const matchesBillingType = !billingTypeFilter || billingTypeFilter === "all" || billingType === billingTypeFilter;
+    const matchesBillingType = !billingTypeFilter || billingTypeFilter === "all" || license.billing_unit === billingTypeFilter;
     return matchesSearch && matchesCategory && matchesBillingType;
   });
 
   const uniqueCategories = [...new Set(licenses.map(license => license.category))];
-  const uniqueBillingTypes = [...new Set(licenses.map(license => getBillingType(license.name)))];
+  const uniqueBillingTypes = [...new Set(licenses.map(license => license.billing_unit))];
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Lizenzen...</div>;
@@ -236,14 +235,14 @@ export function LicensesPage() {
                     <p className="text-xs text-muted-foreground mb-1">Abrechnungseinheit</p>
                     <Badge 
                       variant={
-                        getBillingType(license.name) === "Fix" ? "secondary" :
-                        getBillingType(license.name) === "pro User" ? "default" :
-                        getBillingType(license.name) === "pro Client" ? "destructive" :
+                        license.billing_unit === "Fix" ? "secondary" :
+                        license.billing_unit === "pro User" ? "default" :
+                        license.billing_unit === "pro Client" ? "destructive" :
                         "outline"
                       }
                       className="text-xs"
                     >
-                      {getBillingType(license.name)}
+                      {license.billing_unit}
                     </Badge>
                   </div>
                 </div>
