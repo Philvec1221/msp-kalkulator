@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
 import { EmployeesPage } from "@/pages/EmployeesPage";
 import { LicensesPage } from "@/pages/LicensesPage";
 import { ServicesPage } from "@/pages/ServicesPage";
@@ -16,7 +14,6 @@ import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
 const Index = () => {
   const [activeMainTab, setActiveMainTab] = useState("angebote");
   const [activeSubTab, setActiveSubTab] = useState("kalkulation");
-  const { signOut, isAdmin } = useAuth();
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,27 +25,6 @@ const Index = () => {
               <h1 className="text-3xl font-bold">vectano MSP Calculator</h1>
               <p className="text-teal-100 mt-2">Professionelle Enterprise-Lösung für MSP-Kalkulation</p>
               <p className="text-teal-200 text-sm mt-1">Version 1.1.0 - Produktionsbereit für Enterprise-Einsatz</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => window.location.href = '/admin'}
-                  className="text-white hover:bg-white/20"
-                >
-                  Admin
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={signOut}
-                className="text-white hover:bg-white/20"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Abmelden
-              </Button>
             </div>
           </div>
         </div>

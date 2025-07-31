@@ -7,23 +7,9 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 import AdminPage from "./pages/AdminPage";
-import { useAuth } from "./hooks/useAuth";
-
 const queryClient = new QueryClient();
 
 const App = () => {
-  const { isAuthenticated, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-lg font-semibold">Laden...</h2>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -31,10 +17,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route 
-              path="/" 
-              element={isAuthenticated ? <Index /> : <AuthPage />} 
-            />
+            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
