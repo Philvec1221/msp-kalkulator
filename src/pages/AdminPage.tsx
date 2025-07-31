@@ -5,15 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
 const AdminPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [error, setError] = useState("");
-  const { isAdmin, createUser } = useAuth();
+  const [passwordError, setPasswordError] = useState("");
+  const { isAdmin, createUser, user } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -60,8 +65,94 @@ const AdminPage = () => {
     }
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordLoading(true);
+    setPasswordError("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Passwörter stimmen nicht überein.");
+      setPasswordLoading(false);
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Passwort muss mindestens 6 Zeichen lang sein.");
+      setPasswordLoading(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword
+      });
+      
+      if (error) throw error;
+
+      toast({
+        title: "Passwort erfolgreich geändert!",
+        description: "Ihr neues Passwort ist jetzt aktiv.",
+      });
+
+      // Reset form
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      setPasswordError(error.message || "Fehler beim Ändern des Passworts");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 space-y-8">
+      {/* Passwort ändern Sektion */}
+      <div className="max-w-md mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle>Passwort ändern</CardTitle>
+            <CardDescription>Aktueller Nutzer: {user?.email}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {passwordError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertDescription>{passwordError}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">Neues Passwort</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Passwort bestätigen</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={passwordLoading}>
+                {passwordLoading ? "Wird geändert..." : "Passwort ändern"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Neue Nutzer erstellen Sektion */}
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
