@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileText, Edit, Trash, Search, Filter } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLicenses } from "@/hooks/useLicenses";
 import { LicenseForm } from "@/components/forms/LicenseForm";
 import {
@@ -23,15 +23,69 @@ export function LicensesPage() {
   const { licenses, loading, addLicense, updateLicense, deleteLicense } = useLicenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [billingTypeFilter, setBillingTypeFilter] = useState("");
+
+  const sampleLicenses = [
+    { name: "IT Glue - Network Glue (OI)", category: "Kaseya", cost_per_month: 185.52, price_per_month: 278.28, active: true },
+    { name: "IT Glue - MyGlue", category: "Kaseya", cost_per_month: 62.50, price_per_month: 93.75, active: true },
+    { name: "Dark Web ID Domains", category: "Kaseya", cost_per_month: 4.48, price_per_month: 6.72, active: true },
+    { name: "RMM Advanced Software Management", category: "Datto", cost_per_month: 0.17, price_per_month: 0.26, active: true },
+    { name: "RMM Managed Endpoint", category: "Datto", cost_per_month: 0.77, price_per_month: 1.16, active: true },
+    { name: "Protect Advanced", category: "ESET", cost_per_month: 1.55, price_per_month: 2.33, active: true },
+    { name: "Ultra Subscription", category: "PA File Sight", cost_per_month: 18.00, price_per_month: 27.00, active: true },
+    { name: "AutoElevate 750 Agent Plan Advanced", category: "CyberFox", cost_per_month: 1.65, price_per_month: 2.48, active: true },
+    { name: "EL_Storage pro TB", category: "Wasabi", cost_per_month: 5.80, price_per_month: 8.70, active: true },
+    { name: "Backup Radar", category: "Scalepad", cost_per_month: 0.65, price_per_month: 0.98, active: true },
+    { name: "Cloud Connect", category: "Veeam", cost_per_month: 3.35, price_per_month: 5.03, active: true },
+    { name: "Enterprise Standard", category: "Keeper", cost_per_month: 3.00, price_per_month: 4.50, active: true },
+    { name: "Enterprise Plus", category: "Keeper", cost_per_month: 4.80, price_per_month: 7.20, active: true },
+    { name: "Schwachstellenscan", category: "ConnectSecure", cost_per_month: 0.26, price_per_month: 0.39, active: true },
+    { name: "Legacy Plan (40000 Operations/...)", category: "Make", cost_per_month: 29.00, price_per_month: 43.50, active: true },
+    { name: "Microsoft 365 Business Basic", category: "Microsoft", cost_per_month: 5.60, price_per_month: 8.40, active: true },
+    { name: "Microsoft 365 Business Standard", category: "Microsoft", cost_per_month: 11.70, price_per_month: 17.55, active: true },
+    { name: "Microsoft 365 Business Premium", category: "Microsoft", cost_per_month: 20.60, price_per_month: 30.90, active: true },
+    { name: "Cyber Backup Standard Server", category: "Acronis", cost_per_month: 89.00, price_per_month: 133.50, active: true },
+    { name: "Windows Defender ATP", category: "Microsoft", cost_per_month: 3.50, price_per_month: 5.25, active: true },
+    { name: "Backup & Replication", category: "Veeam", cost_per_month: 150.00, price_per_month: 225.00, active: true },
+    { name: "Endpoint Security", category: "ESET", cost_per_month: 2.80, price_per_month: 4.20, active: true },
+    { name: "Test2", category: "Test", cost_per_month: 2.00, price_per_month: 3.00, active: true }
+  ];
+
+  // Mapping für Abrechnungseinheiten basierend auf den Bildern
+  const getBillingType = (licenseName: string) => {
+    if (licenseName.includes("MyGlue") || licenseName.includes("Enterprise") || licenseName.includes("Business")) return "pro User";
+    if (licenseName.includes("Advanced") || licenseName.includes("Endpoint") || licenseName.includes("Radar") || licenseName.includes("ATP") || licenseName.includes("Test")) return "pro Client";
+    if (licenseName.includes("Ultra") || licenseName.includes("Cloud Connect") || licenseName.includes("Cyber Backup")) return "pro Server";
+    return "Fix";
+  };
+
+  const addSampleLicenses = async () => {
+    for (const lic of sampleLicenses) {
+      try {
+        await addLicense(lic);
+      } catch (error) {
+        console.error('Error adding license:', lic.name, error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (licenses.length === 0) {
+      addSampleLicenses();
+    }
+  }, [licenses.length]);
 
   const filteredLicenses = licenses.filter(license => {
+    const billingType = getBillingType(license.name);
     const matchesSearch = license.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          license.category.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !categoryFilter || license.category === categoryFilter;
-    return matchesSearch && matchesCategory;
+    const matchesBillingType = !billingTypeFilter || billingType === billingTypeFilter;
+    return matchesSearch && matchesCategory && matchesBillingType;
   });
 
   const uniqueCategories = [...new Set(licenses.map(license => license.category))];
+  const uniqueBillingTypes = [...new Set(licenses.map(license => getBillingType(license.name)))];
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Lizenzen...</div>;
@@ -75,6 +129,19 @@ export function LicensesPage() {
                   {uniqueCategories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={billingTypeFilter} onValueChange={setBillingTypeFilter}>
+                <SelectTrigger className="w-[220px]">
+                  <SelectValue placeholder="Alle Abrechnungseinheiten" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Alle Abrechnungseinheiten</SelectItem>
+                  {uniqueBillingTypes.map((billingType) => (
+                    <SelectItem key={billingType} value={billingType}>
+                      {billingType}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -166,8 +233,11 @@ export function LicensesPage() {
                   
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">Abrechnungseinheit</p>
-                    <Badge variant="secondary" className="text-xs">
-                      fix
+                    <Badge 
+                      variant={getBillingType(license.name) === "Fix" ? "secondary" : "default"} 
+                      className="text-xs"
+                    >
+                      {getBillingType(license.name)}
                     </Badge>
                   </div>
                 </div>
