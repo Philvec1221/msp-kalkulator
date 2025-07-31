@@ -28,6 +28,11 @@ export function MultiSelect({
 }: MultiSelectProps) {
   const [open, setOpen] = React.useState(false);
 
+  // Frühe Rückgabe wenn onChange nicht definiert ist
+  if (!onChange) {
+    return null;
+  }
+
   const handleSelect = (optionValue: string) => {
     const newSelected = selected.includes(optionValue)
       ? selected.filter(value => value !== optionValue)

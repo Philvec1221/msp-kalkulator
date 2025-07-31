@@ -32,8 +32,8 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   
-  const { licenses } = useLicenses();
-  const { updateServiceLicenses, getLicensesByServiceId } = useServiceLicenses();
+  const { licenses, loading: licensesLoading } = useLicenses();
+  const { updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
 
   // Bereite Lizenzoptionen für MultiSelect vor
   const licenseOptions = (licenses || []).map(license => ({
@@ -43,11 +43,11 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
 
   // Lade bestehende Lizenzen wenn Service bearbeitet wird
   useEffect(() => {
-    if (service && service.id) {
+    if (service && service.id && !serviceLicensesLoading) {
       const existingLicenses = getLicensesByServiceId(service.id);
       setSelectedLicenses(existingLicenses || []);
     }
-  }, [service, getLicensesByServiceId]);
+  }, [service, getLicensesByServiceId, serviceLicensesLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,12 +122,18 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="licenses">Lizenzen</Label>
-            <MultiSelect
-              options={licenseOptions}
-              selected={selectedLicenses}
-              onChange={setSelectedLicenses}
-              placeholder="Lizenzen auswählen..."
-            />
+            {licensesLoading ? (
+              <div className="h-10 bg-muted rounded-md flex items-center justify-center">
+                <span className="text-sm text-muted-foreground">Lade Lizenzen...</span>
+              </div>
+            ) : (
+              <MultiSelect
+                options={licenseOptions}
+                selected={selectedLicenses}
+                onChange={setSelectedLicenses}
+                placeholder="Lizenzen auswählen..."
+              />
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
