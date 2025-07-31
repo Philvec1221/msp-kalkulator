@@ -6,10 +6,11 @@ import { ServicesPage } from "@/pages/ServicesPage";
 import { PackagesPage } from "@/pages/PackagesPage";
 import { CalculatorPage } from "@/pages/CalculatorPage";
 import { BackupPage } from "@/pages/BackupPage";
+import { ConfigPage } from "@/pages/ConfigPage";
 
 const Index = () => {
   const [activeMainTab, setActiveMainTab] = useState("verwaltung");
-  const [activeSubTab, setActiveSubTab] = useState("mitarbeiter");
+  const [activeSubTab, setActiveSubTab] = useState("konfig");
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,7 +104,7 @@ const Index = () => {
         {activeMainTab === "verwaltung" && activeSubTab === "backup" && <BackupPage />}
         
         {/* Angebote Content */}
-        {activeMainTab === "angebote" && activeSubTab === "konfig" && <CalculatorPage />}
+        {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
         {activeMainTab === "angebote" && activeSubTab === "vergleich" && <div>Vergleich Seite - wird implementiert</div>}
         {activeMainTab === "angebote" && activeSubTab === "angebot" && <div>Angebot Seite - wird implementiert</div>}
         
