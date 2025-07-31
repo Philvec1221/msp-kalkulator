@@ -22,8 +22,8 @@ import {
 export function LicensesPage() {
   const { licenses, loading, addLicense, updateLicense, deleteLicense } = useLicenses();
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [billingTypeFilter, setBillingTypeFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [billingTypeFilter, setBillingTypeFilter] = useState("all");
 
   const sampleLicenses = [
     { name: "IT Glue - Network Glue (OI)", category: "Kaseya", cost_per_month: 185.52, price_per_month: 278.28, billing_unit: "Fix", active: true },
@@ -69,13 +69,6 @@ export function LicensesPage() {
     }
   };
 
-  // Entfernt: Automatische Hinzufügung von Beispieldaten
-  // useEffect(() => {
-  //   if (licenses.length === 0) {
-  //     addSampleLicenses();
-  //   }
-  // }, [licenses.length]);
-
   const filteredLicenses = licenses.filter(license => {
     const matchesSearch = license.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          license.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,8 +77,8 @@ export function LicensesPage() {
     return matchesSearch && matchesCategory && matchesBillingType;
   });
 
-  const uniqueCategories = [...new Set(licenses.map(license => license.category).filter(Boolean))];
-  const uniqueBillingTypes = [...new Set(licenses.map(license => license.billing_unit).filter(Boolean))];
+  const uniqueCategories = [...new Set(licenses.map(license => license.category).filter(category => category && category.trim() !== ''))];
+  const uniqueBillingTypes = [...new Set(licenses.map(license => license.billing_unit).filter(unit => unit && unit.trim() !== ''))];
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Lizenzen...</div>;
