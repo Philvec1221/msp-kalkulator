@@ -2,9 +2,9 @@ import * as React from "react";
 import { Check, X, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MultiSelectOption {
   value: string;
@@ -29,7 +29,7 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
 
   // Frühe Rückgabe wenn onChange nicht definiert ist
-  if (!onChange) {
+  if (!onChange || !Array.isArray(options) || !Array.isArray(selected)) {
     return null;
   }
 
@@ -85,27 +85,34 @@ export function MultiSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
-          <Command>
-            <CommandInput placeholder="Lizenzen suchen..." />
-            <CommandEmpty>Keine Lizenzen gefunden.</CommandEmpty>
-            <CommandGroup className="max-h-64 overflow-auto">
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.value}
-                  onSelect={() => handleSelect(option.value)}
-                >
-                  <Check
+          <ScrollArea className="max-h-64">
+            <div className="p-2">
+              {options.length === 0 ? (
+                <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                  Keine Optionen verfügbar
+                </div>
+              ) : (
+                options.map((option) => (
+                  <div
+                    key={option.value}
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                      "flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                      "cursor-pointer"
                     )}
-                  />
-                  {option.label}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </Command>
+                    onClick={() => handleSelect(option.value)}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    {option.label}
+                  </div>
+                ))
+              )}
+            </div>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
     </div>

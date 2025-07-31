@@ -122,9 +122,13 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="licenses">Lizenzen</Label>
-            {licensesLoading ? (
-              <div className="h-10 bg-muted rounded-md flex items-center justify-center">
-                <span className="text-sm text-muted-foreground">Lade Lizenzen...</span>
+            {licensesLoading || !licenses ? (
+              <div className="h-10 bg-muted rounded-md flex items-center justify-center text-sm text-muted-foreground">
+                Lade Lizenzen...
+              </div>
+            ) : licenses.length === 0 ? (
+              <div className="h-10 bg-muted rounded-md flex items-center justify-center text-sm text-muted-foreground">
+                Keine Lizenzen verfügbar
               </div>
             ) : (
               <MultiSelect
