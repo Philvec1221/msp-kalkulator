@@ -112,28 +112,37 @@ export type Database = {
       services: {
         Row: {
           active: boolean
+          billing_type: string | null
           created_at: string
           description: string | null
           id: string
           name: string
+          package_level: string | null
+          product_name: string | null
           time_in_minutes: number
           updated_at: string
         }
         Insert: {
           active?: boolean
+          billing_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name: string
+          package_level?: string | null
+          product_name?: string | null
           time_in_minutes: number
           updated_at?: string
         }
         Update: {
           active?: boolean
+          billing_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
           name?: string
+          package_level?: string | null
+          product_name?: string | null
           time_in_minutes?: number
           updated_at?: string
         }

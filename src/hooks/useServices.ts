@@ -6,7 +6,10 @@ export interface Service {
   id: string;
   name: string;
   description: string | null;
+  product_name: string | null;
   time_in_minutes: number;
+  billing_type: string;
+  package_level: string;
   active: boolean;
   created_at: string;
   updated_at: string;

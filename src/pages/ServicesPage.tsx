@@ -37,9 +37,44 @@ export function ServicesPage() {
     return matchesSearch && matchesPackage;
   });
 
-  const getPackageBadges = (serviceId: string) => {
-    // This will be implemented when package configs are added
-    return ["pro Server", "ab Basis"];
+  const getBillingTypeDisplay = (billingType: string) => {
+    const types = {
+      'fix': 'fix',
+      'pro_user': 'pro User',
+      'pro_server': 'pro Server', 
+      'pro_client': 'pro Client'
+    };
+    return types[billingType as keyof typeof types] || billingType;
+  };
+
+  const getPackageLevelDisplay = (packageLevel: string) => {
+    const levels = {
+      'basis': 'ab Basis',
+      'gold': 'ab Gold',
+      'allin': 'ab Allin',
+      'allin_black': 'ab Allin Black'
+    };
+    return levels[packageLevel as keyof typeof levels] || packageLevel;
+  };
+
+  const getPackageBadgeVariant = (packageLevel: string) => {
+    switch (packageLevel) {
+      case 'basis': return 'default';
+      case 'gold': return 'secondary';
+      case 'allin': return 'outline';
+      case 'allin_black': return 'destructive';
+      default: return 'default';
+    }
+  };
+
+  const getBillingTypeBadgeVariant = (billingType: string) => {
+    switch (billingType) {
+      case 'pro_server': return 'default';
+      case 'pro_user': return 'secondary';
+      case 'pro_client': return 'outline';
+      case 'fix': return 'destructive';
+      default: return 'default';
+    }
   };
 
   if (loading) {
@@ -116,21 +151,26 @@ export function ServicesPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold text-lg">{service.name}</h3>
                         <div className="flex gap-2">
-                          {getPackageBadges(service.id).map((badge, index) => (
-                            <Badge key={index} variant={index === 0 ? "default" : "outline"}>
-                              {badge}
-                            </Badge>
-                          ))}
+                          <Badge variant={getBillingTypeBadgeVariant(service.billing_type)}>
+                            {getBillingTypeDisplay(service.billing_type)}
+                          </Badge>
+                          <Badge variant={getPackageBadgeVariant(service.package_level)}>
+                            {getPackageLevelDisplay(service.package_level)}
+                          </Badge>
                         </div>
                       </div>
                       {service.description && (
                         <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
                       )}
                       <div className="flex items-center gap-4 text-sm">
-                        <span className="text-muted-foreground">Produkt: Email Protection</span>
+                        <span className="text-muted-foreground">
+                          Produkt: {service.product_name || 'Nicht angegeben'}
+                        </span>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Technikzeit: {formatTime(service.time_in_minutes)}</span>
+                          <span className="text-muted-foreground">
+                            Technikzeit: {formatTime(service.time_in_minutes)}
+                          </span>
                         </div>
                       </div>
                     </div>

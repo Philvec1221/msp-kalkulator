@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit } from "lucide-react";
 import { Service } from "@/hooks/useServices";
@@ -19,7 +20,10 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [formData, setFormData] = useState({
     name: service?.name || '',
     description: service?.description || '',
+    product_name: service?.product_name || '',
     time_in_minutes: service?.time_in_minutes || 0,
+    billing_type: service?.billing_type || 'fix',
+    package_level: service?.package_level || 'basis',
     active: service?.active ?? true,
   });
   const [loading, setLoading] = useState(false);
@@ -32,7 +36,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
       await onSubmit(formData);
       setOpen(false);
       if (!service) {
-        setFormData({ name: '', description: '', time_in_minutes: 0, active: true });
+        setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'basis', active: true });
       }
     } catch (error) {
       // Error handling is done in the hook
@@ -86,6 +90,47 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
             />
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="product_name">Produkt</Label>
+            <Input
+              id="product_name"
+              value={formData.product_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, product_name: e.target.value }))}
+              placeholder="z.B. Monitoring Suite"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="billing_type">Lizenzierung</Label>
+              <Select value={formData.billing_type} onValueChange={(value) => setFormData(prev => ({ ...prev, billing_type: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wählen Sie..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fix">Fix</SelectItem>
+                  <SelectItem value="pro_user">pro User</SelectItem>
+                  <SelectItem value="pro_server">pro Server</SelectItem>
+                  <SelectItem value="pro_client">pro Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="package_level">Ab Paket</Label>
+              <Select value={formData.package_level} onValueChange={(value) => setFormData(prev => ({ ...prev, package_level: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Wählen Sie..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basis">ab Basis</SelectItem>
+                  <SelectItem value="gold">ab Gold</SelectItem>
+                  <SelectItem value="allin">ab Allin</SelectItem>
+                  <SelectItem value="allin_black">ab Allin Black</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="time_in_minutes">
               Technikzeit in Minuten * 
