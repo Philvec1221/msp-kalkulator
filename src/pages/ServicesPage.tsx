@@ -26,7 +26,7 @@ export function ServicesPage() {
   const { licenses } = useLicenses();
   const { getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
-  const [packageFilter, setPackageFilter] = useState("");
+  const [packageFilter, setPackageFilter] = useState("all");
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -37,7 +37,7 @@ export function ServicesPage() {
   const filteredServices = services.filter(service => {
     const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesPackage = !packageFilter; // Will be implemented with package configs
+    const matchesPackage = packageFilter === "all"; // Will be implemented with package configs
     return matchesSearch && matchesPackage;
   });
 
@@ -119,7 +119,7 @@ export function ServicesPage() {
                   <SelectValue placeholder="Alle Pakete" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Pakete</SelectItem>
+                  <SelectItem value="all">Alle Pakete</SelectItem>
                   <SelectItem value="basis">Alle Abrechnungseinheiten</SelectItem>
                 </SelectContent>
               </Select>
