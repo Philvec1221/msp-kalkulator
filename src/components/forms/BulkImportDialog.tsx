@@ -27,14 +27,27 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
   const { toast } = useToast();
 
   const parseInput = () => {
-    const lines = inputText.trim().split('\n').filter(line => line.trim());
-    const services = lines.map(line => {
-      const parts = line.split('\t').map(part => part.trim());
-      if (parts.length >= 2) {
-        return { name: parts[0], description: parts[1] };
-      }
-      return { name: parts[0] };
-    });
+    if (!inputText.trim()) {
+      setPreviewServices([]);
+      return;
+    }
+
+    // Split by double line breaks to separate service blocks
+    const serviceBlocks = inputText.trim().split(/\n\s*\n/);
+    
+    const services = serviceBlocks
+      .filter(block => block.trim())
+      .map(block => {
+        const lines = block.trim().split('\n');
+        const name = lines[0]?.trim() || '';
+        const description = lines.slice(1).join('\n').trim();
+        
+        return {
+          name,
+          description: description || undefined
+        };
+      });
+    
     setPreviewServices(services);
   };
 
@@ -126,14 +139,25 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
                   Services (eine Zeile pro Service)
                 </Label>
                 <div className="text-sm text-muted-foreground mb-2">
-                  Format: "Service Name" oder "Service Name [Tab] Beschreibung"
+                  Services durch Leerzeilen trennen. Erste Zeile = Service-Name, folgende Zeilen = Beschreibung.
                 </div>
                 <Textarea
                   id="services-input"
-                  placeholder="Microsoft 365 Business Basic&#10;Microsoft 365 Business Standard&#10;Azure AD Premium P1&#10;..."
+                  placeholder={`24-7 5min Takt Remote Monitoring / Überwachung Ihrer IT
+- Serverstabilität und - performance
+- Benachrichtigung bei Unregelmäßigkeiten
+- Überwachung & Neustart von definierten Diensten bei Fehlern
+
+Bereitstellung einer einfachen sicheren Fernwartungslösung
+
+Mobile Device Management
+- Geräte Management für Smartphone und Tablets
+- Mobile App Management
+- Advanced Features
+bei Buchung Managed Total Secure Microsoft 365 Business Premium - EU bereits enthalten`}
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  className="min-h-[200px] font-mono text-sm"
+                  className="min-h-[300px] font-mono text-sm"
                 />
               </div>
               
@@ -208,17 +232,21 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
               <CardContent>
                 <div className="max-h-60 overflow-y-auto space-y-2">
                   {previewServices.map((service, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                      <div>
-                        <div className="font-medium">{service.name}</div>
-                        {service.description && (
-                          <div className="text-sm text-muted-foreground">{service.description}</div>
-                        )}
-                      </div>
-                      <div className="flex gap-2">
-                        <Badge variant="outline">{defaultBillingType}</Badge>
-                        <Badge variant="outline">{defaultPackageLevel}</Badge>
-                        <Badge variant="outline">{defaultTime}min</Badge>
+                    <div key={index} className="p-3 bg-muted rounded-lg">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium">{service.name}</div>
+                          {service.description && (
+                            <div className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
+                              {service.description}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <Badge variant="outline">{defaultBillingType}</Badge>
+                          <Badge variant="outline">{defaultPackageLevel}</Badge>
+                          <Badge variant="outline">{defaultTime}min</Badge>
+                        </div>
                       </div>
                     </div>
                   ))}
