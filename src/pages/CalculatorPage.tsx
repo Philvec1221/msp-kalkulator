@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Download, Save, Eye, FileText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
@@ -117,6 +118,47 @@ export function CalculatorPage() {
 
   return (
     <div className="space-y-6">
+      {/* Paket-Auswahl */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-blue-600">📦</span>
+            Paket-Auswahl
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="selectedPackage">Paket wählen</Label>
+              <Select 
+                value={quoteData.selectedPackage} 
+                onValueChange={(value) => setQuoteData(prev => ({ ...prev, selectedPackage: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Paket auswählen..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="basis">Basis</SelectItem>
+                  <SelectItem value="gold">Gold</SelectItem>
+                  <SelectItem value="allin">Allin</SelectItem>
+                  <SelectItem value="allin_black">Allin Black</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Bestimmt welche Services im Angebot enthalten sind
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
+              <Badge variant="default" className="text-lg px-4 py-2">{quoteData.selectedPackage}</Badge>
+              <p className="text-xs text-muted-foreground mt-2">
+                {packageServices.length} Services enthalten
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Aufschlag-Verwaltung */}
       <Card>
         <CardHeader>
