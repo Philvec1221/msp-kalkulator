@@ -21,6 +21,7 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
     cost_per_month: license?.cost_per_month || 0,
     price_per_month: license?.price_per_month || 0,
     active: license?.active ?? true,
+    billing_unit: 'fix', // Default billing unit
   });
   const [loading, setLoading] = useState(false);
 
@@ -32,7 +33,7 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
       await onSubmit(formData);
       setOpen(false);
       if (!license) {
-        setFormData({ name: '', category: '', cost_per_month: 0, price_per_month: 0, active: true });
+        setFormData({ name: '', category: '', cost_per_month: 0, price_per_month: 0, active: true, billing_unit: 'fix' });
       }
     } catch (error) {
       // Error handling is done in the hook

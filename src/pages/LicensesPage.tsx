@@ -100,33 +100,32 @@ export function LicensesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredLicenses.map((license) => (
-            <Card key={license.id}>
+            <Card key={license.id} className="relative">
               <CardContent className="p-6">
+                {/* Header with Icon and Actions */}
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <FileText className="h-4 w-4 text-primary" />
+                    <div className="p-2 bg-blue-50 rounded-lg">
+                      <FileText className="h-4 w-4 text-blue-600" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold truncate">{license.name}</h3>
-                      <p className="text-sm text-muted-foreground">Hersteller</p>
-                      <p className="text-sm font-medium">{license.category}</p>
-                    </div>
+                    <h3 className="font-semibold text-blue-600 text-sm">
+                      {license.name}
+                    </h3>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <LicenseForm
                       license={license}
                       onSubmit={(data) => updateLicense(license.id, data)}
                       trigger={
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <Edit className="h-3 w-3 text-blue-600" />
                         </Button>
                       }
                     />
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
-                          <Trash className="h-4 w-4" />
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                          <Trash className="h-3 w-3 text-red-600" />
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -151,21 +150,26 @@ export function LicensesPage() {
                   </div>
                 </div>
                 
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Einkaufspreis</span>
-                    <span className="font-medium text-primary">{license.cost_per_month.toFixed(2)}€</span>
+                {/* Content */}
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Hersteller</p>
+                    <p className="font-medium">{license.category}</p>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Abrechnungseinheit</span>
-                    <Badge variant="outline">fix</Badge>
+                  
+                  <div>
+                    <p className="text-xs text-muted-foreground">Einkaufspreis</p>
+                    <p className="text-lg font-semibold text-green-600">
+                      {license.cost_per_month.toFixed(2)}€
+                    </p>
                   </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Badge variant={license.active ? "default" : "secondary"}>
-                    {license.active ? "Aktiv" : "Inaktiv"}
-                  </Badge>
+                  
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-1">Abrechnungseinheit</p>
+                    <Badge variant="secondary" className="text-xs">
+                      fix
+                    </Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
