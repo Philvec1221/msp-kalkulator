@@ -73,6 +73,34 @@ const AuthPage = () => {
     }
   };
 
+  const handlePasswordReset = async () => {
+    if (!email) {
+      setError("Bitte geben Sie Ihre E-Mail-Adresse ein.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/`
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Passwort-Reset gesendet!",
+        description: "Überprüfen Sie Ihre E-Mail für den Reset-Link.",
+      });
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      setError(error.message || "Fehler beim Passwort-Reset");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -151,6 +179,15 @@ const AuthPage = () => {
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? "Wird angemeldet..." : "Anmelden"}
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={handlePasswordReset}
+                    disabled={loading}
+                  >
+                    Passwort zurücksetzen
                   </Button>
                 </form>
               </TabsContent>
