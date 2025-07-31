@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MultiSelectOption {
   value: string;
@@ -85,7 +84,7 @@ export function MultiSelect({
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-full p-0" align="start">
-          <ScrollArea className="max-h-64">
+          <div className="max-h-64 overflow-auto">
             <div className="p-2">
               {options.length === 0 ? (
                 <div className="px-2 py-1.5 text-sm text-muted-foreground">
@@ -112,7 +111,7 @@ export function MultiSelect({
                 ))
               )}
             </div>
-          </ScrollArea>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
