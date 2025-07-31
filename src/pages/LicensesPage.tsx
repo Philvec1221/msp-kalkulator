@@ -79,8 +79,8 @@ export function LicensesPage() {
     const billingType = getBillingType(license.name);
     const matchesSearch = license.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          license.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !categoryFilter || license.category === categoryFilter;
-    const matchesBillingType = !billingTypeFilter || billingType === billingTypeFilter;
+    const matchesCategory = !categoryFilter || categoryFilter === "all" || license.category === categoryFilter;
+    const matchesBillingType = !billingTypeFilter || billingTypeFilter === "all" || billingType === billingTypeFilter;
     return matchesSearch && matchesCategory && matchesBillingType;
   });
 
@@ -125,7 +125,7 @@ export function LicensesPage() {
                   <SelectValue placeholder="Alle Hersteller" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Hersteller</SelectItem>
+                  <SelectItem value="all">Alle Hersteller</SelectItem>
                   {uniqueCategories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
@@ -138,7 +138,7 @@ export function LicensesPage() {
                   <SelectValue placeholder="Alle Abrechnungseinheiten" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Alle Abrechnungseinheiten</SelectItem>
+                  <SelectItem value="all">Alle Abrechnungseinheiten</SelectItem>
                   {uniqueBillingTypes.map((billingType) => (
                     <SelectItem key={billingType} value={billingType}>
                       {billingType}
