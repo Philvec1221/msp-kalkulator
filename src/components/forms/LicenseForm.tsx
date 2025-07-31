@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Edit } from "lucide-react";
 import { License } from "@/hooks/useLicenses";
@@ -21,7 +22,7 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
     cost_per_month: license?.cost_per_month || 0,
     price_per_month: license?.price_per_month || 0,
     active: license?.active ?? true,
-    billing_unit: 'fix', // Default billing unit
+    billing_unit: 'Fix', // Default billing unit wie im Bild
   });
   const [loading, setLoading] = useState(false);
 
@@ -33,7 +34,7 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
       await onSubmit(formData);
       setOpen(false);
       if (!license) {
-        setFormData({ name: '', category: '', cost_per_month: 0, price_per_month: 0, active: true, billing_unit: 'fix' });
+        setFormData({ name: '', category: '', cost_per_month: 0, price_per_month: 0, active: true, billing_unit: 'Fix' });
       }
     } catch (error) {
       // Error handling is done in the hook
@@ -58,77 +59,75 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
             {license ? 'Lizenz bearbeiten' : 'Neue Lizenz'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Produkt *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="z.B. Microsoft 365 Business"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="category">Hersteller/Kategorie *</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-              placeholder="z.B. Microsoft"
-              required
-            />
-          </div>
+         <form onSubmit={handleSubmit} className="space-y-4">
+           {/* Hersteller */}
+           <div className="space-y-2">
+             <Label htmlFor="category">Hersteller</Label>
+             <Input
+               id="category"
+               value={formData.category}
+               onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+               placeholder="z.B. Microsoft, ESET, Veeam"
+               required
+             />
+           </div>
+           
+           {/* Produkt */}
+           <div className="space-y-2">
+             <Label htmlFor="name">Produkt</Label>
+             <Input
+               id="name"
+               value={formData.name}
+               onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+               placeholder="z.B. Windows Defender ATP"
+               required
+             />
+           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cost_per_month">Einkaufspreis (€) *</Label>
-              <Input
-                id="cost_per_month"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.cost_per_month}
-                onChange={(e) => setFormData(prev => ({ ...prev, cost_per_month: parseFloat(e.target.value) || 0 }))}
-                placeholder="0.00"
-                required
-              />
-            </div>
+           {/* Einkaufspreis */}
+           <div className="space-y-2">
+             <Label htmlFor="cost_per_month">Einkaufspreis (€)</Label>
+             <Input
+               id="cost_per_month"
+               type="number"
+               step="0.01"
+               min="0"
+               value={formData.cost_per_month || ''}
+               onChange={(e) => setFormData(prev => ({ ...prev, cost_per_month: parseFloat(e.target.value) || 0 }))}
+               placeholder="0"
+               required
+             />
+           </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="price_per_month">Verkaufspreis (€) *</Label>
-              <Input
-                id="price_per_month"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.price_per_month}
-                onChange={(e) => setFormData(prev => ({ ...prev, price_per_month: parseFloat(e.target.value) || 0 }))}
-                placeholder="0.00"
-                required
-              />
-            </div>
-          </div>
+           {/* Abrechnungseinheit */}
+           <div className="space-y-2">
+             <Label htmlFor="billing_unit">Abrechnungseinheit</Label>
+             <Select 
+               value={formData.billing_unit} 
+               onValueChange={(value) => setFormData(prev => ({ ...prev, billing_unit: value }))}
+             >
+               <SelectTrigger>
+                 <SelectValue placeholder="Wählen Sie..." />
+               </SelectTrigger>
+               <SelectContent>
+                 <SelectItem value="Fix">Fix</SelectItem>
+                 <SelectItem value="pro User">pro User</SelectItem>
+                 <SelectItem value="pro Client">pro Client</SelectItem>
+                 <SelectItem value="pro Server">pro Server</SelectItem>
+               </SelectContent>
+             </Select>
+           </div>
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="active">Aktiv</Label>
-            <Switch
-              id="active"
-              checked={formData.active}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Speichern...' : 'Speichern'}
-            </Button>
-          </div>
-        </form>
+           {/* Buttons */}
+           <div className="flex justify-end gap-2 pt-4">
+             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+               Abbrechen
+             </Button>
+             <Button type="submit" disabled={loading} className="bg-teal-600 hover:bg-teal-700">
+               {loading ? 'Wird hinzugefügt...' : 'Hinzufügen'}
+             </Button>
+           </div>
+         </form>
       </DialogContent>
     </Dialog>
   );
