@@ -18,7 +18,7 @@ const AuthPage = () => {
   const { toast } = useToast();
 
   // Erlaubte E-Mail-Domains
-  const allowedDomains = ["company.com", "example.org"]; // Hier die gewünschten Domains eintragen
+  const allowedDomains = ["vectano.de"]; // Nur vectano.de Domain erlaubt
 
   const isEmailDomainAllowed = (email: string) => {
     const domain = email.split("@")[1]?.toLowerCase();
