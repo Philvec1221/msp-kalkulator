@@ -47,7 +47,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
       const existingLicenses = getLicensesByServiceId(service.id);
       setSelectedLicenses(existingLicenses || []);
     }
-  }, [service, getLicensesByServiceId, serviceLicensesLoading]);
+  }, [service?.id, serviceLicensesLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
