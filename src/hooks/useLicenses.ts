@@ -9,6 +9,7 @@ export interface License {
   cost_per_month: number;
   price_per_month: number;
   billing_unit: string;
+  cost_allocation_service_id?: string;
   active: boolean;
   created_at: string;
   updated_at: string;

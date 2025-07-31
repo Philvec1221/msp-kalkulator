@@ -9,7 +9,7 @@ export interface Service {
   description: string | null;
   product_name: string | null;
   time_in_minutes: number;
-  billing_type: string;
+  billing_type: 'fix' | 'pro_client' | 'pro_server' | 'pro_user' | 'pro_device';
   package_level: string;
   min_package_level?: string;
   active: boolean;
@@ -30,7 +30,7 @@ export function useServices() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setServices(data || []);
+      setServices((data || []) as Service[]);
     } catch (error) {
       console.error('Error fetching services:', error);
       toast({
@@ -78,7 +78,7 @@ export function useServices() {
         }
       }
       
-      setServices(prev => [data, ...prev]);
+      setServices(prev => [data as Service, ...prev]);
       toast({
         title: "Erfolg",
         description: "Service wurde hinzugefügt.",
@@ -106,7 +106,7 @@ export function useServices() {
 
       if (error) throw error;
       
-      setServices(prev => prev.map(svc => svc.id === id ? data : svc));
+      setServices(prev => prev.map(svc => svc.id === id ? data as Service : svc));
       toast({
         title: "Erfolg",
         description: "Service wurde aktualisiert.",

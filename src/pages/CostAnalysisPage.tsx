@@ -50,8 +50,8 @@ export function CostAnalysisPage() {
         let timeCost = 0;
         let licenseCosts = 0;
 
-        // Calculate time-based costs
-        if (service.billing_type === 'time' && service.time_in_minutes) {
+        // Calculate time-based costs (all billing types use time)
+        if (service.time_in_minutes) {
           timeCost = service.time_in_minutes * avgCostPerMinute;
         }
 

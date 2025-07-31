@@ -145,7 +145,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="billing_type">Lizenzierung</Label>
-              <Select value={formData.billing_type} onValueChange={(value) => setFormData(prev => ({ ...prev, billing_type: value }))}>
+              <Select value={formData.billing_type} onValueChange={(value) => setFormData(prev => ({ ...prev, billing_type: value as 'fix' | 'pro_client' | 'pro_server' | 'pro_user' | 'pro_device' }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Wählen Sie..." />
                 </SelectTrigger>
@@ -154,6 +154,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                   <SelectItem value="pro_user">pro User</SelectItem>
                   <SelectItem value="pro_server">pro Server</SelectItem>
                   <SelectItem value="pro_client">pro Client</SelectItem>
+                  <SelectItem value="pro_device">pro Device</SelectItem>
                 </SelectContent>
               </Select>
             </div>

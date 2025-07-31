@@ -51,8 +51,8 @@ export function CustomerViewPage() {
       let totalMonthlyPrice = 0;
 
       packageServices.forEach(service => {
-        // Add service time cost
-        if (service.billing_type === 'time' && service.time_in_minutes) {
+        // Add service time cost (all billing types use time calculation)
+        if (service.time_in_minutes) {
           totalMonthlyPrice += service.time_in_minutes * avgCostPerMinute;
         }
 

@@ -46,6 +46,7 @@ export type Database = {
           active: boolean
           billing_unit: string
           category: string
+          cost_allocation_service_id: string | null
           cost_per_month: number
           created_at: string
           id: string
@@ -57,6 +58,7 @@ export type Database = {
           active?: boolean
           billing_unit?: string
           category: string
+          cost_allocation_service_id?: string | null
           cost_per_month: number
           created_at?: string
           id?: string
@@ -68,6 +70,7 @@ export type Database = {
           active?: boolean
           billing_unit?: string
           category?: string
+          cost_allocation_service_id?: string | null
           cost_per_month?: number
           created_at?: string
           id?: string
@@ -75,7 +78,15 @@ export type Database = {
           price_per_month?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "licenses_cost_allocation_service_id_fkey"
+            columns: ["cost_allocation_service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       package_configs: {
         Row: {
@@ -173,18 +184,21 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          include_cost: boolean
           license_id: string
           service_id: string
         }
         Insert: {
           created_at?: string
           id?: string
+          include_cost?: boolean
           license_id: string
           service_id: string
         }
         Update: {
           created_at?: string
           id?: string
+          include_cost?: boolean
           license_id?: string
           service_id?: string
         }

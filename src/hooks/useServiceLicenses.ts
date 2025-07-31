@@ -6,6 +6,7 @@ export interface ServiceLicense {
   id: string;
   service_id: string;
   license_id: string;
+  include_cost: boolean;
   created_at: string;
 }
 
@@ -35,11 +36,11 @@ export function useServiceLicenses() {
     }
   };
 
-  const addServiceLicense = async (serviceId: string, licenseId: string) => {
+  const addServiceLicense = async (serviceId: string, licenseId: string, includeCost: boolean = true) => {
     try {
       const { data, error } = await supabase
         .from('service_licenses')
-        .insert([{ service_id: serviceId, license_id: licenseId }])
+        .insert([{ service_id: serviceId, license_id: licenseId, include_cost: includeCost }])
         .select()
         .single();
 
@@ -82,7 +83,7 @@ export function useServiceLicenses() {
     }
   };
 
-  const updateServiceLicenses = async (serviceId: string, licenseIds: string[]) => {
+  const updateServiceLicenses = async (serviceId: string, licenseIds: string[], includeCosts: { [licenseId: string]: boolean } = {}) => {
     try {
       // Erst alle bestehenden Lizenzen für diesen Service entfernen
       await supabase
@@ -90,11 +91,12 @@ export function useServiceLicenses() {
         .delete()
         .eq('service_id', serviceId);
 
-      // Dann die neuen Lizenzen hinzufügen
+      // Dann die neuen Lizenzen hinzufügen mit include_cost Flag
       if (licenseIds.length > 0) {
         const insertData = licenseIds.map(licenseId => ({
           service_id: serviceId,
-          license_id: licenseId
+          license_id: licenseId,
+          include_cost: includeCosts[licenseId] ?? true // Default true wenn nicht angegeben
         }));
 
         const { error } = await supabase
