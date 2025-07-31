@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+
 import { useEmployees } from "@/hooks/useEmployees";
 
 interface CalculationConfig {
@@ -25,7 +25,7 @@ export function ConfigPage() {
     ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length / 60
     : 0;
 
-  const selectedPackage = "Basis"; // This will be dynamic later
+  
 
   return (
     <div className="space-y-6">
@@ -109,13 +109,8 @@ export function ConfigPage() {
               <span className="font-semibold">{activeEmployees.length}</span>
             </div>
             
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Ausgewähltes Paket:</span>
-              <Badge variant="default">{selectedPackage}</Badge>
-            </div>
-            
             <p className="text-xs text-muted-foreground mt-4">
-              Gehen Sie zum Vergleich-Tab, um Pakete zu vergleichen und auszuwählen.
+              Diese Werte bilden die Grundlage für alle Berechnungen in der Angebotserstellung.
             </p>
           </CardContent>
         </Card>
