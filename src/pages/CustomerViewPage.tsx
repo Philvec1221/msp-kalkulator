@@ -77,7 +77,7 @@ export function CustomerViewPage() {
       };
 
       return {
-        name: level.charAt(0).toUpperCase() + level.slice(1),
+        name: level === 'allin black' ? 'Allin Black' : level.charAt(0).toUpperCase() + level.slice(1),
         description: descriptions[level as keyof typeof descriptions] || '',
         monthlyPrice: totalMonthlyPrice,
         yearlyPrice: totalMonthlyPrice * 12 * 0.9, // 10% discount for yearly
@@ -189,10 +189,10 @@ export function CustomerViewPage() {
                 </div>
                 <Button 
                   className="w-full"
-                  variant={pkg.highlighted ? "default" : "outline"}
+                  variant={selectedPackage === pkg.name.toLowerCase() ? "default" : "outline"}
                   onClick={() => setSelectedPackage(pkg.name.toLowerCase())}
                 >
-                  {pkg.highlighted ? "Ausgewählt" : "Auswählen"}
+                  {selectedPackage === pkg.name.toLowerCase() ? "Ausgewählt" : "Auswählen"}
                 </Button>
               </CardContent>
             </Card>
