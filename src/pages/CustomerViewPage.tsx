@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Users, Server, Monitor } from "lucide-react";
+import { Check, X, Users, Server, Monitor, FileText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
@@ -187,13 +187,35 @@ export function CustomerViewPage() {
                     ))}
                   </div>
                 </div>
-                <Button 
-                  className="w-full"
-                  variant={selectedPackage === pkg.name.toLowerCase() ? "default" : "outline"}
-                  onClick={() => setSelectedPackage(pkg.name.toLowerCase())}
-                >
-                  {selectedPackage === pkg.name.toLowerCase() ? "Ausgewählt" : "Auswählen"}
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    className="w-full"
+                    variant={selectedPackage === pkg.name.toLowerCase() ? "default" : "outline"}
+                    onClick={() => setSelectedPackage(pkg.name.toLowerCase())}
+                  >
+                    {selectedPackage === pkg.name.toLowerCase() ? "Ausgewählt" : "Auswählen"}
+                  </Button>
+                  
+                  {selectedPackage === pkg.name.toLowerCase() && (
+                    <Button 
+                      variant="secondary"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => {
+                        const params = new URLSearchParams({
+                          package: pkg.name.toLowerCase(),
+                          clients: config.clients.toString(),
+                          servers: config.servers.toString(),
+                          users: config.users.toString()
+                        });
+                        window.open(`/contract-appendix?${params.toString()}`, '_blank');
+                      }}
+                    >
+                      <FileText className="h-4 w-4 mr-2" />
+                      Vertragsanhang
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
