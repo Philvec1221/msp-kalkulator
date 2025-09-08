@@ -10,6 +10,7 @@ import { BackupPage } from "@/pages/BackupPage";
 import { ConfigPage } from "@/pages/ConfigPage";
 import { CustomerViewPage } from "@/pages/CustomerViewPage";
 import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
+import AddonServicesPage from "@/pages/AddonServicesPage";
 
 const Index = () => {
   const [activeMainTab, setActiveMainTab] = useState("angebote");
@@ -63,7 +64,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           {activeMainTab === "verwaltung" && (
             <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-5 bg-transparent h-12">
+              <TabsList className="grid w-full grid-cols-6 bg-transparent h-12">
                 <TabsTrigger value="mitarbeiter" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Mitarbeiter
                 </TabsTrigger>
@@ -75,6 +76,9 @@ const Index = () => {
                 </TabsTrigger>
                 <TabsTrigger value="pakete" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Pakete
+                </TabsTrigger>
+                <TabsTrigger value="addons" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                  Add-Ons
                 </TabsTrigger>
                 <TabsTrigger value="backup" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                   Backup
@@ -108,6 +112,7 @@ const Index = () => {
         {activeMainTab === "verwaltung" && activeSubTab === "lizenzen" && <LicensesPage />}
         {activeMainTab === "verwaltung" && activeSubTab === "services" && <ServicesPage />}
         {activeMainTab === "verwaltung" && activeSubTab === "pakete" && <PackagesPage />}
+        {activeMainTab === "verwaltung" && activeSubTab === "addons" && <AddonServicesPage />}
         {activeMainTab === "verwaltung" && activeSubTab === "backup" && <BackupPage />}
         
         {/* Angebote Content */}

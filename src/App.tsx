@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import AuthPage from "./pages/AuthPage";
 import AdminPage from "./pages/AdminPage";
 import ContractAppendixPage from "./pages/ContractAppendixPage";
+import AddonServicesPage from "./pages/AddonServicesPage";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/addon-services" element={<AddonServicesPage />} />
             <Route path="/contract-appendix" element={<ContractAppendixPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

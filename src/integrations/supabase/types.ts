@@ -7,13 +7,79 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
   }
   public: {
     Tables: {
+      addon_service_licenses: {
+        Row: {
+          addon_service_id: string
+          created_at: string
+          id: string
+          include_cost: boolean
+          license_id: string
+        }
+        Insert: {
+          addon_service_id: string
+          created_at?: string
+          id?: string
+          include_cost?: boolean
+          license_id: string
+        }
+        Update: {
+          addon_service_id?: string
+          created_at?: string
+          id?: string
+          include_cost?: boolean
+          license_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "addon_service_licenses_addon_service_id_fkey"
+            columns: ["addon_service_id"]
+            isOneToOne: false
+            referencedRelation: "addon_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "addon_service_licenses_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "licenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      addon_services: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           active: boolean
