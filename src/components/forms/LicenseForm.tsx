@@ -109,12 +109,14 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
                <SelectTrigger>
                  <SelectValue placeholder="Wählen Sie..." />
                </SelectTrigger>
-               <SelectContent>
-                 <SelectItem value="Fix">Fix</SelectItem>
-                 <SelectItem value="pro User">pro User</SelectItem>
-                 <SelectItem value="pro Client">pro Client</SelectItem>
-                 <SelectItem value="pro Server">pro Server</SelectItem>
-               </SelectContent>
+                <SelectContent>
+                  <SelectItem value="Fix">Fix</SelectItem>
+                  <SelectItem value="pro User">pro User</SelectItem>
+                  <SelectItem value="pro Client">pro Client</SelectItem>
+                  <SelectItem value="pro Server">pro Server</SelectItem>
+                  <SelectItem value="per TB">per TB</SelectItem>
+                  <SelectItem value="pro Site">pro Site</SelectItem>
+                </SelectContent>
              </Select>
            </div>
 
