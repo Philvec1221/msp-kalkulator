@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit } from "lucide-react";
 import { Employee } from "@/hooks/useEmployees";
 
@@ -19,6 +20,7 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
     name: employee?.name || '',
     hourly_rate: employee?.hourly_rate || 0,
     active: employee?.active ?? true,
+    inactive_reason: employee?.inactive_reason || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -30,7 +32,7 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
       await onSubmit(formData);
       setOpen(false);
       if (!employee) {
-        setFormData({ name: '', hourly_rate: 0, active: true });
+        setFormData({ name: '', hourly_rate: 0, active: true, inactive_reason: '' });
       }
     } catch (error) {
       // Error handling is done in the hook
@@ -54,6 +56,9 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
           <DialogTitle>
             {employee ? 'Mitarbeiter bearbeiten' : 'Neuer Mitarbeiter'}
           </DialogTitle>
+          <DialogDescription>
+            {employee ? 'Bearbeiten Sie die Mitarbeiterinformationen.' : 'Fügen Sie einen neuen Mitarbeiter hinzu.'}
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -89,6 +94,19 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
             />
           </div>
+
+          {!formData.active && (
+            <div className="space-y-2">
+              <Label htmlFor="inactive_reason">Grund für Inaktivität</Label>
+              <Textarea
+                id="inactive_reason"
+                value={formData.inactive_reason}
+                onChange={(e) => setFormData(prev => ({ ...prev, inactive_reason: e.target.value }))}
+                placeholder="Warum ist dieser Mitarbeiter inaktiv? (z.B. Krankheit, Urlaub, gekündigt...)"
+                rows={3}
+              />
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>

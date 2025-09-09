@@ -86,6 +86,7 @@ export type Database = {
           created_at: string
           hourly_rate: number
           id: string
+          inactive_reason: string | null
           name: string
           updated_at: string
         }
@@ -94,6 +95,7 @@ export type Database = {
           created_at?: string
           hourly_rate: number
           id?: string
+          inactive_reason?: string | null
           name: string
           updated_at?: string
         }
@@ -102,6 +104,7 @@ export type Database = {
           created_at?: string
           hourly_rate?: number
           id?: string
+          inactive_reason?: string | null
           name?: string
           updated_at?: string
         }

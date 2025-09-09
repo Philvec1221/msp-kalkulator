@@ -7,6 +7,7 @@ export interface Employee {
   name: string;
   hourly_rate: number;
   active: boolean;
+  inactive_reason?: string;
   created_at: string;
   updated_at: string;
 }

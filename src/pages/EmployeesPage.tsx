@@ -80,7 +80,7 @@ export function EmployeesPage() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">Mitarbeiterverwaltung</h2>
           <p className="text-muted-foreground">
-            Verwalten Sie Ihre Mitarbeiter und deren Stundensätze ({employees.length} Mitarbeiter)
+            Verwalten Sie Ihre Mitarbeiter und deren Stundensätze ({employees.length} gesamt, {activeEmployees.length} aktiv)
             {activeEmployees.length > 0 && (
               <span className="ml-2">• Ø {averageHourlyRate.toFixed(2)} €/h</span>
             )}
@@ -160,9 +160,12 @@ export function EmployeesPage() {
                       {employee.active ? "Aktiv" : "Inaktiv"}
                     </Badge>
                     {!employee.active && (
-                      <p className="text-xs text-muted-foreground">
-                        Wird nicht in Berechnungen einbezogen
-                      </p>
+                      <div className="text-xs text-muted-foreground">
+                        <p>Wird nicht in Berechnungen einbezogen</p>
+                        {employee.inactive_reason && (
+                          <p className="mt-1 italic">Grund: {employee.inactive_reason}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
