@@ -1,44 +1,95 @@
-import { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Edit } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { X, Plus, Edit } from "lucide-react";
 import { Employee } from "@/hooks/useEmployees";
+import { useDepartments } from "@/hooks/useDepartments";
+import { useEmployeeDepartments } from "@/hooks/useEmployeeDepartments";
 
 interface EmployeeFormProps {
   employee?: Employee;
-  onSubmit: (data: Omit<Employee, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
+  onSubmit: (data: Omit<Employee, 'id' | 'created_at' | 'updated_at'>, departmentIds: string[]) => Promise<any>;
   trigger?: React.ReactNode;
 }
 
 export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: employee?.name || '',
     hourly_rate: employee?.hourly_rate || 0,
     active: employee?.active ?? true,
-    inactive_reason: employee?.inactive_reason || '',
+    inactive_reason: employee?.inactive_reason || ''
   });
-  const [loading, setLoading] = useState(false);
+  const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<string[]>([]);
+  const [newDepartmentName, setNewDepartmentName] = useState('');
+  
+  const { departments, addDepartment } = useDepartments();
+  const { getDepartmentsByEmployee } = useEmployeeDepartments();
+
+  useEffect(() => {
+    if (employee) {
+      setFormData({
+        name: employee.name,
+        hourly_rate: employee.hourly_rate,
+        active: employee.active,
+        inactive_reason: employee.inactive_reason || ''
+      });
+      // Load existing departments for this employee
+      const employeeDepartments = getDepartmentsByEmployee(employee.id);
+      setSelectedDepartmentIds(employeeDepartments.map(d => d.id));
+    }
+  }, [employee, getDepartmentsByEmployee]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      await onSubmit(formData);
+      await onSubmit(formData, selectedDepartmentIds);
       setOpen(false);
-      if (!employee) {
-        setFormData({ name: '', hourly_rate: 0, active: true, inactive_reason: '' });
-      }
+      // Reset form
+      setFormData({
+        name: '',
+        hourly_rate: 0,
+        active: true,
+        inactive_reason: ''
+      });
+      setSelectedDepartmentIds([]);
     } catch (error) {
-      // Error handling is done in the hook
+      // Error handling is done in the parent component
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddDepartment = async () => {
+    if (newDepartmentName.trim()) {
+      try {
+        const newDepartment = await addDepartment(newDepartmentName.trim());
+        setSelectedDepartmentIds(prev => [...prev, newDepartment.id]);
+        setNewDepartmentName('');
+      } catch (error) {
+        // Error handling is done in the hook
+      }
+    }
+  };
+
+  const toggleDepartment = (departmentId: string) => {
+    setSelectedDepartmentIds(prev => 
+      prev.includes(departmentId)
+        ? prev.filter(id => id !== departmentId)
+        : [...prev, departmentId]
+    );
+  };
+
+  const removeDepartment = (departmentId: string) => {
+    setSelectedDepartmentIds(prev => prev.filter(id => id !== departmentId));
   };
 
   return (
@@ -51,16 +102,18 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {employee ? 'Mitarbeiter bearbeiten' : 'Neuer Mitarbeiter'}
           </DialogTitle>
           <DialogDescription>
-            {employee ? 'Bearbeiten Sie die Mitarbeiterinformationen.' : 'Fügen Sie einen neuen Mitarbeiter hinzu.'}
+            {employee ? 'Bearbeiten Sie die Mitarbeiterinformationen und Abteilungs-Zuordnungen.' : 'Fügen Sie einen neuen Mitarbeiter hinzu und ordnen Sie ihn Abteilungen zu.'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name *</Label>
             <Input
@@ -95,29 +148,95 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
             />
           </div>
 
-          {!formData.active && (
-            <div className="space-y-2">
-              <Label htmlFor="inactive_reason">Grund für Inaktivität</Label>
-              <Textarea
-                id="inactive_reason"
-                value={formData.inactive_reason}
-                onChange={(e) => setFormData(prev => ({ ...prev, inactive_reason: e.target.value }))}
-                placeholder="Warum ist dieser Mitarbeiter inaktiv? (z.B. Krankheit, Urlaub, gekündigt...)"
-                rows={3}
-              />
-            </div>
-          )}
-
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Abbrechen
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Speichern...' : 'Speichern'}
-            </Button>
+          <div className="space-y-2">
+            <Label htmlFor="inactive_reason">Grund für Inaktivität</Label>
+            <Textarea
+              id="inactive_reason"
+              value={formData.inactive_reason}
+              onChange={(e) => setFormData(prev => ({ ...prev, inactive_reason: e.target.value }))}
+              placeholder="Grund für Inaktivität..."
+              disabled={formData.active}
+            />
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
+
+          <div className="space-y-2">
+            <Label htmlFor="departments">Abteilungen</Label>
+            
+            {/* Selected Departments */}
+            <div className="flex flex-wrap gap-2 min-h-[32px] p-2 border rounded-md">
+              {selectedDepartmentIds.length > 0 ? (
+                selectedDepartmentIds.map(departmentId => {
+                  const department = departments.find(d => d.id === departmentId);
+                  if (!department) return null;
+                  return (
+                    <Badge key={departmentId} variant="secondary" className="flex items-center gap-1">
+                      {department.name}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                        onClick={() => removeDepartment(departmentId)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </Badge>
+                  );
+                })
+              ) : (
+                <span className="text-sm text-muted-foreground">Keine Abteilungen ausgewählt</span>
+              )}
+            </div>
+
+            {/* Available Departments */}
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Verfügbare Abteilungen:</Label>
+              <div className="flex flex-wrap gap-2">
+                {departments
+                  .filter(dept => !selectedDepartmentIds.includes(dept.id))
+                  .map(department => (
+                    <Button
+                      key={department.id}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => toggleDepartment(department.id)}
+                      className="h-8"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      {department.name}
+                    </Button>
+                  ))}
+              </div>
+            </div>
+
+            {/* Add New Department */}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Neue Abteilung hinzufügen..."
+                value={newDepartmentName}
+                onChange={(e) => setNewDepartmentName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddDepartment())}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleAddDepartment}
+                disabled={!newDepartmentName.trim()}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Speichern..." : (employee ? "Aktualisieren" : "Hinzufügen")}
+        </Button>
+      </form>
+    </DialogContent>
+  </Dialog>
+);
 }
