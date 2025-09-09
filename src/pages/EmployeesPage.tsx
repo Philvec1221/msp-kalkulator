@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Pencil, Trash2, Search } from "lucide-react";
+import { Pencil, Trash2, Search, Plus, X } from "lucide-react";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useEmployeeDepartments } from "@/hooks/useEmployeeDepartments";
@@ -13,12 +13,13 @@ import { EmployeeForm } from "@/components/forms/EmployeeForm";
 
 export function EmployeesPage() {
   const { employees, loading, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
-  const { departments } = useDepartments();
+  const { departments, addDepartment, deleteDepartment } = useDepartments();
   const { assignEmployeeToDepartments, getDepartmentsByEmployee, getDepartmentAverageHourlyRate } = useEmployeeDepartments();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [newDepartmentName, setNewDepartmentName] = useState('');
 
   const handleSubmit = async (employeeData: any, departmentIds: string[]) => {
     let result;
@@ -34,6 +35,17 @@ export function EmployeesPage() {
     }
     
     return result;
+  };
+
+  const handleAddDepartment = async () => {
+    if (newDepartmentName.trim()) {
+      try {
+        await addDepartment(newDepartmentName.trim());
+        setNewDepartmentName('');
+      } catch (error) {
+        // Error handling is done in the hook
+      }
+    }
   };
 
   // Filter employees
@@ -88,6 +100,88 @@ export function EmployeesPage() {
           <Button>+ Mitarbeiter hinzufügen</Button>
         } />
       </div>
+
+      {/* Department Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Abteilungen verwalten</CardTitle>
+          <CardDescription>Erstellen und verwalten Sie Abteilungen für die Mitarbeiter-Zuordnung</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Add Department */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Neue Abteilung hinzufügen..."
+              value={newDepartmentName}
+              onChange={(e) => setNewDepartmentName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddDepartment())}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleAddDepartment}
+              disabled={!newDepartmentName.trim()}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Hinzufügen
+            </Button>
+          </div>
+
+          {/* Existing Departments */}
+          {departments.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium text-muted-foreground">Bestehende Abteilungen:</h4>
+              <div className="flex flex-wrap gap-2">
+                {departments.map(department => {
+                  const employeesInDept = employees.filter(emp => 
+                    getDepartmentsByEmployee(emp.id).some(d => d.id === department.id)
+                  );
+                  return (
+                    <div key={department.id} className="flex items-center gap-1">
+                      <Badge variant="outline" className="flex items-center gap-2">
+                        <span>{department.name}</span>
+                        <span className="text-xs text-muted-foreground">({employeesInDept.length})</span>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-4 w-4 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Abteilung löschen</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Sind Sie sicher, dass Sie die Abteilung "{department.name}" löschen möchten? 
+                                {employeesInDept.length > 0 && (
+                                  <span className="block mt-2 text-orange-600">
+                                    Warnung: {employeesInDept.length} Mitarbeiter sind dieser Abteilung zugeordnet.
+                                  </span>
+                                )}
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => deleteDepartment(department.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Löschen
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </Badge>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <div className="flex gap-4 flex-wrap">
