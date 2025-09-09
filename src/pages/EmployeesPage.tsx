@@ -20,6 +20,12 @@ import {
 export function EmployeesPage() {
   const { employees, loading, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
 
+  // Calculate average hourly rate for active employees
+  const activeEmployees = employees.filter(emp => emp.active);
+  const averageHourlyRate = activeEmployees.length > 0 
+    ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length
+    : 0;
+
   const sampleEmployees = [
     { name: "PG", hourly_rate: 57.03, active: true },
     { name: "KB", hourly_rate: 74.67, active: true },
@@ -75,6 +81,9 @@ export function EmployeesPage() {
           <h2 className="text-2xl font-bold text-foreground">Mitarbeiterverwaltung</h2>
           <p className="text-muted-foreground">
             Verwalten Sie Ihre Mitarbeiter und deren Stundensätze ({employees.length} Mitarbeiter)
+            {activeEmployees.length > 0 && (
+              <span className="ml-2">• Ø {averageHourlyRate.toFixed(2)} €/h</span>
+            )}
           </p>
         </div>
         <EmployeeForm onSubmit={addEmployee} />
@@ -146,9 +155,16 @@ export function EmployeesPage() {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <Badge variant={employee.active ? "default" : "secondary"}>
-                    {employee.active ? "Aktiv" : "Inaktiv"}
-                  </Badge>
+                  <div className="flex flex-col gap-1">
+                    <Badge variant={employee.active ? "default" : "secondary"}>
+                      {employee.active ? "Aktiv" : "Inaktiv"}
+                    </Badge>
+                    {!employee.active && (
+                      <p className="text-xs text-muted-foreground">
+                        Wird nicht in Berechnungen einbezogen
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>
