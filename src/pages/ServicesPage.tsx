@@ -84,8 +84,10 @@ export function ServicesPage() {
   };
 
   const handleDragStart = (e: React.DragEvent, serviceId: string) => {
+    console.log('Drag started:', serviceId);
     setDraggedServiceId(serviceId);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', serviceId);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -95,6 +97,7 @@ export function ServicesPage() {
 
   const handleDrop = (e: React.DragEvent, targetServiceId: string) => {
     e.preventDefault();
+    console.log('Drop on:', targetServiceId, 'from:', draggedServiceId);
     if (draggedServiceId && draggedServiceId !== targetServiceId) {
       // Determine if we should insert after based on drop position
       const targetElement = e.currentTarget as HTMLElement;
@@ -102,12 +105,14 @@ export function ServicesPage() {
       const dropY = e.clientY;
       const insertAfter = dropY > rect.top + rect.height / 2;
       
+      console.log('Updating order - dragged:', draggedServiceId, 'target:', targetServiceId, 'insertAfter:', insertAfter);
       updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
     }
     setDraggedServiceId(null);
   };
 
   const handleDragEnd = () => {
+    console.log('Drag ended');
     setDraggedServiceId(null);
   };
 
@@ -184,9 +189,10 @@ export function ServicesPage() {
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, service.id)}
               onDragEnd={handleDragEnd}
-              className={`transition-all duration-200 cursor-move ${
+              className={`transition-all duration-200 ${
                 draggedServiceId === service.id ? 'opacity-50 scale-95' : ''
-              } ${draggedServiceId && draggedServiceId !== service.id ? 'border-primary/50' : ''}`}
+              } ${draggedServiceId && draggedServiceId !== service.id ? 'border-primary/50 bg-primary/5' : ''}`}
+              style={{ cursor: 'move' }}
             >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
