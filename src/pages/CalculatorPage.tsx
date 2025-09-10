@@ -11,6 +11,7 @@ import { useServices } from "@/hooks/useServices";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
 
 interface QuoteData {
   customerNumber: string;
@@ -28,7 +29,7 @@ export function CalculatorPage() {
   const { services } = useServices();
   const { employees } = useEmployees();
   const { licenses } = useLicenses();
-  const { getLicensesByServiceId } = useServiceLicenses();
+  const { getAllServiceLicenseRelations } = useServiceLicenses();
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
@@ -49,63 +50,22 @@ export function CalculatorPage() {
 
   // Calculate package services based on selected package
   const getPackageServices = () => {
-    return services.filter(service => {
-      const packageLevels = ['basis', 'gold', 'allin', 'allin_black'];
-      const selectedIndex = packageLevels.indexOf(quoteData.selectedPackage.toLowerCase());
-      const serviceIndex = packageLevels.indexOf(service.package_level);
-      return serviceIndex <= selectedIndex;
-    });
+    return getServicesForPackage(services, quoteData.selectedPackage);
   };
 
-  const calculateServiceCost = (service: any) => {
-    let quantity = 0;
-    
-    // Determine quantity based on billing type
-    switch (service.billing_type) {
-      case 'pro_client':
-        quantity = quoteData.clients;
-        break;
-      case 'pro_server':
-        quantity = quoteData.servers;
-        break;
-      case 'pro_user':
-        quantity = quoteData.users;
-        break;
-      case 'fix':
-        quantity = 1;
-        break;
-      default:
-        quantity = 1;
-    }
-
-    // Calculate technician costs
-    const techCosts = (service.time_in_minutes * averageCostPerMinute * quantity);
-    
-    // Calculate license costs based on service-license relationships
-    let licenseCosts = 0;
-    const serviceLicenseIds = getLicensesByServiceId(service.id);
-    serviceLicenseIds.forEach(licenseId => {
-      const license = licenses.find(l => l.id === licenseId && l.active);
-      if (license) {
-        // Use license cost_per_month for EK calculation
-        licenseCosts += Number(license.cost_per_month) * quantity;
-      }
-    });
-    
-    const ekTotal = techCosts + licenseCosts;
-    const vkTotal = ekTotal * (1 + quoteData.markup / 100);
-    
-    return {
-      quantity,
-      techCosts,
-      licenseCosts,
-      ekTotal,
-      vkTotal
-    };
-  };
 
   const packageServices = getPackageServices();
-  const totalEK = packageServices.reduce((sum, service) => sum + calculateServiceCost(service).ekTotal, 0);
+  
+  // Calculate costs with license deduplication
+  const packageCosts = calculatePackageCosts(
+    packageServices,
+    licenses,
+    getAllServiceLicenseRelations(),
+    averageCostPerMinute,
+    { clients: quoteData.clients, servers: quoteData.servers, users: quoteData.users }
+  );
+  
+  const totalEK = packageCosts.totalCostEK;
   const totalVK = totalEK * (1 + quoteData.markup / 100);
 
   useEffect(() => {

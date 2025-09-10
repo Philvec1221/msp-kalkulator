@@ -125,6 +125,16 @@ export function useServiceLicenses() {
       .map(sl => sl.license_id);
   };
 
+  const getLicensesWithCostIncludeByServiceId = (serviceId: string): { licenseId: string; includeCost: boolean }[] => {
+    return serviceLicenses
+      .filter(sl => sl.service_id === serviceId)
+      .map(sl => ({ licenseId: sl.license_id, includeCost: sl.include_cost }));
+  };
+
+  const getAllServiceLicenseRelations = () => {
+    return serviceLicenses;
+  };
+
   useEffect(() => {
     fetchServiceLicenses();
   }, []);
@@ -136,6 +146,8 @@ export function useServiceLicenses() {
     removeServiceLicense,
     updateServiceLicenses,
     getLicensesByServiceId,
+    getLicensesWithCostIncludeByServiceId,
+    getAllServiceLicenseRelations,
     refetch: fetchServiceLicenses
   };
 }

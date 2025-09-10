@@ -6,6 +6,7 @@ import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
+import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
 
 interface PackageCostBreakdown {
   packageName: string;
@@ -24,7 +25,7 @@ interface PackageCostBreakdown {
 export function CostAnalysisPage() {
   const { services } = useServices();
   const { licenses } = useLicenses();
-  const { getLicensesByServiceId } = useServiceLicenses();
+  const { getAllServiceLicenseRelations } = useServiceLicenses();
   const { employees } = useEmployees();
 
   // Calculate average cost per minute from active employees
@@ -33,62 +34,52 @@ export function CostAnalysisPage() {
     ? activeEmployees.reduce((sum, emp) => sum + Number(emp.hourly_rate), 0) / activeEmployees.length / 60
     : 0;
 
-  // Calculate cost breakdown for each package
+  // Calculate cost breakdown for each package with license deduplication
   const packageAnalysis: PackageCostBreakdown[] = useMemo(() => {
     const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
+    const defaultConfig = { clients: 1, servers: 1, users: 1 }; // Base calculation for analysis
     
     return packageLevels.map(level => {
-      const packageServices = services.filter(service => 
-        service.active && service.package_level?.toLowerCase() === level.toLowerCase()
+      const packageServices = getServicesForPackage(services, level);
+
+      // Calculate package costs with deduplication
+      const packageCosts = calculatePackageCosts(
+        packageServices,
+        licenses,
+        getAllServiceLicenseRelations(),
+        avgCostPerMinute,
+        defaultConfig
       );
 
-      let totalCost = 0;
-      let totalPrice = 0;
+      // Build service costs breakdown
       const serviceCosts: PackageCostBreakdown['serviceCosts'] = [];
-
       packageServices.forEach(service => {
         let timeCost = 0;
-        let licenseCosts = 0;
-
-        // Calculate time-based costs (all billing types use time)
         if (service.time_in_minutes) {
           timeCost = service.time_in_minutes * avgCostPerMinute;
         }
 
-        // Calculate license costs for this service
-        const serviceLicenseIds = getLicensesByServiceId(service.id);
-        serviceLicenseIds.forEach(licenseId => {
-          const license = licenses.find(l => l.id === licenseId && l.active);
-          if (license) {
-            licenseCosts += Number(license.cost_per_month);
-            totalPrice += Number(license.price_per_month);
-          }
-        });
-
-        const totalServiceCost = timeCost + licenseCosts;
-        totalCost += totalServiceCost;
-
         serviceCosts.push({
           serviceName: service.name,
           timeCost,
-          licenseCosts,
-          totalServiceCost
+          licenseCosts: 0, // Individual service license costs are now deduplicated
+          totalServiceCost: timeCost
         });
       });
 
-      const margin = totalPrice - totalCost;
-      const marginPercent = totalCost > 0 ? (margin / totalCost) * 100 : 0;
+      const margin = packageCosts.totalPriceVK - packageCosts.totalCostEK;
+      const marginPercent = packageCosts.totalCostEK > 0 ? (margin / packageCosts.totalCostEK) * 100 : 0;
 
       return {
         packageName: level.charAt(0).toUpperCase() + level.slice(1),
-        totalCost,
-        totalPrice,
+        totalCost: packageCosts.totalCostEK,
+        totalPrice: packageCosts.totalPriceVK,
         margin,
         marginPercent,
         serviceCosts
       };
     });
-  }, [services, licenses, avgCostPerMinute, getLicensesByServiceId]);
+  }, [services, licenses, avgCostPerMinute, getAllServiceLicenseRelations]);
 
   const getPackageColor = (packageName: string) => {
     switch (packageName.toLowerCase()) {

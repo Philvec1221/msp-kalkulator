@@ -7,6 +7,7 @@ import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
+import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
 
 interface PackageData {
   name: string;
@@ -28,7 +29,7 @@ export function CustomerViewPage() {
   // Fetch real data from hooks
   const { services } = useServices();
   const { licenses } = useLicenses();
-  const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
+  const { getAllServiceLicenseRelations } = useServiceLicenses();
   const { employees } = useEmployees();
 
   // Calculate average hourly rate per minute
@@ -37,37 +38,25 @@ export function CustomerViewPage() {
     ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length / 60
     : 0;
 
-  // Calculate package data from real services and licenses
+  // Calculate package data from real services and licenses with deduplication
   const packages: PackageData[] = useMemo(() => {
     const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
     
     return packageLevels.map((level, index) => {
       // Get services for this package level
-      const packageServices = services.filter(service => 
-        service.active && service.package_level?.toLowerCase() === level.toLowerCase()
+      const packageServices = getServicesForPackage(services, level);
+
+      // Calculate package costs with license deduplication
+      const packageCosts = calculatePackageCosts(
+        packageServices,
+        licenses,
+        getAllServiceLicenseRelations(),
+        avgCostPerMinute,
+        config
       );
 
-      // Calculate total cost
-      let totalMonthlyPrice = 0;
-
-      packageServices.forEach(service => {
-        // Add service time cost (all billing types use time calculation)
-        if (service.time_in_minutes) {
-          totalMonthlyPrice += service.time_in_minutes * avgCostPerMinute;
-        }
-
-        // Add license costs for this service
-        const serviceLicenseIds = getLicensesByServiceId(service.id);
-        serviceLicenseIds.forEach(licenseId => {
-          const license = licenses.find(l => l.id === licenseId && l.active);
-          if (license) {
-            totalMonthlyPrice += Number(license.price_per_month);
-          }
-        });
-      });
-
-      // Apply infrastructure multipliers
-      totalMonthlyPrice *= config.clients * 0.1 + config.servers * 0.2 + config.users * 0.05;
+      // Use VK prices for customer view
+      let totalMonthlyPrice = packageCosts.totalPriceVK;
 
       const descriptions = {
         'basis': 'Grundlegende IT-Services für kleine Unternehmen',
@@ -85,7 +74,7 @@ export function CustomerViewPage() {
         highlighted: index === 0 // Highlight first package (Basis)
       };
     });
-  }, [services, licenses, serviceLicenses, avgCostPerMinute, config]);
+  }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
 
   const getPackageVariant = (packageName: string) => {
     switch (packageName.toLowerCase()) {
