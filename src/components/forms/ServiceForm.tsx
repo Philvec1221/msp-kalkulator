@@ -15,7 +15,7 @@ import { MultiSelect } from "@/components/ui/multi-select";
 
 interface ServiceFormProps {
   service?: Service;
-  onSubmit: (data: Omit<Service, 'id' | 'created_at' | 'updated_at'>) => Promise<any>;
+  onSubmit: (data: Omit<Service, 'id' | 'created_at' | 'updated_at' | 'sort_order'>) => Promise<any>;
   trigger?: React.ReactNode;
 }
 

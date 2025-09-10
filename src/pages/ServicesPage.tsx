@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Edit, Trash, Search, Filter, Clock } from "lucide-react";
+import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
@@ -23,11 +23,12 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function ServicesPage() {
-  const { services, loading, addService, updateService, deleteService } = useServices();
+  const { services, loading, addService, updateService, deleteService, updateServiceOrder } = useServices();
   const { licenses } = useLicenses();
   const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
+  const [draggedServiceId, setDraggedServiceId] = useState<string | null>(null);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -80,6 +81,34 @@ export function ServicesPage() {
       case 'fix': return 'destructive';
       default: return 'default';
     }
+  };
+
+  const handleDragStart = (e: React.DragEvent, serviceId: string) => {
+    setDraggedServiceId(serviceId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent, targetServiceId: string) => {
+    e.preventDefault();
+    if (draggedServiceId && draggedServiceId !== targetServiceId) {
+      // Determine if we should insert after based on drop position
+      const targetElement = e.currentTarget as HTMLElement;
+      const rect = targetElement.getBoundingClientRect();
+      const dropY = e.clientY;
+      const insertAfter = dropY > rect.top + rect.height / 2;
+      
+      updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
+    }
+    setDraggedServiceId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedServiceId(null);
   };
 
   if (loading) {
@@ -148,12 +177,25 @@ export function ServicesPage() {
       ) : (
         <div className="space-y-4">
           {filteredServices.map((service) => (
-            <Card key={service.id}>
+            <Card 
+              key={service.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, service.id)}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, service.id)}
+              onDragEnd={handleDragEnd}
+              className={`transition-all duration-200 cursor-move ${
+                draggedServiceId === service.id ? 'opacity-50 scale-95' : ''
+              } ${draggedServiceId && draggedServiceId !== service.id ? 'border-primary/50' : ''}`}
+            >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="p-2 bg-primary/10 rounded-lg mt-1">
-                      <Settings className="h-4 w-4 text-primary" />
+                    <div className="flex items-center gap-2">
+                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Settings className="h-4 w-4 text-primary" />
+                      </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">

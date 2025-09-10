@@ -392,6 +392,7 @@ export type Database = {
           name: string
           package_level: string | null
           product_name: string | null
+          sort_order: number | null
           time_in_minutes: number
           updated_at: string
         }
@@ -405,6 +406,7 @@ export type Database = {
           name: string
           package_level?: string | null
           product_name?: string | null
+          sort_order?: number | null
           time_in_minutes: number
           updated_at?: string
         }
@@ -418,6 +420,7 @@ export type Database = {
           name?: string
           package_level?: string | null
           product_name?: string | null
+          sort_order?: number | null
           time_in_minutes?: number
           updated_at?: string
         }

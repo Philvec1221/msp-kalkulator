@@ -67,6 +67,7 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
     let successCount = 0;
     let errorCount = 0;
 
+    // Import services sequentially to maintain order
     for (const service of previewServices) {
       try {
         await addService({
