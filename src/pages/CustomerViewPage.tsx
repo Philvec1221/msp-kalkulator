@@ -2,12 +2,14 @@ import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Users, Server, Monitor, FileText } from "lucide-react";
+import { Check, X, Users, Server, Monitor, FileText, Clock, Shield } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
+import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
 
 interface PackageData {
   name: string;
@@ -31,6 +33,7 @@ export function CustomerViewPage() {
   const { licenses } = useLicenses();
   const { getAllServiceLicenseRelations } = useServiceLicenses();
   const { employees } = useEmployees();
+  const { getConfigByServiceAndPackage } = usePackageConfigs();
 
   // Calculate average hourly rate per minute
   const activeEmployees = employees.filter(emp => emp.active);
@@ -165,15 +168,63 @@ export function CustomerViewPage() {
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <div className="space-y-2 mb-6">
+                <div className="space-y-3 mb-6">
                   <p className="text-sm font-medium">Enthaltene Services:</p>
-                  <div className="space-y-1">
-                    {pkg.services.map((service, index) => (
-                      <div key={index} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-green-600" />
-                        <span>{service}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-2">
+                    {pkg.services.map((serviceName, index) => {
+                      const service = services.find(s => s.name === serviceName);
+                      const packageConfig = service ? getConfigByServiceAndPackage(service.id, pkg.name.toLowerCase()) : null;
+                      
+                      return (
+                        <div key={index} className="p-3 bg-muted/30 rounded-lg">
+                          <div className="flex items-start gap-2 mb-2">
+                            <span className="text-lg">
+                              {packageConfig ? getInclusionIcon(packageConfig.inclusion_type as InclusionType) : '✓'}
+                            </span>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">{serviceName}</span>
+                                {packageConfig && (
+                                  <Badge 
+                                    variant={getInclusionVariant(packageConfig.inclusion_type as InclusionType)}
+                                    className="text-xs"
+                                  >
+                                    {getInclusionLabel(packageConfig.inclusion_type as InclusionType)}
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {packageConfig && (
+                                <div className="space-y-1 text-xs text-muted-foreground">
+                                  {packageConfig.sla_response_time && (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      <span>Reaktionszeit: {packageConfig.sla_response_time}</span>
+                                    </div>
+                                  )}
+                                  {packageConfig.sla_availability && (
+                                    <div className="flex items-center gap-1">
+                                      <Shield className="h-3 w-3" />
+                                      <span>Verfügbarkeit: {packageConfig.sla_availability}</span>
+                                    </div>
+                                  )}
+                                  {packageConfig.custom_description && (
+                                    <div className="text-xs italic">
+                                      {packageConfig.custom_description}
+                                    </div>
+                                  )}
+                                  {packageConfig.hourly_rate_surcharge && (
+                                    <div className="text-xs">
+                                      Stundensatz-Zuschlag: +{packageConfig.hourly_rate_surcharge}%
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="space-y-2">

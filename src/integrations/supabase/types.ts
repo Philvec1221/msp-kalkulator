@@ -217,26 +217,44 @@ export type Database = {
       package_configs: {
         Row: {
           created_at: string
+          custom_description: string | null
+          hourly_rate_surcharge: number | null
           id: string
+          inclusion_type: string | null
           multiplier: number
+          notes: string | null
           package_type: string
           service_id: string
+          sla_availability: string | null
+          sla_response_time: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          custom_description?: string | null
+          hourly_rate_surcharge?: number | null
           id?: string
+          inclusion_type?: string | null
           multiplier?: number
+          notes?: string | null
           package_type: string
           service_id: string
+          sla_availability?: string | null
+          sla_response_time?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          custom_description?: string | null
+          hourly_rate_surcharge?: number | null
           id?: string
+          inclusion_type?: string | null
           multiplier?: number
+          notes?: string | null
           package_type?: string
           service_id?: string
+          sla_availability?: string | null
+          sla_response_time?: string | null
           updated_at?: string
         }
         Relationships: [
