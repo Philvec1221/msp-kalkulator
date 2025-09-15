@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import { EmployeesPage } from "@/pages/EmployeesPage";
 import { LicensesPage } from "@/pages/LicensesPage";
 import { ServicesPage } from "@/pages/ServicesPage";
@@ -13,7 +14,10 @@ import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
 import AddonServicesPage from "@/pages/AddonServicesPage";
 
 const Index = () => {
-  const [activeMainTab, setActiveMainTab] = useState("angebote");
+  const { isAdmin } = useAuth();
+  
+  // Default tabs based on user role
+  const [activeMainTab, setActiveMainTab] = useState(isAdmin ? "angebote" : "kalkulator");
   const [activeSubTab, setActiveSubTab] = useState("kalkulation");
 
   return (
@@ -35,92 +39,121 @@ const Index = () => {
       <div className="bg-teal-400">
         <div className="container mx-auto px-4">
           <Tabs value={activeMainTab} onValueChange={setActiveMainTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
-              <TabsTrigger 
-                value="verwaltung" 
-                className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
-              >
-                Verwaltung
-              </TabsTrigger>
-              <TabsTrigger 
-                value="angebote"
-                className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
-              >
-                Angebote
-              </TabsTrigger>
-              <TabsTrigger 
-                value="kundenview"
-                className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
-              >
-                Kundenview
-              </TabsTrigger>
-            </TabsList>
+            {isAdmin ? (
+              // Admin Navigation - All 3 tabs
+              <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
+                <TabsTrigger 
+                  value="verwaltung" 
+                  className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
+                >
+                  Verwaltung
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="angebote"
+                  className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
+                >
+                  Angebote
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="kundenview"
+                  className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
+                >
+                  Kundenview
+                </TabsTrigger>
+              </TabsList>
+            ) : (
+              // User Navigation - Only 2 tabs
+              <TabsList className="grid w-full grid-cols-2 bg-transparent h-12">
+                <TabsTrigger 
+                  value="kalkulator"
+                  className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
+                >
+                  Kalkulator
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="kundenview"
+                  className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
+                >
+                  Kundenview
+                </TabsTrigger>
+              </TabsList>
+            )}
           </Tabs>
         </div>
       </div>
 
-      {/* Sub Navigation */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4">
-          {activeMainTab === "verwaltung" && (
-            <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-6 bg-transparent h-12">
-                <TabsTrigger value="mitarbeiter" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Mitarbeiter
-                </TabsTrigger>
-                <TabsTrigger value="lizenzen" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Lizenzen
-                </TabsTrigger>
-                <TabsTrigger value="services" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Services
-                </TabsTrigger>
-                <TabsTrigger value="pakete" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Pakete
-                </TabsTrigger>
-                <TabsTrigger value="addons" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Add-Ons
-                </TabsTrigger>
-                <TabsTrigger value="backup" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Backup
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
-          
-          {activeMainTab === "angebote" && (
-            <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
-                <TabsTrigger value="konfig" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Konfig
-                </TabsTrigger>
-                <TabsTrigger value="kalkulation" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Kalkulation
-                </TabsTrigger>
-                <TabsTrigger value="kostenanalyse" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                  Kostenanalyse
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          )}
+      {/* Sub Navigation - Only for Admin */}
+      {isAdmin && (
+        <div className="bg-white border-b">
+          <div className="container mx-auto px-4">
+            {activeMainTab === "verwaltung" && (
+              <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-6 bg-transparent h-12">
+                  <TabsTrigger value="mitarbeiter" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Mitarbeiter
+                  </TabsTrigger>
+                  <TabsTrigger value="lizenzen" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Lizenzen
+                  </TabsTrigger>
+                  <TabsTrigger value="services" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Services
+                  </TabsTrigger>
+                  <TabsTrigger value="pakete" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Pakete
+                  </TabsTrigger>
+                  <TabsTrigger value="addons" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Add-Ons
+                  </TabsTrigger>
+                  <TabsTrigger value="backup" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Backup
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+            
+            {activeMainTab === "angebote" && (
+              <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
+                <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
+                  <TabsTrigger value="konfig" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Konfig
+                  </TabsTrigger>
+                  <TabsTrigger value="kalkulation" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Kalkulation
+                  </TabsTrigger>
+                  <TabsTrigger value="kostenanalyse" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Kostenanalyse
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Content */}
       <div className="container mx-auto px-4 py-6">
-        {/* Verwaltung Content */}
-        {activeMainTab === "verwaltung" && activeSubTab === "mitarbeiter" && <EmployeesPage />}
-        {activeMainTab === "verwaltung" && activeSubTab === "lizenzen" && <LicensesPage />}
-        {activeMainTab === "verwaltung" && activeSubTab === "services" && <ServicesPage />}
-        {activeMainTab === "verwaltung" && activeSubTab === "pakete" && <PackagesPage />}
-        {activeMainTab === "verwaltung" && activeSubTab === "addons" && <AddonServicesPage />}
-        {activeMainTab === "verwaltung" && activeSubTab === "backup" && <BackupPage />}
+        {/* Admin Content */}
+        {isAdmin && (
+          <>
+            {/* Verwaltung Content */}
+            {activeMainTab === "verwaltung" && activeSubTab === "mitarbeiter" && <EmployeesPage />}
+            {activeMainTab === "verwaltung" && activeSubTab === "lizenzen" && <LicensesPage />}
+            {activeMainTab === "verwaltung" && activeSubTab === "services" && <ServicesPage />}
+            {activeMainTab === "verwaltung" && activeSubTab === "pakete" && <PackagesPage />}
+            {activeMainTab === "verwaltung" && activeSubTab === "addons" && <AddonServicesPage />}
+            {activeMainTab === "verwaltung" && activeSubTab === "backup" && <BackupPage />}
+            
+            {/* Angebote Content */}
+            {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
+            {activeMainTab === "angebote" && activeSubTab === "kalkulation" && <CalculatorPage />}
+            {activeMainTab === "angebote" && activeSubTab === "kostenanalyse" && <CostAnalysisPage />}
+          </>
+        )}
         
-        {/* Angebote Content */}
-        {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
-        {activeMainTab === "angebote" && activeSubTab === "kalkulation" && <CalculatorPage />}
-        {activeMainTab === "angebote" && activeSubTab === "kostenanalyse" && <CostAnalysisPage />}
+        {/* User Content - Direct page display */}
+        {!isAdmin && activeMainTab === "kalkulator" && <CalculatorPage />}
         
-        {/* Kundenview Content */}
+        {/* Kundenview Content - Available to both Admin and User */}
         {activeMainTab === "kundenview" && <CustomerViewPage />}
       </div>
     </div>

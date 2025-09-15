@@ -67,17 +67,9 @@ const adminItems: NavItem[] = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
-  const { isAdmin, profile, user } = useAuth();
+  const { isAdmin } = useAuth();
   const currentPath = location.pathname;
   const collapsed = state === "collapsed";
-
-  // Debug logging
-  console.log('AppSidebar Debug:', { 
-    isAdmin, 
-    profile, 
-    user: user?.email,
-    profileRole: profile?.role 
-  });
 
   const isActive = (path: string) => {
     if (path === "/") {
