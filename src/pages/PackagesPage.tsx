@@ -70,8 +70,7 @@ export function PackagesPage() {
                     <div className="flex items-center gap-3">
                       {getPackageIcon(pkg.name, pkg.color)}
                       <Badge 
-                        {...getPackageBadgeProps([pkg], pkg.name)}
-                        className={`text-sm font-medium ${getPackageBadgeProps([pkg], pkg.name).className}`}
+                        {...getPackageBadgeProps(packages, pkg.name)}
                       >
                         {pkg.name}
                       </Badge>

@@ -114,7 +114,6 @@ export function CalculatorPage() {
               <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
               <Badge 
                 {...getPackageBadgeProps(packages || [], quoteData.selectedPackage)}
-                className={`text-lg px-4 py-2 ${getPackageBadgeProps(packages || [], quoteData.selectedPackage).className}`}
               >
                 {quoteData.selectedPackage}
               </Badge>

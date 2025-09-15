@@ -144,7 +144,6 @@ export function CustomerViewPage() {
                 <div className="mb-3">
                   <Badge 
                     {...getPackageBadgeProps(dbPackages || [], pkg.name)}
-                    className={`text-sm ${getPackageBadgeProps(dbPackages || [], pkg.name).className}`}
                   >
                     {pkg.name}
                   </Badge>

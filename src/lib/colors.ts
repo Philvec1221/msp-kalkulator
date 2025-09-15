@@ -131,9 +131,9 @@ export const getColorClasses = (colorName: string) => {
   const needsBlackText = ['white', 'light gray', 'yellow', 'amber', 'lime'].includes(color.name.toLowerCase());
   
   return {
-    bg: `bg-[hsl(var(${color.cssVar}))]`,
-    text: needsBlackText ? 'text-black' : 'text-white',
-    border: `border-[hsl(var(${color.cssVar}))]`,
+    bgHsl: color.value,
+    textColor: needsBlackText ? '#000000' : '#ffffff',
+    borderHsl: color.value,
   };
 };
 
@@ -141,11 +141,14 @@ export const getColorClasses = (colorName: string) => {
 export const getPackageBadgeProps = (packages: any[], packageName: string) => {
   const colorName = getPackageColor(packageName, packages);
   const colorClasses = getColorClasses(colorName);
-  const variant = getBadgeVariantFromColor(colorName);
   
   return {
-    variant,
-    className: `${colorClasses.bg} ${colorClasses.text} ${colorClasses.border}`,
-    style: undefined // Clear any inline styles
+    variant: "outline" as const,
+    className: "border-2",
+    style: {
+      backgroundColor: `hsl(${colorClasses.bgHsl})`,
+      color: colorClasses.textColor,
+      borderColor: `hsl(${colorClasses.borderHsl})`,
+    }
   };
 };
