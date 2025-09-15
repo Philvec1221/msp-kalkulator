@@ -10,7 +10,8 @@ import {
   Shield,
   Database,
   BarChart3,
-  Building
+  Building,
+  Eye
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,6 +34,13 @@ interface NavItem {
   adminOnly?: boolean;
 }
 
+// Navigation for regular users
+const userNavItems: NavItem[] = [
+  { title: "Kalkulator", url: "/", icon: Calculator },
+  { title: "Kundenview", url: "/customer-view", icon: Eye },
+];
+
+// Navigation for admin users
 const mainNavItems: NavItem[] = [
   { title: "Kalkulator", url: "/", icon: Calculator },
   { title: "Services", url: "/services", icon: FileText },
@@ -85,7 +93,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Hauptfunktionen</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {mainNavItems.map((item) => (
+              {(isAdmin ? mainNavItems : userNavItems).map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
@@ -99,41 +107,45 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Verwaltung</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filterAdminItems(managementItems).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isAdmin && (
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Verwaltung</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {filterAdminItems(managementItems).map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="mr-2 h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Konfiguration</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {filterAdminItems(configItems).map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
-                      <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            <SidebarGroup>
+              <SidebarGroupLabel>Konfiguration</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {filterAdminItems(configItems).map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink to={item.url} className={getNavCls}>
+                          <item.icon className="mr-2 h-4 w-4" />
+                          {!collapsed && <span>{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
+        )}
 
         {isAdmin && (
           <SidebarGroup>

@@ -17,6 +17,7 @@ import { EmployeesPage } from "./pages/EmployeesPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { CostAnalysisPage } from "./pages/CostAnalysisPage";
 import { CalculatorPage } from "./pages/CalculatorPage";
+import { CustomerViewPage } from "./pages/CustomerViewPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
@@ -119,6 +120,14 @@ const App = () => {
                 <ProtectedRoute>
                   <AppLayout>
                     <CalculatorPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/customer-view" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CustomerViewPage />
                   </AppLayout>
                 </ProtectedRoute>
               } />
