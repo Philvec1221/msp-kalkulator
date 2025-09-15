@@ -1,13 +1,21 @@
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { UserManagement } from "@/components/admin/UserManagement";
 
 const AdminPage = () => {
   const [email, setEmail] = useState("");
@@ -18,7 +26,7 @@ const AdminPage = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [error, setError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const { isAdmin, createUser, user } = useAuth();
+  const { isAdmin, user } = useAuth();
   const { toast } = useToast();
 
   // Redirect if not admin
@@ -44,14 +52,34 @@ const AdminPage = () => {
       return;
     }
 
+    if (password.length < 8) {
+      setError("Das Passwort muss mindestens 8 Zeichen lang sein");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { error } = await createUser(email, password);
+      // Call the edge function instead of direct auth
+      const { data, error } = await supabase.functions.invoke('create-user', {
+        body: {
+          email: email,
+          password: password,
+        },
+      });
       
-      if (error) throw error;
+      if (error) {
+        setError(error.message || 'Fehler beim Erstellen des Benutzers');
+        return;
+      }
+
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
 
       toast({
-        title: "Nutzer erfolgreich erstellt!",
-        description: `Nutzer ${email} wurde angelegt.`,
+        title: "Erfolg",
+        description: "Neuer Benutzer wurde erfolgreich erstellt",
       });
 
       // Reset form
@@ -59,7 +87,7 @@ const AdminPage = () => {
       setPassword("");
     } catch (error: any) {
       console.error("Create user error:", error);
-      setError(error.message || "Fehler beim Erstellen des Nutzers");
+      setError(error.message || "Ein unerwarteter Fehler ist aufgetreten");
     } finally {
       setLoading(false);
     }
@@ -156,8 +184,8 @@ const AdminPage = () => {
       <div className="max-w-md mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Admin Panel</CardTitle>
-            <CardDescription>Neue Nutzer anlegen</CardDescription>
+            <CardTitle>Neuen Benutzer erstellen</CardTitle>
+            <CardDescription>Neuen Benutzer mit @vectano.de E-Mail anlegen</CardDescription>
           </CardHeader>
           <CardContent>
             {error && (
@@ -186,7 +214,7 @@ const AdminPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
@@ -195,6 +223,13 @@ const AdminPage = () => {
             </form>
           </CardContent>
         </Card>
+      </div>
+
+      <Separator className="my-8" />
+
+      {/* Benutzerverwaltung */}
+      <div className="max-w-6xl mx-auto">
+        <UserManagement />
       </div>
     </div>
   );
