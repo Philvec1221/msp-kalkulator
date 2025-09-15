@@ -8,17 +8,17 @@ export interface ColorDefinition {
   cssVar: string; // CSS variable name
 }
 
-// Design Colors (Professional palette)
+// Design Colors (App theme colors)
 export const designColors: ColorDefinition[] = [
-  { name: 'Slate', value: '210 40% 98%', hex: '#F8FAFC', cssVar: '--package-slate' },
-  { name: 'Gray', value: '220 14.3% 95.9%', hex: '#F3F4F6', cssVar: '--package-gray' },
-  { name: 'Blue', value: '221.2 83.2% 53.3%', hex: '#3B82F6', cssVar: '--package-blue' },
-  { name: 'Indigo', value: '238.7 83.5% 66.7%', hex: '#6366F1', cssVar: '--package-indigo' },
-  { name: 'Purple', value: '262.1 83.3% 57.8%', hex: '#8B5CF6', cssVar: '--package-purple' },
-  { name: 'Pink', value: '330.4 81.2% 60.4%', hex: '#EC4899', cssVar: '--package-pink' },
+  { name: 'Primary', value: '222.2 47.4% 11.2%', hex: '#1F2937', cssVar: '--package-primary' },
+  { name: 'Teal', value: '173.4 80.4% 40%', hex: '#14B8A6', cssVar: '--package-teal' },
+  { name: 'Cyan', value: '188.7 94.5% 42.7%', hex: '#06B6D4', cssVar: '--package-cyan' },
+  { name: 'Muted', value: '210 40% 96.1%', hex: '#F1F5F9', cssVar: '--package-muted' },
+  { name: 'Accent', value: '210 40% 96.1%', hex: '#F1F5F9', cssVar: '--package-accent' },
+  { name: 'Destructive', value: '0 84.2% 60.2%', hex: '#EF4444', cssVar: '--package-destructive' },
 ];
 
-// Standard Colors (Classic palette)
+// Standard Colors (Extended palette)
 export const standardColors: ColorDefinition[] = [
   { name: 'Red', value: '0 84.2% 60.2%', hex: '#EF4444', cssVar: '--package-red' },
   { name: 'Orange', value: '24.6 95% 53.1%', hex: '#F97316', cssVar: '--package-orange' },
@@ -27,15 +27,22 @@ export const standardColors: ColorDefinition[] = [
   { name: 'Lime', value: '84.2 80.5% 67%', hex: '#84CC16', cssVar: '--package-lime' },
   { name: 'Green', value: '142.1 76.2% 36.3%', hex: '#22C55E', cssVar: '--package-green' },
   { name: 'Emerald', value: '160.1 84.1% 39.4%', hex: '#10B981', cssVar: '--package-emerald' },
-  { name: 'Teal', value: '173.4 80.4% 40%', hex: '#14B8A6', cssVar: '--package-teal' },
-  { name: 'Cyan', value: '188.7 94.5% 42.7%', hex: '#06B6D4', cssVar: '--package-cyan' },
+  { name: 'Teal-Std', value: '173.4 80.4% 40%', hex: '#14B8A6', cssVar: '--package-teal-std' },
   { name: 'Sky', value: '204.4 94% 54.1%', hex: '#0EA5E9', cssVar: '--package-sky' },
+  { name: 'Blue', value: '221.2 83.2% 53.3%', hex: '#3B82F6', cssVar: '--package-blue' },
+  { name: 'Indigo', value: '238.7 83.5% 66.7%', hex: '#6366F1', cssVar: '--package-indigo' },
   { name: 'Violet', value: '262.1 83.3% 57.8%', hex: '#8B5CF6', cssVar: '--package-violet' },
+  { name: 'Purple', value: '262.1 83.3% 57.8%', hex: '#8B5CF6', cssVar: '--package-purple-std' },
   { name: 'Fuchsia', value: '292.2 84.1% 60.6%', hex: '#D946EF', cssVar: '--package-fuchsia' },
+  { name: 'Pink', value: '330.4 81.2% 60.4%', hex: '#EC4899', cssVar: '--package-pink-std' },
   { name: 'Rose', value: '351.3 94.5% 71.4%', hex: '#F43F5E', cssVar: '--package-rose' },
-  { name: 'Stone', value: '25 5.3% 44.7%', hex: '#78716C', cssVar: '--package-stone' },
-  { name: 'Zinc', value: '240 4.9% 83.9%', hex: '#D4D4D8', cssVar: '--package-zinc' },
-  { name: 'Neutral', value: '0 0% 45.1%', hex: '#737373', cssVar: '--package-neutral' },
+  { name: 'Brown', value: '25 5.3% 44.7%', hex: '#78716C', cssVar: '--package-brown' },
+  { name: 'Gray', value: '220 14.3% 45.9%', hex: '#6B7280', cssVar: '--package-gray-std' },
+  { name: 'Slate', value: '215.4 16.3% 46.9%', hex: '#64748B', cssVar: '--package-slate-std' },
+  { name: 'Black', value: '0 0% 9%', hex: '#171717', cssVar: '--package-black' },
+  { name: 'White', value: '0 0% 100%', hex: '#FFFFFF', cssVar: '--package-white' },
+  { name: 'Light Gray', value: '210 20% 90%', hex: '#E2E8F0', cssVar: '--package-light-gray' },
+  { name: 'Dark Gray', value: '215.4 16.3% 25%', hex: '#374151', cssVar: '--package-dark-gray' },
 ];
 
 export const allColors = [...designColors, ...standardColors];
@@ -54,17 +61,23 @@ export const getBadgeVariantFromColor = (colorName: string): "default" | "second
   switch (color.name.toLowerCase()) {
     case 'red':
     case 'rose':
+    case 'destructive':
       return 'destructive';
     case 'gray':
     case 'slate':
-    case 'stone':
-    case 'zinc':
-    case 'neutral':
+    case 'light gray':
+    case 'dark gray':
+    case 'brown':
+    case 'black':
+    case 'white':
       return 'secondary';
     case 'blue':
     case 'indigo':
     case 'purple':
     case 'violet':
+    case 'primary':
+    case 'teal':
+    case 'cyan':
       return 'default';
     default:
       return 'outline';
@@ -81,10 +94,12 @@ export const getColorClasses = (colorName: string) => {
   const color = getColorByName(colorName);
   if (!color) return { bg: 'bg-muted', text: 'text-muted-foreground', border: 'border-muted' };
   
-  const varName = color.cssVar.replace('--', '');
+  // Determine if we need white or black text based on color
+  const needsBlackText = ['white', 'light gray', 'yellow', 'amber', 'lime'].includes(color.name.toLowerCase());
+  
   return {
     bg: `bg-[hsl(var(${color.cssVar}))]`,
-    text: 'text-white', // Most package colors work well with white text
+    text: needsBlackText ? 'text-black' : 'text-white',
     border: `border-[hsl(var(${color.cssVar}))]`,
   };
 };

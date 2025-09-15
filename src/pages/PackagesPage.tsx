@@ -74,7 +74,7 @@ export function PackagesPage() {
                         className="text-sm font-medium"
                         style={{ 
                           backgroundColor: getColorByName(pkg.color)?.hex, 
-                          color: 'white',
+                          color: getColorClasses(pkg.color).text === 'text-white' ? 'white' : 'black',
                           borderColor: getColorByName(pkg.color)?.hex
                         }}
                       >

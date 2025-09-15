@@ -9,7 +9,7 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
-import { getBadgeVariantFromColor, getColorByName } from "@/lib/colors";
+import { getBadgeVariantFromColor, getColorByName, getColorClasses } from "@/lib/colors";
 import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
 
 interface PackageData {
@@ -85,8 +85,8 @@ export function CustomerViewPage() {
     switch (packageName.toLowerCase()) {
       case "basis": return "Gray";
       case "gold": return "Amber";
-      case "allin": return "Blue";
-      case "allin black": return "Neutral";
+      case "allin": return "Teal";
+      case "allin black": return "Black";
       default: return "Gray";
     }
   };
@@ -156,7 +156,7 @@ export function CustomerViewPage() {
                     className="text-sm"
                     style={{ 
                       backgroundColor: getColorByName(getPackageColor(pkg.name))?.hex, 
-                      color: 'white',
+                      color: getColorClasses(getPackageColor(pkg.name)).text === 'text-white' ? 'white' : 'black',
                       borderColor: getColorByName(getPackageColor(pkg.name))?.hex
                     }}
                   >

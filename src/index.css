@@ -38,15 +38,15 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    /* Package Colors - Design Colors */
-    --package-slate: 210 40% 98%;
-    --package-gray: 220 14.3% 95.9%;
-    --package-blue: 221.2 83.2% 53.3%;
-    --package-indigo: 238.7 83.5% 66.7%;
-    --package-purple: 262.1 83.3% 57.8%;
-    --package-pink: 330.4 81.2% 60.4%;
+    /* Package Colors - Design Colors (App Theme) */
+    --package-primary: 222.2 47.4% 11.2%;
+    --package-teal: 173.4 80.4% 40%;
+    --package-cyan: 188.7 94.5% 42.7%;
+    --package-muted: 210 40% 96.1%;
+    --package-accent: 210 40% 96.1%;
+    --package-destructive: 0 84.2% 60.2%;
 
-    /* Package Colors - Standard Colors */
+    /* Package Colors - Standard Colors (Extended) */
     --package-red: 0 84.2% 60.2%;
     --package-orange: 24.6 95% 53.1%;
     --package-amber: 45.4 93.4% 47.5%;
@@ -54,15 +54,22 @@ All colors MUST be HSL.
     --package-lime: 84.2 80.5% 67%;
     --package-green: 142.1 76.2% 36.3%;
     --package-emerald: 160.1 84.1% 39.4%;
-    --package-teal: 173.4 80.4% 40%;
-    --package-cyan: 188.7 94.5% 42.7%;
+    --package-teal-std: 173.4 80.4% 40%;
     --package-sky: 204.4 94% 54.1%;
+    --package-blue: 221.2 83.2% 53.3%;
+    --package-indigo: 238.7 83.5% 66.7%;
     --package-violet: 262.1 83.3% 57.8%;
+    --package-purple-std: 262.1 83.3% 57.8%;
     --package-fuchsia: 292.2 84.1% 60.6%;
+    --package-pink-std: 330.4 81.2% 60.4%;
     --package-rose: 351.3 94.5% 71.4%;
-    --package-stone: 25 5.3% 44.7%;
-    --package-zinc: 240 4.9% 83.9%;
-    --package-neutral: 0 0% 45.1%;
+    --package-brown: 25 5.3% 44.7%;
+    --package-gray-std: 220 14.3% 45.9%;
+    --package-slate-std: 215.4 16.3% 46.9%;
+    --package-black: 0 0% 9%;
+    --package-white: 0 0% 100%;
+    --package-light-gray: 210 20% 90%;
+    --package-dark-gray: 215.4 16.3% 25%;
 
     --sidebar-background: 0 0% 98%;
 
