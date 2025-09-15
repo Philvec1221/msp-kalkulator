@@ -11,6 +11,11 @@ import ContractAppendixPage from "./pages/ContractAppendixPage";
 import AddonServicesPage from "./pages/AddonServicesPage";
 import PackageConfigPage from "./pages/PackageConfigPage";
 import { PackagesPage } from "./pages/PackagesPage";
+import { ServicesPage } from "./pages/ServicesPage";
+import { LicensesPage } from "./pages/LicensesPage";
+import { EmployeesPage } from "./pages/EmployeesPage";
+import { CostAnalysisPage } from "./pages/CostAnalysisPage";
+import { CalculatorPage } from "./pages/CalculatorPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import { AppLayout } from "./components/layout/AppLayout";
 import { ErrorBoundary } from "./components/common/ErrorBoundary";
@@ -65,6 +70,46 @@ const App = () => {
                 <ProtectedRoute>
                   <AppLayout>
                     <ContractAppendixPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/services" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ServicesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/licenses" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <LicensesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/employees" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <EmployeesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/cost-analysis" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CostAnalysisPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/calculator" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CalculatorPage />
                   </AppLayout>
                 </ProtectedRoute>
               } />
