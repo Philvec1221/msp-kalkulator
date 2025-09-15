@@ -111,9 +111,15 @@ export function useServices() {
       // Get current service to compare min_package_level changes
       const currentService = services.find(s => s.id === id);
       
+      // Map package_level to min_package_level if needed
+      const updateData = { ...updates };
+      if (updates.package_level) {
+        updateData.min_package_level = updates.package_level;
+      }
+      
       const { data, error } = await supabase
         .from('services')
-        .update(updates)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
@@ -121,7 +127,7 @@ export function useServices() {
       if (error) throw error;
       
       // If min_package_level changed, update service_packages
-      const newMinPackageLevel = updates.min_package_level || updates.package_level;
+      const newMinPackageLevel = updateData.min_package_level || updateData.package_level;
       const currentMinPackageLevel = currentService?.min_package_level || currentService?.package_level;
       
       if (newMinPackageLevel && newMinPackageLevel !== currentMinPackageLevel) {
