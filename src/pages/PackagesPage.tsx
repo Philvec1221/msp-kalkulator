@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePackages } from "@/hooks/usePackages";
 import { useServices } from "@/hooks/useServices";
 import { PackageForm } from "@/components/forms/PackageForm";
+import { getColorByName, getBadgeVariantFromColor, getColorClasses } from "@/lib/colors";
 import { getServicesForPackage } from "@/lib/costing";
 import {
   AlertDialog,
@@ -23,19 +24,11 @@ export function PackagesPage() {
   const { packages, loading, addPackage, updatePackage, deletePackage } = usePackages();
   const { services } = useServices();
 
-  const getPackageIcon = (packageName: string) => {
-    switch (packageName.toLowerCase()) {
-      case 'basis':
-        return <Package className="h-5 w-5 text-gray-600" />;
-      case 'gold':
-        return <Package className="h-5 w-5 text-yellow-600" />;
-      case 'allin':
-        return <Package className="h-5 w-5 text-blue-600" />;
-      case 'allin black':
-        return <Package className="h-5 w-5 text-black" />;
-      default:
-        return <Package className="h-5 w-5 text-gray-600" />;
-    }
+  const getPackageIcon = (packageName: string, color: string) => {
+    const colorInfo = getColorByName(color);
+    const iconColor = colorInfo ? `text-[${colorInfo.hex}]` : 'text-muted-foreground';
+    
+    return <Package className={`h-5 w-5 ${iconColor}`} />;
   };
 
   const getServiceStatsForPackage = (packageName: string) => {
@@ -48,14 +41,6 @@ export function PackagesPage() {
     };
   };
 
-  const getBadgeVariant = (color: string) => {
-    switch (color) {
-      case 'primary': return 'default';
-      case 'warning': return 'secondary';
-      case 'destructive': return 'destructive';
-      default: return 'outline';
-    }
-  };
 
   if (loading) {
     return <div className="flex justify-center py-8">Lade Pakete...</div>;
@@ -83,8 +68,16 @@ export function PackagesPage() {
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      {getPackageIcon(pkg.name)}
-                      <Badge variant={getBadgeVariant(pkg.color)} className="text-sm font-medium">
+                      {getPackageIcon(pkg.name, pkg.color)}
+                      <Badge 
+                        variant={getBadgeVariantFromColor(pkg.color)} 
+                        className="text-sm font-medium"
+                        style={{ 
+                          backgroundColor: getColorByName(pkg.color)?.hex, 
+                          color: 'white',
+                          borderColor: getColorByName(pkg.color)?.hex
+                        }}
+                      >
                         {pkg.name}
                       </Badge>
                     </div>

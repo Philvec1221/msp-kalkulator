@@ -9,6 +9,7 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getBadgeVariantFromColor, getColorByName } from "@/lib/colors";
 import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
 
 interface PackageData {
@@ -79,13 +80,14 @@ export function CustomerViewPage() {
     });
   }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
 
-  const getPackageVariant = (packageName: string) => {
+  // Map package names to colors for consistent display
+  const getPackageColor = (packageName: string): string => {
     switch (packageName.toLowerCase()) {
-      case "basis": return "default";
-      case "gold": return "secondary";
-      case "allin": return "outline";
-      case "allin black": return "destructive";
-      default: return "default";
+      case "basis": return "Gray";
+      case "gold": return "Amber";
+      case "allin": return "Blue";
+      case "allin black": return "Neutral";
+      default: return "Gray";
     }
   };
 
@@ -149,7 +151,15 @@ export function CustomerViewPage() {
               )}
               <CardHeader className="text-center pb-4">
                 <div className="mb-3">
-                  <Badge variant={getPackageVariant(pkg.name)} className="text-sm">
+                  <Badge 
+                    variant={getBadgeVariantFromColor(getPackageColor(pkg.name))} 
+                    className="text-sm"
+                    style={{ 
+                      backgroundColor: getColorByName(getPackageColor(pkg.name))?.hex, 
+                      color: 'white',
+                      borderColor: getColorByName(getPackageColor(pkg.name))?.hex
+                    }}
+                  >
                     {pkg.name}
                   </Badge>
                 </div>

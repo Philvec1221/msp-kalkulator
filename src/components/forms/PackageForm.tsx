@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Package } from "@/hooks/usePackages";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { Plus } from "lucide-react";
 
 interface PackageFormProps {
@@ -21,7 +21,7 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
     name: '',
     description: '',
     order_index: 1,
-    color: 'default',
+    color: 'Gray',
     active: true,
   });
 
@@ -49,7 +49,7 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
           name: '',
           description: '',
           order_index: 1,
-          color: 'default',
+          color: 'Gray',
           active: true,
         });
       }
@@ -114,19 +114,11 @@ export function PackageForm({ package: editPackage, onSubmit, trigger }: Package
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="color">Farbe</Label>
-            <Select value={formData.color} onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Wählen Sie eine Farbe" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="default">Grau (Standard)</SelectItem>
-                <SelectItem value="primary">Blau (Primary)</SelectItem>
-                <SelectItem value="secondary">Violett (Secondary)</SelectItem>
-                <SelectItem value="warning">Gelb (Warning)</SelectItem>
-                <SelectItem value="destructive">Rot (Destructive)</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="color">Paket-Farbe</Label>
+            <ColorPicker
+              value={formData.color}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, color: value }))}
+            />
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

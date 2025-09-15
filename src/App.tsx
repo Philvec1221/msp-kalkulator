@@ -10,6 +10,7 @@ import AdminPage from "./pages/AdminPage";
 import ContractAppendixPage from "./pages/ContractAppendixPage";
 import AddonServicesPage from "./pages/AddonServicesPage";
 import PackageConfigPage from "./pages/PackageConfigPage";
+import { PackagesPage } from "./pages/PackagesPage";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/addon-services" element={<AddonServicesPage />} />
+            <Route path="/packages" element={<PackagesPage />} />
             <Route path="/package-config" element={<PackageConfigPage />} />
             <Route path="/contract-appendix" element={<ContractAppendixPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

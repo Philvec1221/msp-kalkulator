@@ -38,6 +38,32 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* Package Colors - Design Colors */
+    --package-slate: 210 40% 98%;
+    --package-gray: 220 14.3% 95.9%;
+    --package-blue: 221.2 83.2% 53.3%;
+    --package-indigo: 238.7 83.5% 66.7%;
+    --package-purple: 262.1 83.3% 57.8%;
+    --package-pink: 330.4 81.2% 60.4%;
+
+    /* Package Colors - Standard Colors */
+    --package-red: 0 84.2% 60.2%;
+    --package-orange: 24.6 95% 53.1%;
+    --package-amber: 45.4 93.4% 47.5%;
+    --package-yellow: 54.5 91.7% 68.3%;
+    --package-lime: 84.2 80.5% 67%;
+    --package-green: 142.1 76.2% 36.3%;
+    --package-emerald: 160.1 84.1% 39.4%;
+    --package-teal: 173.4 80.4% 40%;
+    --package-cyan: 188.7 94.5% 42.7%;
+    --package-sky: 204.4 94% 54.1%;
+    --package-violet: 262.1 83.3% 57.8%;
+    --package-fuchsia: 292.2 84.1% 60.6%;
+    --package-rose: 351.3 94.5% 71.4%;
+    --package-stone: 25 5.3% 44.7%;
+    --package-zinc: 240 4.9% 83.9%;
+    --package-neutral: 0 0% 45.1%;
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -91,6 +117,32 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Package Colors - Design Colors */
+    --package-slate: 210 40% 98%;
+    --package-gray: 220 14.3% 95.9%;
+    --package-blue: 221.2 83.2% 53.3%;
+    --package-indigo: 238.7 83.5% 66.7%;
+    --package-purple: 262.1 83.3% 57.8%;
+    --package-pink: 330.4 81.2% 60.4%;
+
+    /* Package Colors - Standard Colors */
+    --package-red: 0 84.2% 60.2%;
+    --package-orange: 24.6 95% 53.1%;
+    --package-amber: 45.4 93.4% 47.5%;
+    --package-yellow: 54.5 91.7% 68.3%;
+    --package-lime: 84.2 80.5% 67%;
+    --package-green: 142.1 76.2% 36.3%;
+    --package-emerald: 160.1 84.1% 39.4%;
+    --package-teal: 173.4 80.4% 40%;
+    --package-cyan: 188.7 94.5% 42.7%;
+    --package-sky: 204.4 94% 54.1%;
+    --package-violet: 262.1 83.3% 57.8%;
+    --package-fuchsia: 292.2 84.1% 60.6%;
+    --package-rose: 351.3 94.5% 71.4%;
+    --package-stone: 25 5.3% 44.7%;
+    --package-zinc: 240 4.9% 83.9%;
+    --package-neutral: 0 0% 45.1%;
   }
 }
 
