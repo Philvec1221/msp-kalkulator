@@ -189,12 +189,22 @@ export function usePackages() {
     fetchPackages();
   }, []);
 
+  // Helper function to get package by name
+  const getPackageByName = (name: string) => {
+    return packages.find(pkg => 
+      pkg.name.toLowerCase() === name.toLowerCase() ||
+      pkg.name.toLowerCase().replace(' ', '_') === name.toLowerCase() ||
+      pkg.name.toLowerCase().replace(' ', '') === name.toLowerCase()
+    );
+  };
+
   return {
     packages,
     loading,
     addPackage,
     updatePackage,
     deletePackage,
-    refetch: fetchPackages
+    refetch: fetchPackages,
+    getPackageByName
   };
 }

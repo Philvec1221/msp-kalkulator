@@ -12,7 +12,8 @@ import { ServiceForm } from "@/components/forms/ServiceForm";
 import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import { toast } from "sonner";
 import { formatDescription } from "@/lib/formatDescription";
-import { getPackageColor, getColorClasses } from "@/lib/colors";
+import { getPackageBadgeProps } from "@/lib/colors";
+import { usePackages } from "@/hooks/usePackages";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +28,7 @@ import {
 
 export function ServicesPage() {
   const { services, loading, addService, updateService, deleteService, updateServiceOrder } = useServices();
+  const { packages } = usePackages();
   const { licenses } = useLicenses();
   const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
@@ -138,10 +140,9 @@ export function ServicesPage() {
     return levels[packageLevel as keyof typeof levels] || packageLevel;
   };
 
-  const getPackageBadgeStyle = (packageLevel: string) => {
-    const colorName = getPackageColor(packageLevel);
-    const colorClasses = getColorClasses(colorName);
-    return colorClasses;
+  // Get package badge props using real package data
+  const getPackageBadgePropsForService = (packageLevel: string) => {
+    return getPackageBadgeProps(packages, packageLevel);
   };
 
   const getBillingTypeBadgeVariant = (billingType: string) => {
@@ -556,9 +557,7 @@ export function ServicesPage() {
                             {getBillingTypeDisplay(service.billing_type)}
                           </Badge>
                           <Badge 
-                            className={getPackageBadgeStyle(service.package_level).bg + " " + 
-                                     getPackageBadgeStyle(service.package_level).text + " " +
-                                     getPackageBadgeStyle(service.package_level).border}
+                            {...getPackageBadgePropsForService(service.package_level)}
                           >
                             {getPackageLevelDisplay(service.package_level)}
                           </Badge>

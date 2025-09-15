@@ -9,7 +9,8 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
-import { getBadgeVariantFromColor, getColorByName, getColorClasses, getPackageColor } from "@/lib/colors";
+import { getPackageBadgeProps } from "@/lib/colors";
+import { usePackages } from "@/hooks/usePackages";
 import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
 
 interface PackageData {
@@ -35,6 +36,7 @@ export function CustomerViewPage() {
   const { getAllServiceLicenseRelations } = useServiceLicenses();
   const { employees } = useEmployees();
   const { getConfigByServiceAndPackage } = usePackageConfigs();
+  const { packages: dbPackages } = usePackages();
 
   // Calculate average hourly rate per minute
   const activeEmployees = employees.filter(emp => emp.active);
@@ -141,13 +143,8 @@ export function CustomerViewPage() {
               <CardHeader className="text-center pb-4">
                 <div className="mb-3">
                   <Badge 
-                    variant={getBadgeVariantFromColor(getPackageColor(pkg.name))} 
-                    className="text-sm"
-                    style={{ 
-                      backgroundColor: getColorByName(getPackageColor(pkg.name))?.hex, 
-                      color: getColorClasses(getPackageColor(pkg.name)).text === 'text-white' ? 'white' : 'black',
-                      borderColor: getColorByName(getPackageColor(pkg.name))?.hex
-                    }}
+                    {...getPackageBadgeProps(dbPackages, pkg.name)}
+                    className={`text-sm ${getPackageBadgeProps(dbPackages, pkg.name).className}`}
                   >
                     {pkg.name}
                   </Badge>

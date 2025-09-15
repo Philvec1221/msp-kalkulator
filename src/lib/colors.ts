@@ -47,19 +47,29 @@ export const standardColors: ColorDefinition[] = [
 
 export const allColors = [...designColors, ...standardColors];
 
-// Package-specific color mapping
-const packageColorMap: { [key: string]: string } = {
-  'Basis': 'Teal',
-  'Gold': 'Amber',
-  'Allin': 'Purple',
-  'Allin Black': 'Black',
-  'basis': 'Teal',
-  'gold': 'Amber', 
-  'allin': 'Purple',
-  'allin_black': 'Black'
+// Package color utilities - now uses real package data
+export const getPackageColorFromData = (packages: any[], packageName: string): string => {
+  const pkg = packages.find(p => 
+    p.name.toLowerCase() === packageName.toLowerCase() ||
+    p.name.toLowerCase().replace(' ', '_') === packageName.toLowerCase() ||
+    p.name.toLowerCase().replace(' ', '') === packageName.toLowerCase()
+  );
+  return pkg?.color || 'Primary';
 };
 
+// Legacy function for backward compatibility - will be removed
 export const getPackageColor = (packageName: string): string => {
+  console.warn('getPackageColor is deprecated, use getPackageColorFromData with package data');
+  const packageColorMap: { [key: string]: string } = {
+    'Basis': 'Teal',
+    'Gold': 'Amber', 
+    'Allin': 'Purple',
+    'Allin Black': 'Black',
+    'basis': 'Teal',
+    'gold': 'Amber',
+    'allin': 'Purple',
+    'allin_black': 'Black'
+  };
   return packageColorMap[packageName] || 'Primary';
 };
 
@@ -117,5 +127,18 @@ export const getColorClasses = (colorName: string) => {
     bg: `bg-[hsl(var(${color.cssVar}))]`,
     text: needsBlackText ? 'text-black' : 'text-white',
     border: `border-[hsl(var(${color.cssVar}))]`,
+  };
+};
+
+// Get complete badge properties for a package using real data
+export const getPackageBadgeProps = (packages: any[], packageName: string) => {
+  const colorName = getPackageColorFromData(packages, packageName);
+  const colorClasses = getColorClasses(colorName);
+  const variant = getBadgeVariantFromColor(colorName);
+  
+  return {
+    variant,
+    className: `${colorClasses.bg} ${colorClasses.text} ${colorClasses.border}`,
+    style: undefined // Clear any inline styles
   };
 };

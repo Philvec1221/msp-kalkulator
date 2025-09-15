@@ -13,7 +13,7 @@ import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
-import { getPackageColor, getBadgeVariantFromColor, getColorClasses } from "@/lib/colors";
+import { getPackageBadgeProps } from "@/lib/colors";
 
 interface QuoteData {
   customerNumber: string;
@@ -113,8 +113,8 @@ export function CalculatorPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
               <Badge 
-                variant={getBadgeVariantFromColor(getPackageColor(quoteData.selectedPackage))} 
-                className={`text-lg px-4 py-2 ${getColorClasses(getPackageColor(quoteData.selectedPackage)).bg} ${getColorClasses(getPackageColor(quoteData.selectedPackage)).text}`}
+                {...getPackageBadgeProps(packages, quoteData.selectedPackage)}
+                className={`text-lg px-4 py-2 ${getPackageBadgeProps(packages, quoteData.selectedPackage).className}`}
               >
                 {quoteData.selectedPackage}
               </Badge>
@@ -205,8 +205,7 @@ export function CalculatorPage() {
             <div>
               <span className="text-sm text-muted-foreground">Paket: </span>
               <Badge 
-                variant={getBadgeVariantFromColor(getPackageColor(quoteData.selectedPackage))}
-                className={`${getColorClasses(getPackageColor(quoteData.selectedPackage)).bg} ${getColorClasses(getPackageColor(quoteData.selectedPackage)).text}`}
+                {...getPackageBadgeProps(packages, quoteData.selectedPackage)}
               >
                 {quoteData.selectedPackage}
               </Badge>
