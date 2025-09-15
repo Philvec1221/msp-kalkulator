@@ -152,9 +152,14 @@ export function getServicesForPackage(services: Service[], packageLevel: string)
   const packageLevels = ['basis', 'gold', 'allin', 'allin_black'];
   const selectedIndex = packageLevels.indexOf(packageLevel.toLowerCase().replace(' ', '_'));
   
-  if (selectedIndex === -1) return [];
+  console.log(`🎯 getServicesForPackage called with packageLevel: "${packageLevel}", selectedIndex: ${selectedIndex}`);
   
-  return services.filter(service => {
+  if (selectedIndex === -1) {
+    console.log(`❌ Package level "${packageLevel}" not found in packageLevels`);
+    return [];
+  }
+  
+  const filteredServices = services.filter(service => {
     if (!service.active) return false;
     
     // Handle both min_package_level and package_level fields, and normalize case
@@ -162,7 +167,16 @@ export function getServicesForPackage(services: Service[], packageLevel: string)
       .toLowerCase().replace(' ', '_');
     const serviceIndex = packageLevels.indexOf(serviceMinLevel);
     
-    // Include services where the service's minimum package level is at or below the selected package level
-    return serviceIndex !== -1 && serviceIndex <= selectedIndex;
+    const included = serviceIndex !== -1 && serviceIndex <= selectedIndex;
+    
+    if (service.name.includes('Monitoring')) { // Debug specific service we know was changed
+      console.log(`🔍 Service "${service.name}": min_package_level="${service.min_package_level}", package_level="${service.package_level}", serviceMinLevel="${serviceMinLevel}", serviceIndex=${serviceIndex}, included=${included}`);
+    }
+    
+    return included;
   });
+  
+  console.log(`📊 Package "${packageLevel}": ${filteredServices.length}/${services.filter(s => s.active).length} services included`);
+  
+  return filteredServices;
 }

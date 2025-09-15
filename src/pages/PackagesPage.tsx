@@ -42,6 +42,15 @@ export function PackagesPage() {
     // Use the same logic as costing.ts to get services for this package level
     const packageServices = getServicesForPackage(services, packageName);
     
+    // Debug logging to see what's happening
+    console.log(`🔍 Package: ${packageName}, Services found:`, packageServices.length);
+    console.log(`📊 Services with min_package_level:`, services.map(s => ({
+      name: s.name,
+      min_package_level: s.min_package_level,
+      package_level: s.package_level,
+      active: s.active
+    })).slice(0, 5)); // Show first 5 services for debugging
+    
     return {
       total: packageServices.length,
       active: packageServices.length // getServicesForPackage already filters for active services
