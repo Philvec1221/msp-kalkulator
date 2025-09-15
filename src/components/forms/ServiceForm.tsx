@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Edit } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Plus, Edit, Info } from "lucide-react";
 import { Service } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
@@ -169,24 +170,47 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                 />
                 
                 {selectedLicenses.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <Label className="text-sm font-medium">Kostenkalkulation</Label>
-                    <div className="space-y-2">
+                  <div className="mt-3 space-y-3 p-4 bg-muted/50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium">Kostenkalkulation der Lizenzen</Label>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">
+                              Deaktivieren Sie "Kosten einbeziehen", wenn diese Lizenz bereits in einem anderen Service kalkuliert wird, 
+                              um Doppelzählungen zu vermeiden.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <div className="space-y-3">
                       {selectedLicenses.map(licenseId => {
                         const license = licenses.find(l => l.id === licenseId);
+                        const isIncluded = includeCosts[licenseId] ?? true;
                         return (
-                          <div key={licenseId} className="flex items-center justify-between py-1">
-                            <span className="text-sm">{license?.name}</span>
-                            <div className="flex items-center space-x-2">
+                          <div key={licenseId} className={`flex items-center justify-between p-3 rounded-md border ${isIncluded ? 'bg-background border-primary/20' : 'bg-muted border-muted-foreground/20'}`}>
+                            <div className="flex-1">
+                              <div className="font-medium text-sm">{license?.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {isIncluded ? '✓ Kostenwirksam in diesem Service' : '○ Nur Zuordnung, Kosten werden woanders kalkuliert'}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="text-right">
+                                <div className="text-xs font-medium">
+                                  {isIncluded ? 'Einbeziehen' : 'Ausschließen'}
+                                </div>
+                              </div>
                               <Switch
-                                checked={includeCosts[licenseId] ?? true}
+                                checked={isIncluded}
                                 onCheckedChange={(checked) => 
                                   setIncludeCosts(prev => ({ ...prev, [licenseId]: checked }))
                                 }
                               />
-                              <Label className="text-xs text-muted-foreground">
-                                {includeCosts[licenseId] ?? true ? 'Kosten einbeziehen' : 'Kosten ausschließen'}
-                              </Label>
                             </div>
                           </div>
                         );

@@ -31,17 +31,16 @@ export function getUniqueLicensesFromServices(
 ): UniqueLicense[] {
   const licenseMap = new Map<string, UniqueLicense>();
 
-  services.forEach(service => {
-    // Get license IDs for this service
-    const serviceLicenseIds = serviceLicenses
-      .filter(sl => sl.service_id === service.id)
-      .map(sl => sl.license_id);
+services.forEach(service => {
+    // Get licenses that should be included in cost calculation for this service
+    const serviceLicenseRelations = serviceLicenses
+      .filter(sl => sl.service_id === service.id && sl.include_cost === true);
 
-    serviceLicenseIds.forEach(licenseId => {
-      const license = licenses.find(l => l.id === licenseId && l.active);
+    serviceLicenseRelations.forEach(relation => {
+      const license = licenses.find(l => l.id === relation.license_id && l.active);
       if (!license) return;
 
-      if (!licenseMap.has(licenseId)) {
+      if (!licenseMap.has(relation.license_id)) {
         // Determine quantity based on license billing unit
         let quantity = 1;
         switch (license.billing_unit?.toLowerCase()) {
@@ -64,7 +63,7 @@ export function getUniqueLicensesFromServices(
             break;
         }
 
-        licenseMap.set(licenseId, {
+        licenseMap.set(relation.license_id, {
           id: license.id,
           name: license.name,
           cost_per_month: Number(license.cost_per_month),
