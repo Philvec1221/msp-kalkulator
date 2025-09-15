@@ -11,6 +11,7 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { ServiceForm } from "@/components/forms/ServiceForm";
 import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import { toast } from "sonner";
+import { formatDescription } from "@/lib/formatDescription";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -563,7 +564,9 @@ export function ServicesPage() {
                         </div>
                       </div>
                       {service.description && (
-                        <p className="text-sm text-muted-foreground mb-3">{service.description}</p>
+                        <div className="text-sm text-muted-foreground mb-3">
+                          {formatDescription(service.description)}
+                        </div>
                       )}
                       <div className="flex flex-col gap-2 text-sm">
                         <div className="flex items-center gap-2">

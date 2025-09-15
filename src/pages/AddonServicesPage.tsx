@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useAddonServices } from '@/hooks/useAddonServices';
 import AddonServiceForm from '@/components/forms/AddonServiceForm';
+import { formatDescription } from '@/lib/formatDescription';
 
 export default function AddonServicesPage() {
   const { addonServices, loading, addAddonService, updateAddonService, deleteAddonService } = useAddonServices();
@@ -74,7 +75,7 @@ export default function AddonServicesPage() {
                     <CardTitle className="text-lg">{addonService.name}</CardTitle>
                     {addonService.description && (
                       <CardDescription className="mt-1">
-                        {addonService.description}
+                        {formatDescription(addonService.description)}
                       </CardDescription>
                     )}
                   </div>

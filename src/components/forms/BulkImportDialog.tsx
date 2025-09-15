@@ -10,6 +10,7 @@ import { Upload, AlertCircle } from 'lucide-react';
 import { useServices } from '@/hooks/useServices';
 import { usePackages, getPackageHierarchy } from '@/hooks/usePackages';
 import { useToast } from '@/hooks/use-toast';
+import { formatDescription } from '@/lib/formatDescription';
 
 interface BulkImportDialogProps {
   onImportComplete: () => void;
@@ -244,8 +245,8 @@ bei Buchung Managed Total Secure Microsoft 365 Business Premium - EU bereits ent
                         <div className="flex-1">
                           <div className="font-medium">{service.name}</div>
                           {service.description && (
-                            <div className="text-sm text-muted-foreground mt-1 whitespace-pre-line">
-                              {service.description}
+                            <div className="text-sm text-muted-foreground mt-1">
+                              {formatDescription(service.description)}
                             </div>
                           )}
                         </div>

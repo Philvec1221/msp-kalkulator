@@ -10,6 +10,7 @@ import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useServicePackages } from "@/hooks/useServicePackages";
 import { useToast } from "@/hooks/use-toast";
+import { formatDescription } from "@/lib/formatDescription";
 
 export default function ContractAppendixPage() {
   const [searchParams] = useSearchParams();
@@ -253,9 +254,9 @@ export default function ContractAppendixPage() {
                           {index + 1}. {service.name}
                         </h3>
                         {service.description && (
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {service.description}
-                          </p>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {formatDescription(service.description)}
+                          </div>
                         )}
                       </div>
                     </div>
