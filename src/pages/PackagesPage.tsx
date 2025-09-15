@@ -6,6 +6,7 @@ import { useState } from "react";
 import { usePackages } from "@/hooks/usePackages";
 import { useServices } from "@/hooks/useServices";
 import { PackageForm } from "@/components/forms/PackageForm";
+import { getServicesForPackage } from "@/lib/costing";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,14 +39,12 @@ export function PackagesPage() {
   };
 
   const getServiceStatsForPackage = (packageName: string) => {
-    const packageServices = services.filter(service => 
-      service.package_level === packageName.toLowerCase().replace(' ', '_')
-    );
-    const activeServices = packageServices.filter(service => service.active);
+    // Use the same logic as costing.ts to get services for this package level
+    const packageServices = getServicesForPackage(services, packageName);
     
     return {
       total: packageServices.length,
-      active: activeServices.length
+      active: packageServices.length // getServicesForPackage already filters for active services
     };
   };
 

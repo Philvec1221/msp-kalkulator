@@ -157,9 +157,12 @@ export function getServicesForPackage(services: Service[], packageLevel: string)
   return services.filter(service => {
     if (!service.active) return false;
     
-    const serviceLevel = service.package_level?.toLowerCase().replace(' ', '_') || 'basis';
-    const serviceIndex = packageLevels.indexOf(serviceLevel);
+    // Handle both min_package_level and package_level fields, and normalize case
+    const serviceMinLevel = (service.min_package_level || service.package_level || 'basis')
+      .toLowerCase().replace(' ', '_');
+    const serviceIndex = packageLevels.indexOf(serviceMinLevel);
     
-    return serviceIndex <= selectedIndex;
+    // Include services where the service's minimum package level is at or below the selected package level
+    return serviceIndex !== -1 && serviceIndex <= selectedIndex;
   });
 }
