@@ -6,7 +6,7 @@ import { useState } from "react";
 import { usePackages } from "@/hooks/usePackages";
 import { useServices } from "@/hooks/useServices";
 import { PackageForm } from "@/components/forms/PackageForm";
-import { getColorByName, getBadgeVariantFromColor, getColorClasses } from "@/lib/colors";
+import { getColorByName, getBadgeVariantFromColor, getColorClasses, getPackageColor, getPackageBadgeProps } from "@/lib/colors";
 import { getServicesForPackage } from "@/lib/costing";
 import {
   AlertDialog,
@@ -70,13 +70,8 @@ export function PackagesPage() {
                     <div className="flex items-center gap-3">
                       {getPackageIcon(pkg.name, pkg.color)}
                       <Badge 
-                        variant={getBadgeVariantFromColor(pkg.color)} 
-                        className="text-sm font-medium"
-                        style={{ 
-                          backgroundColor: getColorByName(pkg.color)?.hex, 
-                          color: getColorClasses(pkg.color).text === 'text-white' ? 'white' : 'black',
-                          borderColor: getColorByName(pkg.color)?.hex
-                        }}
+                        {...getPackageBadgeProps([pkg], pkg.name)}
+                        className={`text-sm font-medium ${getPackageBadgeProps([pkg], pkg.name).className}`}
                       >
                         {pkg.name}
                       </Badge>

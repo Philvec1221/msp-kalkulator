@@ -113,8 +113,8 @@ export function CalculatorPage() {
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
               <Badge 
-                {...getPackageBadgeProps(packages, quoteData.selectedPackage)}
-                className={`text-lg px-4 py-2 ${getPackageBadgeProps(packages, quoteData.selectedPackage).className}`}
+                {...getPackageBadgeProps(packages || [], quoteData.selectedPackage)}
+                className={`text-lg px-4 py-2 ${getPackageBadgeProps(packages || [], quoteData.selectedPackage).className}`}
               >
                 {quoteData.selectedPackage}
               </Badge>
@@ -205,7 +205,7 @@ export function CalculatorPage() {
             <div>
               <span className="text-sm text-muted-foreground">Paket: </span>
               <Badge 
-                {...getPackageBadgeProps(packages, quoteData.selectedPackage)}
+                {...getPackageBadgeProps(packages || [], quoteData.selectedPackage)}
               >
                 {quoteData.selectedPackage}
               </Badge>

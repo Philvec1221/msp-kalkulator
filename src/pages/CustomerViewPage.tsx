@@ -143,8 +143,8 @@ export function CustomerViewPage() {
               <CardHeader className="text-center pb-4">
                 <div className="mb-3">
                   <Badge 
-                    {...getPackageBadgeProps(dbPackages, pkg.name)}
-                    className={`text-sm ${getPackageBadgeProps(dbPackages, pkg.name).className}`}
+                    {...getPackageBadgeProps(dbPackages || [], pkg.name)}
+                    className={`text-sm ${getPackageBadgeProps(dbPackages || [], pkg.name).className}`}
                   >
                     {pkg.name}
                   </Badge>

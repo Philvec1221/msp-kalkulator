@@ -47,19 +47,21 @@ export const standardColors: ColorDefinition[] = [
 
 export const allColors = [...designColors, ...standardColors];
 
-// Package color utilities - now uses real package data
-export const getPackageColorFromData = (packages: any[], packageName: string): string => {
-  const pkg = packages.find(p => 
-    p.name.toLowerCase() === packageName.toLowerCase() ||
-    p.name.toLowerCase().replace(' ', '_') === packageName.toLowerCase() ||
-    p.name.toLowerCase().replace(' ', '') === packageName.toLowerCase()
-  );
-  return pkg?.color || 'Primary';
-};
-
-// Legacy function for backward compatibility - will be removed
-export const getPackageColor = (packageName: string): string => {
-  console.warn('getPackageColor is deprecated, use getPackageColorFromData with package data');
+// Smart package color function - uses real data when available, fallback otherwise
+export const getPackageColor = (packageName: string, packages?: any[]): string => {
+  // If packages data is provided, try to use it first
+  if (packages && packages.length > 0) {
+    const pkg = packages.find(p => 
+      p.name.toLowerCase() === packageName.toLowerCase() ||
+      p.name.toLowerCase().replace(' ', '_') === packageName.toLowerCase() ||
+      p.name.toLowerCase().replace(' ', '') === packageName.toLowerCase()
+    );
+    if (pkg?.color) {
+      return pkg.color;
+    }
+  }
+  
+  // Fallback to hardcoded mapping
   const packageColorMap: { [key: string]: string } = {
     'Basis': 'Teal',
     'Gold': 'Amber', 
@@ -71,6 +73,11 @@ export const getPackageColor = (packageName: string): string => {
     'allin_black': 'Black'
   };
   return packageColorMap[packageName] || 'Primary';
+};
+
+// Legacy function for backward compatibility
+export const getPackageColorFromData = (packages: any[], packageName: string): string => {
+  return getPackageColor(packageName, packages);
 };
 
 // Get color by name
@@ -130,9 +137,9 @@ export const getColorClasses = (colorName: string) => {
   };
 };
 
-// Get complete badge properties for a package using real data
+// Get complete badge properties for a package
 export const getPackageBadgeProps = (packages: any[], packageName: string) => {
-  const colorName = getPackageColorFromData(packages, packageName);
+  const colorName = getPackageColor(packageName, packages);
   const colorClasses = getColorClasses(colorName);
   const variant = getBadgeVariantFromColor(colorName);
   

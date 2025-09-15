@@ -140,9 +140,10 @@ export function ServicesPage() {
     return levels[packageLevel as keyof typeof levels] || packageLevel;
   };
 
-  // Get package badge props using real package data
+  // Get package badge props using real package data with fallback
   const getPackageBadgePropsForService = (packageLevel: string) => {
-    return getPackageBadgeProps(packages, packageLevel);
+    // Always include packages even if empty array - function will handle fallback
+    return getPackageBadgeProps(packages || [], packageLevel);
   };
 
   const getBillingTypeBadgeVariant = (billingType: string) => {
