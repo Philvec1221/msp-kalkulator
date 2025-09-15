@@ -164,62 +164,74 @@ export function useServices() {
   }, []);
 
   const reorderServices = async (serviceId: string, newSortOrder: number) => {
-    try {
-      const { error } = await supabase
-        .from('services')
-        .update({ sort_order: newSortOrder })
-        .eq('id', serviceId);
+    const { error } = await supabase
+      .from('services')
+      .update({ sort_order: newSortOrder })
+      .eq('id', serviceId);
 
-      if (error) throw error;
+    if (error) throw error;
+  };
+
+  const updateServiceOrder = async (draggedServiceId: string, targetServiceId: string, insertAfter: boolean) => {
+    try {
+      console.log('🔄 Starting updateServiceOrder:', { draggedServiceId, targetServiceId, insertAfter });
+      
+      const draggedService = services.find(s => s.id === draggedServiceId);
+      const targetService = services.find(s => s.id === targetServiceId);
+      
+      if (!draggedService || !targetService) {
+        console.log('❌ Service not found');
+        throw new Error('Service not found');
+      }
+
+      console.log('📊 Services before reorder:', {
+        dragged: { id: draggedService.id, name: draggedService.name, sort_order: draggedService.sort_order },
+        target: { id: targetService.id, name: targetService.name, sort_order: targetService.sort_order }
+      });
+
+      // Create a new array with the reordered services
+      const servicesCopy = [...services];
+      const draggedIndex = servicesCopy.findIndex(s => s.id === draggedServiceId);
+      const targetIndex = servicesCopy.findIndex(s => s.id === targetServiceId);
+      
+      // Remove dragged service from its current position
+      const [draggedItem] = servicesCopy.splice(draggedIndex, 1);
+      
+      // Insert at new position
+      const newIndex = insertAfter ? targetIndex + 1 : targetIndex;
+      servicesCopy.splice(newIndex, 0, draggedItem);
+      
+      // Update sort_order for all services in batch
+      const updates = servicesCopy.map((service, index) => ({
+        id: service.id,
+        sort_order: index + 1
+      }));
+      
+      console.log('📝 Batch updating sort orders:', updates);
+      
+      // Update all services with their new sort order
+      for (const { id, sort_order } of updates) {
+        await reorderServices(id, sort_order);
+      }
       
       // Update local state
-      setServices(prev => prev.map(svc => 
-        svc.id === serviceId ? { ...svc, sort_order: newSortOrder } : svc
-      ).sort((a, b) => a.sort_order - b.sort_order));
+      setServices(servicesCopy.map((service, index) => ({
+        ...service,
+        sort_order: index + 1
+      })));
+      
+      console.log('✅ Service order updated successfully');
       
     } catch (error) {
-      console.error('Error reordering service:', error);
+      console.error('❌ Error updating service order:', error);
       toast({
         title: "Fehler",
         description: "Service-Reihenfolge konnte nicht aktualisiert werden.",
         variant: "destructive",
       });
-      throw error;
-    }
-  };
-
-  const updateServiceOrder = async (draggedServiceId: string, targetServiceId: string, insertAfter: boolean) => {
-    try {
-      const draggedService = services.find(s => s.id === draggedServiceId);
-      const targetService = services.find(s => s.id === targetServiceId);
-      
-      if (!draggedService || !targetService) return;
-
-      // Calculate new sort order
-      const targetOrder = targetService.sort_order;
-      const newOrder = insertAfter ? targetOrder + 0.5 : targetOrder - 0.5;
-      
-      // Update the dragged service
-      await reorderServices(draggedServiceId, newOrder);
-      
-      // Normalize all sort orders to integers
-      const sortedServices = services
-        .map(s => s.id === draggedServiceId ? { ...s, sort_order: newOrder } : s)
-        .sort((a, b) => a.sort_order - b.sort_order);
-      
-      // Update all services with normalized sort orders
-      for (let i = 0; i < sortedServices.length; i++) {
-        const service = sortedServices[i];
-        const normalizedOrder = i + 1;
-        if (service.sort_order !== normalizedOrder) {
-          await reorderServices(service.id, normalizedOrder);
-        }
-      }
-      
-    } catch (error) {
-      console.error('Error updating service order:', error);
       // Refetch to restore correct order
       fetchServices();
+      throw error;
     }
   };
 

@@ -134,7 +134,7 @@ export function ServicesPage() {
         toast.success("Service-Reihenfolge wurde aktualisiert");
       } catch (error) {
         console.error('❌ Error updating service order:', error);
-        toast.error("Fehler beim Aktualisieren der Reihenfolge");
+        // Error toast is already shown in useServices hook
       }
     }
     setDraggedServiceId(null);
@@ -155,7 +155,7 @@ export function ServicesPage() {
         toast.success("Service nach oben verschoben");
       } catch (error) {
         console.error('Error moving service up:', error);
-        toast.error("Fehler beim Verschieben");
+        // Error toast is already shown in useServices hook
       }
     }
   };
@@ -169,7 +169,7 @@ export function ServicesPage() {
         toast.success("Service nach unten verschoben");
       } catch (error) {
         console.error('Error moving service down:', error);
-        toast.error("Fehler beim Verschieben");
+        // Error toast is already shown in useServices hook
       }
     }
   };
