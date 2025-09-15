@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 export interface PackageConfig {
   id: string;
@@ -20,7 +20,6 @@ export interface PackageConfig {
 export function usePackageConfigs() {
   const [packageConfigs, setPackageConfigs] = useState<PackageConfig[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   const fetchPackageConfigs = async () => {
     try {
@@ -34,11 +33,7 @@ export function usePackageConfigs() {
       setPackageConfigs((data || []) as PackageConfig[]);
     } catch (error) {
       console.error('Error fetching package configs:', error);
-      toast({
-        title: "Fehler",
-        description: "Package-Konfigurationen konnten nicht geladen werden.",
-        variant: "destructive",
-      });
+      toast.error("Package-Konfigurationen konnten nicht geladen werden.");
     } finally {
       setLoading(false);
     }
@@ -70,11 +65,7 @@ export function usePackageConfigs() {
       await fetchPackageConfigs();
     } catch (error) {
       console.error('Error upserting package config:', error);
-      toast({
-        title: "Fehler",
-        description: "Package-Konfiguration konnte nicht gespeichert werden.",
-        variant: "destructive",
-      });
+      toast.error("Package-Konfiguration konnte nicht gespeichert werden.");
       throw error;
     }
   };
@@ -90,11 +81,7 @@ export function usePackageConfigs() {
       await fetchPackageConfigs();
     } catch (error) {
       console.error('Error deleting package config:', error);
-      toast({
-        title: "Fehler",
-        description: "Package-Konfiguration konnte nicht gelöscht werden.",
-        variant: "destructive",
-      });
+      toast.error("Package-Konfiguration konnte nicht gelöscht werden.");
       throw error;
     }
   };
