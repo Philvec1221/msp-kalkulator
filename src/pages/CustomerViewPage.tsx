@@ -170,7 +170,7 @@ export function CustomerViewPage() {
                   <div className="space-y-1">
                     {pkg.services.map((service, index) => (
                       <div key={index} className="flex items-center gap-2 text-sm">
-                        <Check className="h-3 w-3 text-green-600" />
+                        <Check className="h-4 w-4 text-green-600" />
                         <span>{service}</span>
                       </div>
                     ))}
