@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
+import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical, ChevronUp, ChevronDown, X, ArrowUpDown, Star, Zap } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
@@ -29,6 +29,12 @@ export function ServicesPage() {
   const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
+  const [billingTypeFilter, setBillingTypeFilter] = useState("all");
+  const [activityFilter, setActivityFilter] = useState("all");
+  const [licenseFilter, setLicenseFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [draggedServiceId, setDraggedServiceId] = useState<string | null>(null);
   const [isDragOverId, setIsDragOverId] = useState<string | null>(null);
 
@@ -38,12 +44,77 @@ export function ServicesPage() {
     return `${hours}:${mins.toString().padStart(2, '0')} Std`;
   };
 
-  const filteredServices = services.filter(service => {
-    const matchesSearch = service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesPackage = packageFilter === "all"; // Will be implemented with package configs
-    return matchesSearch && matchesPackage;
-  });
+  const filteredServices = services
+    .filter(service => {
+      // Search filter - enhanced to include product name
+      const matchesSearch = searchTerm === "" || 
+        service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (service.description && service.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (service.product_name && service.product_name.toLowerCase().includes(searchTerm.toLowerCase()));
+      
+      // Package filter - based on min_package_level
+      const matchesPackage = packageFilter === "all" || 
+        (packageFilter === "basis" && (service.min_package_level === "basis" || service.min_package_level === "Basis")) ||
+        (packageFilter === "gold" && ["gold", "Gold", "basis", "Basis"].includes(service.min_package_level || "")) ||
+        (packageFilter === "allin" && ["allin", "Allin", "gold", "Gold", "basis", "Basis"].includes(service.min_package_level || "")) ||
+        (packageFilter === "allin_black" && ["allin_black", "Allin Black", "allin", "Allin", "gold", "Gold", "basis", "Basis"].includes(service.min_package_level || ""));
+      
+      // Billing type filter
+      const matchesBillingType = billingTypeFilter === "all" || service.billing_type === billingTypeFilter;
+      
+      // Activity filter
+      const matchesActivity = activityFilter === "all" || 
+        (activityFilter === "active" && service.active) ||
+        (activityFilter === "inactive" && !service.active);
+      
+      // License filter
+      const serviceLicenseIds = getLicensesByServiceId(service.id) || [];
+      const hasLicenses = serviceLicenseIds.length > 0;
+      const matchesLicense = licenseFilter === "all" ||
+        (licenseFilter === "with_licenses" && hasLicenses) ||
+        (licenseFilter === "without_licenses" && !hasLicenses);
+      
+      // Time filter
+      const matchesTime = timeFilter === "all" ||
+        (timeFilter === "0-30" && service.time_in_minutes <= 30) ||
+        (timeFilter === "30-60" && service.time_in_minutes > 30 && service.time_in_minutes <= 60) ||
+        (timeFilter === "60-120" && service.time_in_minutes > 60 && service.time_in_minutes <= 120) ||
+        (timeFilter === "120+" && service.time_in_minutes > 120);
+      
+      return matchesSearch && matchesPackage && matchesBillingType && matchesActivity && matchesLicense && matchesTime;
+    })
+    .sort((a, b) => {
+      let aValue: any, bValue: any;
+      
+      switch (sortBy) {
+        case "name":
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case "time":
+          aValue = a.time_in_minutes;
+          bValue = b.time_in_minutes;
+          break;
+        case "package_level":
+          const packageOrder = { "basis": 1, "gold": 2, "allin": 3, "allin_black": 4 };
+          aValue = packageOrder[a.min_package_level as keyof typeof packageOrder] || 0;
+          bValue = packageOrder[b.min_package_level as keyof typeof packageOrder] || 0;
+          break;
+        case "created_at":
+          aValue = new Date(a.created_at);
+          bValue = new Date(b.created_at);
+          break;
+        case "sort_order":
+        default:
+          aValue = a.sort_order || 0;
+          bValue = b.sort_order || 0;
+          break;
+      }
+      
+      if (aValue < bValue) return sortOrder === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
 
   const getBillingTypeDisplay = (billingType: string) => {
     const types = {
@@ -174,6 +245,31 @@ export function ServicesPage() {
     }
   };
 
+  // Quick filter functions
+  const resetFilters = () => {
+    setSearchTerm("");
+    setPackageFilter("all");
+    setBillingTypeFilter("all");
+    setActivityFilter("all");
+    setLicenseFilter("all");
+    setTimeFilter("all");
+  };
+
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (searchTerm) count++;
+    if (packageFilter !== "all") count++;
+    if (billingTypeFilter !== "all") count++;
+    if (activityFilter !== "all") count++;
+    if (licenseFilter !== "all") count++;
+    if (timeFilter !== "all") count++;
+    return count;
+  };
+
+  const toggleSort = () => {
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
+
   if (loading) {
     return <div className="flex justify-center py-8">Lade Services...</div>;
   }
@@ -196,11 +292,58 @@ export function ServicesPage() {
       {services.length > 0 && (
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Filter className="h-4 w-4" />
-              <span className="font-medium">Filter</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span className="font-medium">Filter & Sortierung</span>
+                {getActiveFilterCount() > 0 && (
+                  <Badge variant="secondary">{getActiveFilterCount()}</Badge>
+                )}
+              </div>
+              {getActiveFilterCount() > 0 && (
+                <Button variant="ghost" size="sm" onClick={resetFilters}>
+                  <X className="h-4 w-4 mr-1" />
+                  Filter zurücksetzen
+                </Button>
+              )}
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+
+            {/* Quick Filter Buttons */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button
+                variant={activityFilter === "active" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActivityFilter(activityFilter === "active" ? "all" : "active")}
+              >
+                <Zap className="h-3 w-3 mr-1" />
+                Aktive
+              </Button>
+              <Button
+                variant={licenseFilter === "with_licenses" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setLicenseFilter(licenseFilter === "with_licenses" ? "all" : "with_licenses")}
+              >
+                <Star className="h-3 w-3 mr-1" />
+                Mit Lizenzen
+              </Button>
+              <Button
+                variant={billingTypeFilter === "fix" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setBillingTypeFilter(billingTypeFilter === "fix" ? "all" : "fix")}
+              >
+                Fix-Preis
+              </Button>
+              <Button
+                variant={timeFilter === "0-30" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTimeFilter(timeFilter === "0-30" ? "all" : "0-30")}
+              >
+                ≤ 30min
+              </Button>
+            </div>
+
+            {/* Main Filter Row */}
+            <div className="flex flex-col lg:flex-row gap-4">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -210,18 +353,135 @@ export function ServicesPage() {
                   className="pl-9"
                 />
               </div>
-              <Select value={packageFilter} onValueChange={setPackageFilter}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Alle Pakete" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Pakete</SelectItem>
-                  <SelectItem value="basis">Alle Abrechnungseinheiten</SelectItem>
-                </SelectContent>
-              </Select>
+              
+              <div className="flex flex-wrap gap-2">
+                <Select value={packageFilter} onValueChange={setPackageFilter}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Paket" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Pakete</SelectItem>
+                    <SelectItem value="basis">ab Basis</SelectItem>
+                    <SelectItem value="gold">ab Gold</SelectItem>
+                    <SelectItem value="allin">ab Allin</SelectItem>
+                    <SelectItem value="allin_black">ab Allin Black</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={billingTypeFilter} onValueChange={setBillingTypeFilter}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue placeholder="Abrechnung" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Typen</SelectItem>
+                    <SelectItem value="fix">Fix</SelectItem>
+                    <SelectItem value="pro_user">pro User</SelectItem>
+                    <SelectItem value="pro_server">pro Server</SelectItem>
+                    <SelectItem value="pro_client">pro Client</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={activityFilter} onValueChange={setActivityFilter}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Status</SelectItem>
+                    <SelectItem value="active">Aktiv</SelectItem>
+                    <SelectItem value="inactive">Inaktiv</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={licenseFilter} onValueChange={setLicenseFilter}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Lizenzen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle</SelectItem>
+                    <SelectItem value="with_licenses">Mit Lizenzen</SelectItem>
+                    <SelectItem value="without_licenses">Ohne Lizenzen</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={timeFilter} onValueChange={setTimeFilter}>
+                  <SelectTrigger className="w-[120px]">
+                    <SelectValue placeholder="Zeit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Alle Zeiten</SelectItem>
+                    <SelectItem value="0-30">0-30 Min</SelectItem>
+                    <SelectItem value="30-60">30-60 Min</SelectItem>
+                    <SelectItem value="60-120">60-120 Min</SelectItem>
+                    <SelectItem value="120+">120+ Min</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-1">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sort_order">Reihenfolge</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                      <SelectItem value="time">Zeitaufwand</SelectItem>
+                      <SelectItem value="package_level">Paket-Level</SelectItem>
+                      <SelectItem value="created_at">Erstellungsdatum</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button variant="outline" size="sm" onClick={toggleSort}>
+                    <ArrowUpDown className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              {filteredServices.length} Services gesamt
+
+            {/* Active Filters Display */}
+            {getActiveFilterCount() > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
+                <span className="text-sm text-muted-foreground mr-2">Aktive Filter:</span>
+                {searchTerm && (
+                  <Badge variant="outline" className="gap-1">
+                    Suche: "{searchTerm}"
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setSearchTerm("")} />
+                  </Badge>
+                )}
+                {packageFilter !== "all" && (
+                  <Badge variant="outline" className="gap-1">
+                    Paket: {packageFilter}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setPackageFilter("all")} />
+                  </Badge>
+                )}
+                {billingTypeFilter !== "all" && (
+                  <Badge variant="outline" className="gap-1">
+                    Abrechnung: {getBillingTypeDisplay(billingTypeFilter)}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setBillingTypeFilter("all")} />
+                  </Badge>
+                )}
+                {activityFilter !== "all" && (
+                  <Badge variant="outline" className="gap-1">
+                    Status: {activityFilter === "active" ? "Aktiv" : "Inaktiv"}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setActivityFilter("all")} />
+                  </Badge>
+                )}
+                {licenseFilter !== "all" && (
+                  <Badge variant="outline" className="gap-1">
+                    Lizenzen: {licenseFilter === "with_licenses" ? "Mit Lizenzen" : "Ohne Lizenzen"}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setLicenseFilter("all")} />
+                  </Badge>
+                )}
+                {timeFilter !== "all" && (
+                  <Badge variant="outline" className="gap-1">
+                    Zeit: {timeFilter === "120+" ? "120+ Min" : timeFilter + " Min"}
+                    <X className="h-3 w-3 cursor-pointer" onClick={() => setTimeFilter("all")} />
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            <p className="text-sm text-muted-foreground mt-4">
+              {filteredServices.length} von {services.length} Services 
+              {sortBy !== "sort_order" && ` • Sortiert nach ${sortBy} (${sortOrder === "asc" ? "aufsteigend" : "absteigend"})`}
             </p>
           </CardHeader>
         </Card>
