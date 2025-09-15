@@ -108,6 +108,9 @@ export function useServices() {
 
   const updateService = async (id: string, updates: Partial<Service>) => {
     try {
+      // Get current service to compare min_package_level changes
+      const currentService = services.find(s => s.id === id);
+      
       const { data, error } = await supabase
         .from('services')
         .update(updates)
@@ -116,6 +119,39 @@ export function useServices() {
         .single();
 
       if (error) throw error;
+      
+      // If min_package_level changed, update service_packages
+      const newMinPackageLevel = updates.min_package_level || updates.package_level;
+      const currentMinPackageLevel = currentService?.min_package_level || currentService?.package_level;
+      
+      if (newMinPackageLevel && newMinPackageLevel !== currentMinPackageLevel) {
+        console.log(`🔄 Updating service packages for service ${data.name}: ${currentMinPackageLevel} → ${newMinPackageLevel}`);
+        
+        // Delete existing service_packages entries
+        await supabase
+          .from('service_packages')
+          .delete()
+          .eq('service_id', id);
+        
+        // Create new service_packages entries based on hierarchy
+        const applicablePackages = getPackageHierarchy(newMinPackageLevel);
+        if (applicablePackages.length > 0) {
+          const servicePackageEntries = applicablePackages.map(packageName => ({
+            service_id: id,
+            package_name: packageName
+          }));
+
+          const { error: servicePackagesError } = await supabase
+            .from('service_packages')
+            .insert(servicePackageEntries);
+
+          if (servicePackagesError) {
+            console.error('Error updating service packages:', servicePackagesError);
+          } else {
+            console.log(`✅ Service packages updated for ${data.name}:`, applicablePackages);
+          }
+        }
+      }
       
       setServices(prev => prev.map(svc => svc.id === id ? data as Service : svc));
       toast({
