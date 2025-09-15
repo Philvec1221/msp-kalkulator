@@ -26,34 +26,42 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
 
-const mainNavItems = [
+interface NavItem {
+  title: string;
+  url: string;
+  icon: any;
+  adminOnly?: boolean;
+}
+
+const mainNavItems: NavItem[] = [
   { title: "Kalkulator", url: "/", icon: Calculator },
   { title: "Services", url: "/services", icon: FileText },
   { title: "Pakete", url: "/packages", icon: Package },
   { title: "Lizenzen", url: "/licenses", icon: Key },
 ];
 
-const managementItems = [
+const managementItems: NavItem[] = [
   { title: "Mitarbeiter", url: "/employees", icon: Users, adminOnly: true },
   { title: "Abteilungen", url: "/departments", icon: Building },
   { title: "Addon Services", url: "/addon-services", icon: Puzzle },
 ];
 
-const configItems = [
+const configItems: NavItem[] = [
   { title: "Package Config", url: "/package-config", icon: Settings },
   { title: "Kostenanalyse", url: "/cost-analysis", icon: BarChart3 },
   { title: "Backup", url: "/backup", icon: Database, adminOnly: true },
 ];
 
-const adminItems = [
+const adminItems: NavItem[] = [
   { title: "Admin Panel", url: "/admin", icon: Shield },
 ];
 
 export function AppSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const { isAdmin } = useAuth();
   const currentPath = location.pathname;
+  const collapsed = state === "collapsed";
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -65,11 +73,11 @@ export function AppSidebar() {
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
     isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50";
 
-  const filterAdminItems = (items: typeof mainNavItems) => 
+  const filterAdminItems = (items: NavItem[]) => 
     items.filter(item => !item.adminOnly || isAdmin);
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible>
+    <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarTrigger className="m-2 self-end" />
       
       <SidebarContent className="px-2">
