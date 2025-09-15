@@ -144,8 +144,9 @@ const AuthPage = () => {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="signin" className="w-full">
-              <TabsList className="grid w-full grid-cols-1">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="signin">Anmelden</TabsTrigger>
+                <TabsTrigger value="signup">Registrieren</TabsTrigger>
               </TabsList>
 
               {error && (
@@ -190,6 +191,44 @@ const AuthPage = () => {
                     Passwort zurücksetzen
                   </Button>
                 </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <div className="space-y-4">
+                  <Alert className="border-blue-200 bg-blue-50">
+                    <AlertDescription>
+                      Registrierung ist nur mit @vectano.de E-Mail-Adressen möglich.
+                    </AlertDescription>
+                  </Alert>
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">E-Mail</Label>
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="ihr.name@vectano.de"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Passwort</Label>
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="Mindestens 6 Zeichen"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Wird registriert..." : "Registrieren"}
+                    </Button>
+                  </form>
+                </div>
               </TabsContent>
             </Tabs>
           </CardContent>
