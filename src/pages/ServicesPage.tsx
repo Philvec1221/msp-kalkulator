@@ -12,6 +12,7 @@ import { ServiceForm } from "@/components/forms/ServiceForm";
 import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import { toast } from "sonner";
 import { formatDescription } from "@/lib/formatDescription";
+import { getPackageColor, getColorClasses } from "@/lib/colors";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,7 @@ export function ServicesPage() {
   const [activityFilter, setActivityFilter] = useState("all");
   const [licenseFilter, setLicenseFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("name");
+  const [sortBy, setSortBy] = useState("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [draggedServiceId, setDraggedServiceId] = useState<string | null>(null);
   const [isDragOverId, setIsDragOverId] = useState<string | null>(null);
@@ -137,14 +138,10 @@ export function ServicesPage() {
     return levels[packageLevel as keyof typeof levels] || packageLevel;
   };
 
-  const getPackageBadgeVariant = (packageLevel: string) => {
-    switch (packageLevel) {
-      case 'basis': return 'default';
-      case 'gold': return 'secondary';
-      case 'allin': return 'outline';
-      case 'allin_black': return 'destructive';
-      default: return 'default';
-    }
+  const getPackageBadgeStyle = (packageLevel: string) => {
+    const colorName = getPackageColor(packageLevel);
+    const colorClasses = getColorClasses(colorName);
+    return colorClasses;
   };
 
   const getBillingTypeBadgeVariant = (billingType: string) => {
@@ -558,7 +555,11 @@ export function ServicesPage() {
                           <Badge variant={getBillingTypeBadgeVariant(service.billing_type)}>
                             {getBillingTypeDisplay(service.billing_type)}
                           </Badge>
-                          <Badge variant={getPackageBadgeVariant(service.package_level)}>
+                          <Badge 
+                            className={getPackageBadgeStyle(service.package_level).bg + " " + 
+                                     getPackageBadgeStyle(service.package_level).text + " " +
+                                     getPackageBadgeStyle(service.package_level).border}
+                          >
                             {getPackageLevelDisplay(service.package_level)}
                           </Badge>
                         </div>
