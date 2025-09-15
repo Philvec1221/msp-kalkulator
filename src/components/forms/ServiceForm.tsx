@@ -12,7 +12,10 @@ import { Service } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
+import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { MultiSelect } from "@/components/ui/multi-select";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ServiceFormProps {
   service?: Service;
@@ -34,10 +37,12 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [selectedLicenses, setSelectedLicenses] = useState<string[]>([]);
   const [includeCosts, setIncludeCosts] = useState<{ [licenseId: string]: boolean }>({});
   const [loading, setLoading] = useState(false);
+  const [showPackageConfigs, setShowPackageConfigs] = useState(false);
   
   const { licenses, loading: licensesLoading } = useLicenses();
   const { serviceLicenses, updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
   const { packages } = usePackages();
+  const { packageConfigs, getConfigsByService } = usePackageConfigs();
 
   // Bereite Lizenzoptionen für MultiSelect vor
   const licenseOptions = (licenses || []).map(license => ({
@@ -105,7 +110,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {service ? 'Service bearbeiten' : 'Neuer Service'}
@@ -283,6 +288,92 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
             />
           </div>
+
+          {!service && (
+            <Card className="border-dashed">
+              <CardContent className="pt-6">
+                <div className="text-center text-sm text-muted-foreground">
+                  <Info className="h-4 w-4 mx-auto mb-2" />
+                  <p>Nach dem Erstellen können Sie Package-Konfigurationen hinzufügen,</p>
+                  <p>um festzulegen, wie der Service in verschiedenen Paketen verfügbar ist.</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {service && service.id && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-lg">Package-Konfigurationen</CardTitle>
+                    <CardDescription>
+                      Konfigurieren Sie, wie dieser Service in verschiedenen Paketen verfügbar ist
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setShowPackageConfigs(!showPackageConfigs)}
+                  >
+                    {showPackageConfigs ? 'Ausblenden' : 'Anzeigen'}
+                  </Button>
+                </div>
+              </CardHeader>
+              {showPackageConfigs && (
+                <CardContent>
+                  <div className="space-y-3">
+                    {packages.map(pkg => {
+                      const config = getConfigsByService(service.id).find(c => c.package_type === pkg.name);
+                      return (
+                        <div key={pkg.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <div className="font-medium">{pkg.name}</div>
+                              {config ? (
+                                <div className="flex gap-2 mt-1">
+                                  <Badge variant={
+                                    config.inclusion_type === 'inclusive' ? 'default' :
+                                    config.inclusion_type === 'effort_based' ? 'secondary' :
+                                    config.inclusion_type === 'not_available' ? 'destructive' : 'outline'
+                                  } className="text-xs">
+                                    {config.inclusion_type === 'inclusive' ? 'Inklusive' :
+                                     config.inclusion_type === 'effort_based' ? 'Nach Aufwand' :
+                                     config.inclusion_type === 'not_available' ? 'Nicht verfügbar' : 'Benutzerdefiniert'}
+                                  </Badge>
+                                  {config.sla_response_time && (
+                                    <Badge variant="outline" className="text-xs">
+                                      SLA: {config.sla_response_time}
+                                    </Badge>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="text-sm text-muted-foreground">Noch nicht konfiguriert</div>
+                              )}
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              window.open(`/package-config?service=${service.id}&package=${pkg.name}`, '_blank');
+                            }}
+                          >
+                            {config ? 'Bearbeiten' : 'Konfigurieren'}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                    <div className="text-xs text-muted-foreground mt-2">
+                      💡 Tipp: Konfigurieren Sie für jedes Paket, ob der Service inklusive ist, nach Aufwand abgerechnet wird, oder nicht verfügbar ist.
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )}
 
           <div className="flex justify-end gap-2 pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
