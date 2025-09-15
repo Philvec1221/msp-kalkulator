@@ -14,6 +14,7 @@ import { PackagesPage } from "./pages/PackagesPage";
 import { ServicesPage } from "./pages/ServicesPage";
 import { LicensesPage } from "./pages/LicensesPage";
 import { EmployeesPage } from "./pages/EmployeesPage";
+import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { CostAnalysisPage } from "./pages/CostAnalysisPage";
 import { CalculatorPage } from "./pages/CalculatorPage";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -94,6 +95,14 @@ const App = () => {
                 <ProtectedRoute>
                   <AppLayout>
                     <EmployeesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/departments" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <DepartmentsPage />
                   </AppLayout>
                 </ProtectedRoute>
               } />
