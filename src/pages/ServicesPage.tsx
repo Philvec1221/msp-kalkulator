@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical } from "lucide-react";
+import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { ServiceForm } from "@/components/forms/ServiceForm";
 import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,7 @@ export function ServicesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
   const [draggedServiceId, setDraggedServiceId] = useState<string | null>(null);
+  const [isDragOverId, setIsDragOverId] = useState<string | null>(null);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -84,36 +86,92 @@ export function ServicesPage() {
   };
 
   const handleDragStart = (e: React.DragEvent, serviceId: string) => {
-    console.log('Drag started:', serviceId);
+    console.log('🚀 Drag started:', serviceId);
     setDraggedServiceId(serviceId);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', serviceId);
+    
+    // Add ghost image styling
+    const dragImg = document.createElement('div');
+    dragImg.innerHTML = `<div style="background: white; padding: 8px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">Verschiebe Service...</div>`;
+    dragImg.style.position = 'absolute';
+    dragImg.style.top = '-1000px';
+    document.body.appendChild(dragImg);
+    e.dataTransfer.setDragImage(dragImg, 0, 0);
+    setTimeout(() => document.body.removeChild(dragImg), 0);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, targetServiceId: string) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
+    setIsDragOverId(targetServiceId);
   };
 
-  const handleDrop = (e: React.DragEvent, targetServiceId: string) => {
+  const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
-    console.log('Drop on:', targetServiceId, 'from:', draggedServiceId);
+    setIsDragOverId(null);
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetServiceId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOverId(null);
+    
+    console.log('📍 Drop on:', targetServiceId, 'from:', draggedServiceId);
+    
     if (draggedServiceId && draggedServiceId !== targetServiceId) {
-      // Determine if we should insert after based on drop position
-      const targetElement = e.currentTarget as HTMLElement;
-      const rect = targetElement.getBoundingClientRect();
-      const dropY = e.clientY;
-      const insertAfter = dropY > rect.top + rect.height / 2;
-      
-      console.log('Updating order - dragged:', draggedServiceId, 'target:', targetServiceId, 'insertAfter:', insertAfter);
-      updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
+      try {
+        // Determine if we should insert after based on drop position
+        const targetElement = e.currentTarget as HTMLElement;
+        const rect = targetElement.getBoundingClientRect();
+        const dropY = e.clientY;
+        const insertAfter = dropY > rect.top + rect.height / 2;
+        
+        console.log('🔄 Updating order - dragged:', draggedServiceId, 'target:', targetServiceId, 'insertAfter:', insertAfter);
+        
+        await updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
+        toast.success("Service-Reihenfolge wurde aktualisiert");
+      } catch (error) {
+        console.error('❌ Error updating service order:', error);
+        toast.error("Fehler beim Aktualisieren der Reihenfolge");
+      }
     }
     setDraggedServiceId(null);
   };
 
   const handleDragEnd = () => {
-    console.log('Drag ended');
+    console.log('🏁 Drag ended');
     setDraggedServiceId(null);
+    setIsDragOverId(null);
+  };
+
+  const moveServiceUp = async (serviceId: string) => {
+    const currentIndex = filteredServices.findIndex(s => s.id === serviceId);
+    if (currentIndex > 0) {
+      const targetService = filteredServices[currentIndex - 1];
+      try {
+        await updateServiceOrder(serviceId, targetService.id, false);
+        toast.success("Service nach oben verschoben");
+      } catch (error) {
+        console.error('Error moving service up:', error);
+        toast.error("Fehler beim Verschieben");
+      }
+    }
+  };
+
+  const moveServiceDown = async (serviceId: string) => {
+    const currentIndex = filteredServices.findIndex(s => s.id === serviceId);
+    if (currentIndex < filteredServices.length - 1) {
+      const targetService = filteredServices[currentIndex + 1];
+      try {
+        await updateServiceOrder(serviceId, targetService.id, true);
+        toast.success("Service nach unten verschoben");
+      } catch (error) {
+        console.error('Error moving service down:', error);
+        toast.error("Fehler beim Verschieben");
+      }
+    }
   };
 
   if (loading) {
@@ -181,24 +239,53 @@ export function ServicesPage() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {filteredServices.map((service) => (
+          {filteredServices.map((service, index) => (
             <Card 
               key={service.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, service.id)}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, service.id)}
+              onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, service.id)}
-              onDragEnd={handleDragEnd}
               className={`transition-all duration-200 ${
                 draggedServiceId === service.id ? 'opacity-50 scale-95' : ''
-              } ${draggedServiceId && draggedServiceId !== service.id ? 'border-primary/50 bg-primary/5' : ''}`}
-              style={{ cursor: 'move' }}
+              } ${isDragOverId === service.id && draggedServiceId !== service.id ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''} ${
+                draggedServiceId && draggedServiceId !== service.id ? 'border-primary/30' : ''
+              }`}
             >
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-start gap-4 flex-1">
                     <div className="flex items-center gap-2">
-                      <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab active:cursor-grabbing" />
+                      <div 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, service.id)}
+                        onDragEnd={handleDragEnd}
+                        className="flex flex-col gap-1 cursor-grab active:cursor-grabbing"
+                        title="Zum Verschieben ziehen"
+                      >
+                        <GripVertical className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => moveServiceUp(service.id)}
+                          disabled={index === 0}
+                          title="Nach oben"
+                        >
+                          <ChevronUp className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => moveServiceDown(service.id)}
+                          disabled={index === filteredServices.length - 1}
+                          title="Nach unten"
+                        >
+                          <ChevronDown className="h-3 w-3" />
+                        </Button>
+                      </div>
                       <div className="p-2 bg-primary/10 rounded-lg">
                         <Settings className="h-4 w-4 text-primary" />
                       </div>
