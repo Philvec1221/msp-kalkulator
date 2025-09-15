@@ -4,15 +4,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Package, FileText } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { usePackages } from "@/hooks/usePackages";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 export default function PackageConfigPage() {
   const { services } = useServices();
   const { packages } = usePackages();
+  const [searchParams] = useSearchParams();
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
   const [selectedPackageType, setSelectedPackageType] = useState<string>('');
+
+  // Read URL parameters and set initial filters
+  useEffect(() => {
+    const serviceParam = searchParams.get('service');
+    const packageParam = searchParams.get('package');
+    
+    if (serviceParam) {
+      setSelectedServiceId(serviceParam);
+    }
+    if (packageParam) {
+      setSelectedPackageType(packageParam);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-background">
