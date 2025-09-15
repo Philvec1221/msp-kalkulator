@@ -9,7 +9,7 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
-import { getBadgeVariantFromColor, getColorByName, getColorClasses } from "@/lib/colors";
+import { getBadgeVariantFromColor, getColorByName, getColorClasses, getPackageColor } from "@/lib/colors";
 import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
 
 interface PackageData {
@@ -79,17 +79,6 @@ export function CustomerViewPage() {
       };
     });
   }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
-
-  // Map package names to colors for consistent display
-  const getPackageColor = (packageName: string): string => {
-    switch (packageName.toLowerCase()) {
-      case "basis": return "Gray";
-      case "gold": return "Amber";
-      case "allin": return "Teal";
-      case "allin black": return "Black";
-      default: return "Gray";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-500 to-cyan-500">

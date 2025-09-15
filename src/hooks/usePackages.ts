@@ -36,7 +36,7 @@ export function usePackages() {
       name: 'Basis',
       description: 'Grundlegende IT-Services für kleine Unternehmen',
       order_index: 1,
-      color: 'default',
+      color: 'Teal',
       active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -46,7 +46,7 @@ export function usePackages() {
       name: 'Gold',
       description: 'Erweiterte Services für wachsende Unternehmen',
       order_index: 2,
-      color: 'warning',
+      color: 'Amber',
       active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -56,7 +56,7 @@ export function usePackages() {
       name: 'Allin',
       description: 'Umfassende IT-Betreuung für etablierte Unternehmen',
       order_index: 3,
-      color: 'primary',
+      color: 'Purple',
       active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -66,7 +66,7 @@ export function usePackages() {
       name: 'Allin Black',
       description: 'Premium-Services für höchste Ansprüche',
       order_index: 4,
-      color: 'destructive',
+      color: 'Black',
       active: true,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -83,12 +83,21 @@ export function usePackages() {
         .order('order_index');
       
       if (error) throw error;
-      setPackages(data || []);
+      
+      // Use database data if available, otherwise fall back to sample data
+      if (data && data.length > 0) {
+        setPackages(data);
+      } else {
+        // Initialize with sample packages if database is empty
+        setPackages(samplePackages);
+      }
     } catch (error) {
       console.error('Error fetching packages:', error);
+      // Fall back to sample packages on error
+      setPackages(samplePackages);
       toast({
         title: "Fehler",
-        description: "Pakete konnten nicht geladen werden.",
+        description: "Pakete konnten nicht geladen werden. Verwende Standardpakete.",
         variant: "destructive",
       });
     } finally {
@@ -98,19 +107,20 @@ export function usePackages() {
 
   const addPackage = async (packageData: Omit<Package, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      const newPackage: Package = {
-        ...packageData,
-        id: Math.random().toString(36).substr(2, 9),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      const { data, error } = await supabase
+        .from('packages')
+        .insert([packageData])
+        .select()
+        .single();
       
-      setPackages(prev => [...prev, newPackage]);
+      if (error) throw error;
+      
+      setPackages(prev => [...prev, data]);
       toast({
         title: "Erfolg",
         description: "Paket wurde hinzugefügt.",
       });
-      return newPackage;
+      return data;
     } catch (error) {
       console.error('Error adding package:', error);
       toast({
@@ -124,16 +134,21 @@ export function usePackages() {
 
   const updatePackage = async (id: string, updates: Partial<Package>) => {
     try {
-      const updatedPackage = packages.find(pkg => pkg.id === id);
-      if (!updatedPackage) throw new Error('Package not found');
+      const { data, error } = await supabase
+        .from('packages')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
       
-      const newPackage = { ...updatedPackage, ...updates, updated_at: new Date().toISOString() };
-      setPackages(prev => prev.map(pkg => pkg.id === id ? newPackage : pkg));
+      if (error) throw error;
+      
+      setPackages(prev => prev.map(pkg => pkg.id === id ? data : pkg));
       toast({
         title: "Erfolg", 
         description: "Paket wurde aktualisiert.",
       });
-      return newPackage;
+      return data;
     } catch (error) {
       console.error('Error updating package:', error);
       toast({
@@ -147,6 +162,13 @@ export function usePackages() {
 
   const deletePackage = async (id: string) => {
     try {
+      const { error } = await supabase
+        .from('packages')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      
       setPackages(prev => prev.filter(pkg => pkg.id !== id));
       toast({
         title: "Erfolg",

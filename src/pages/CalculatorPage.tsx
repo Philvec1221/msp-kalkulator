@@ -11,7 +11,9 @@ import { useServices } from "@/hooks/useServices";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { usePackages } from "@/hooks/usePackages";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getPackageColor, getBadgeVariantFromColor, getColorClasses } from "@/lib/colors";
 
 interface QuoteData {
   customerNumber: string;
@@ -30,6 +32,7 @@ export function CalculatorPage() {
   const { employees } = useEmployees();
   const { licenses } = useLicenses();
   const { getAllServiceLicenseRelations } = useServiceLicenses();
+  const { packages } = usePackages();
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
@@ -98,10 +101,9 @@ export function CalculatorPage() {
                   <SelectValue placeholder="Paket auswählen..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basis">Basis</SelectItem>
-                  <SelectItem value="gold">Gold</SelectItem>
-                  <SelectItem value="allin">Allin</SelectItem>
-                  <SelectItem value="allin_black">Allin Black</SelectItem>
+                  {packages.map((pkg) => (
+                    <SelectItem key={pkg.id} value={pkg.name}>{pkg.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
@@ -110,7 +112,12 @@ export function CalculatorPage() {
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
-              <Badge variant="default" className="text-lg px-4 py-2">{quoteData.selectedPackage}</Badge>
+              <Badge 
+                variant={getBadgeVariantFromColor(getPackageColor(quoteData.selectedPackage))} 
+                className={`text-lg px-4 py-2 ${getColorClasses(getPackageColor(quoteData.selectedPackage)).bg} ${getColorClasses(getPackageColor(quoteData.selectedPackage)).text}`}
+              >
+                {quoteData.selectedPackage}
+              </Badge>
               <p className="text-xs text-muted-foreground mt-2">
                 {packageServices.length} Services enthalten
               </p>
@@ -197,7 +204,12 @@ export function CalculatorPage() {
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Paket: </span>
-              <Badge variant="default">{quoteData.selectedPackage}</Badge>
+              <Badge 
+                variant={getBadgeVariantFromColor(getPackageColor(quoteData.selectedPackage))}
+                className={`${getColorClasses(getPackageColor(quoteData.selectedPackage)).bg} ${getColorClasses(getPackageColor(quoteData.selectedPackage)).text}`}
+              >
+                {quoteData.selectedPackage}
+              </Badge>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Aufschlag: </span>

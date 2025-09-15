@@ -47,6 +47,22 @@ export const standardColors: ColorDefinition[] = [
 
 export const allColors = [...designColors, ...standardColors];
 
+// Package-specific color mapping
+const packageColorMap: { [key: string]: string } = {
+  'Basis': 'Teal',
+  'Gold': 'Amber',
+  'Allin': 'Purple',
+  'Allin Black': 'Black',
+  'basis': 'Teal',
+  'gold': 'Amber', 
+  'allin': 'Purple',
+  'allin_black': 'Black'
+};
+
+export const getPackageColor = (packageName: string): string => {
+  return packageColorMap[packageName] || 'Primary';
+};
+
 // Get color by name
 export const getColorByName = (name: string): ColorDefinition | undefined => {
   return allColors.find(color => color.name.toLowerCase() === name.toLowerCase());
