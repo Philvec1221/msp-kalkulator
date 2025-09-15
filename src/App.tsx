@@ -11,29 +11,80 @@ import ContractAppendixPage from "./pages/ContractAppendixPage";
 import AddonServicesPage from "./pages/AddonServicesPage";
 import PackageConfigPage from "./pages/PackageConfigPage";
 import { PackagesPage } from "./pages/PackagesPage";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { AppLayout } from "./components/layout/AppLayout";
+import { ErrorBoundary } from "./components/common/ErrorBoundary";
 const queryClient = new QueryClient();
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/addon-services" element={<AddonServicesPage />} />
-            <Route path="/packages" element={<PackagesPage />} />
-            <Route path="/package-config" element={<PackageConfigPage />} />
-            <Route path="/contract-appendix" element={<ContractAppendixPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/auth" element={<AuthPage />} />
+              
+              {/* Protected routes with layout */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <Index />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/packages" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PackagesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/addon-services" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <AddonServicesPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/package-config" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <PackageConfigPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/contract-appendix" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <ContractAppendixPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Admin-only routes */}
+              <Route path="/admin" element={
+                <ProtectedRoute requireAdmin>
+                  <AppLayout>
+                    <AdminPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 };
 
