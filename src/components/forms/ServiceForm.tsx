@@ -289,18 +289,6 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
             />
           </div>
 
-          {!service && (
-            <Card className="border-dashed">
-              <CardContent className="pt-6">
-                <div className="text-center text-sm text-muted-foreground">
-                  <Info className="h-4 w-4 mx-auto mb-2" />
-                  <p>Nach dem Erstellen können Sie Package-Konfigurationen hinzufügen,</p>
-                  <p>um festzulegen, wie der Service in verschiedenen Paketen verfügbar ist.</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
           {service && service.id && (
             <Card>
               <CardHeader>
@@ -358,16 +346,16 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              window.open(`/package-config?service=${service.id}&package=${pkg.name}`, '_blank');
+                              window.open(`/package-config`, '_blank');
                             }}
                           >
-                            {config ? 'Bearbeiten' : 'Konfigurieren'}
+                            Matrix öffnen
                           </Button>
                         </div>
                       );
                     })}
                     <div className="text-xs text-muted-foreground mt-2">
-                      💡 Tipp: Konfigurieren Sie für jedes Paket, ob der Service inklusive ist, nach Aufwand abgerechnet wird, oder nicht verfügbar ist.
+                      💡 Tipp: Nutzen Sie die Package-Matrix für eine bessere Übersicht aller Konfigurationen.
                     </div>
                   </div>
                 </CardContent>
