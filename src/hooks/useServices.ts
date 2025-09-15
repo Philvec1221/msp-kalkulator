@@ -154,6 +154,10 @@ export function useServices() {
       }
       
       setServices(prev => prev.map(svc => svc.id === id ? data as Service : svc));
+      
+      // Force refetch to ensure PackagesPage gets updated data
+      await fetchServices();
+      
       toast({
         title: "Erfolg",
         description: "Service wurde aktualisiert.",
