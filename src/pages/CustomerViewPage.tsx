@@ -205,7 +205,7 @@ export function CustomerViewPage() {
             return (
               <Card 
                 key={pkg.name} 
-                className={`relative transition-all duration-200 ${
+                className={`relative flex flex-col h-full transition-all duration-200 ${
                   isSelected ? 'ring-2 ring-blue-500 shadow-2xl bg-blue-50/50 border-blue-200' : 'hover:shadow-lg border-border'
                 }`}
               >
@@ -216,7 +216,7 @@ export function CustomerViewPage() {
                     </Badge>
                   </div>
                 )}
-              <CardHeader className="text-center pb-4">
+              <CardHeader className="text-center pb-4 flex-shrink-0">
                 <div className="mb-3">
                   <Badge 
                     {...getPackageBadgeProps(dbPackages || [], pkg.name)}
@@ -224,9 +224,11 @@ export function CustomerViewPage() {
                     {pkg.name}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {pkg.description}
-                </p>
+                <div className="h-12 flex items-center justify-center mb-4">
+                  <p className="text-sm text-muted-foreground text-center">
+                    {pkg.description}
+                  </p>
+                </div>
                 <div className="space-y-1">
                   <div className="text-2xl font-bold text-blue-600">
                     {pkg.monthlyPrice.toFixed(2)}€
@@ -238,69 +240,71 @@ export function CustomerViewPage() {
                   <div className="text-xs text-muted-foreground">pro Jahr</div>
                 </div>
               </CardHeader>
-              <CardContent className="pt-0">
-                <div className="space-y-3 mb-6">
-                  <p className="text-sm font-medium">Enthaltene Services:</p>
-                  <div className="space-y-2">
-                    {pkg.services.map((service, index) => {
-                      const packageConfig = service.id ? packageConfigs.find(
-                        config => config.service_id === service.id && 
-                        config.package_type.toLowerCase() === pkg.name.toLowerCase()
-                      ) : null;
-                      
-                      return (
-                        <div key={index} className="p-3 bg-muted/30 rounded-lg">
-                          <div className="flex items-start gap-2 mb-2">
-                            <span className="text-lg">
-                              {packageConfig ? getInclusionIcon(packageConfig.inclusion_type as InclusionType) : '✓'}
-                            </span>
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">{service.name}</span>
-                                {packageConfig && (
-                                  <Badge 
-                                    variant={getInclusionVariant(packageConfig.inclusion_type as InclusionType)}
-                                    className="text-xs"
-                                  >
-                                    {getInclusionLabel(packageConfig.inclusion_type as InclusionType)}
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                              {packageConfig && (
-                                <div className="space-y-1 text-xs text-muted-foreground">
-                                  {packageConfig.sla_response_time && (
-                                    <div className="flex items-center gap-1">
-                                      <Clock className="h-3 w-3" />
-                                      <span>Reaktionszeit: {packageConfig.sla_response_time}</span>
-                                    </div>
-                                  )}
-                                  {packageConfig.sla_availability && (
-                                    <div className="flex items-center gap-1">
-                                      <Shield className="h-3 w-3" />
-                                      <span>Verfügbarkeit: {packageConfig.sla_availability}</span>
-                                    </div>
-                                  )}
-                                  {packageConfig.custom_description && (
-                                    <div className="text-xs italic">
-                                      {packageConfig.custom_description}
-                                    </div>
+              <CardContent className="pt-0 flex-grow flex flex-col">
+                <div className="flex-grow">
+                  <div className="space-y-3 mb-6">
+                    <p className="text-sm font-medium">Enthaltene Services:</p>
+                    <div className="space-y-2">
+                      {pkg.services.map((service, index) => {
+                        const packageConfig = service.id ? packageConfigs.find(
+                          config => config.service_id === service.id && 
+                          config.package_type.toLowerCase() === pkg.name.toLowerCase()
+                        ) : null;
+                        
+                        return (
+                          <div key={index} className="p-3 bg-muted/30 rounded-lg">
+                            <div className="flex items-start gap-2 mb-2">
+                              <span className="text-lg">
+                                {packageConfig ? getInclusionIcon(packageConfig.inclusion_type as InclusionType) : '✓'}
+                              </span>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-sm font-medium">{service.name}</span>
+                                  {packageConfig && (
+                                    <Badge 
+                                      variant={getInclusionVariant(packageConfig.inclusion_type as InclusionType)}
+                                      className="text-xs"
+                                    >
+                                      {getInclusionLabel(packageConfig.inclusion_type as InclusionType)}
+                                    </Badge>
                                   )}
                                 </div>
-                              )}
+                                
+                                {packageConfig && (
+                                  <div className="space-y-1 text-xs text-muted-foreground">
+                                    {packageConfig.sla_response_time && (
+                                      <div className="flex items-center gap-1">
+                                        <Clock className="h-3 w-3" />
+                                        <span>Reaktionszeit: {packageConfig.sla_response_time}</span>
+                                      </div>
+                                    )}
+                                    {packageConfig.sla_availability && (
+                                      <div className="flex items-center gap-1">
+                                        <Shield className="h-3 w-3" />
+                                        <span>Verfügbarkeit: {packageConfig.sla_availability}</span>
+                                      </div>
+                                    )}
+                                    {packageConfig.custom_description && (
+                                      <div className="text-xs italic">
+                                        {packageConfig.custom_description}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 mt-auto">
                   <Button
                     className={cn(
                       "w-full transition-all duration-200",
                       isSelected 
-                        ? "bg-primary text-primary-foreground shadow-lg scale-105" 
+                        ? "bg-primary text-primary-foreground shadow-lg" 
                         : "bg-muted text-muted-foreground hover:bg-muted/80"
                     )}
                     onClick={() => {
