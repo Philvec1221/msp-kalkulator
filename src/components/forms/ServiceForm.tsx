@@ -226,7 +226,11 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
+                  <PopoverContent 
+                    className="w-full p-0 z-50" 
+                    align="start"
+                    sideOffset={5}
+                  >
                     <div className="p-3 border-b">
                       <div className="relative">
                         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -238,7 +242,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                         />
                       </div>
                     </div>
-                    <ScrollArea className="h-60">
+                    <div className="h-60 overflow-y-auto">
                       <div className="p-2 space-y-1">
                         {filteredLicenses.length === 0 ? (
                           <div className="text-sm text-muted-foreground text-center py-4">
@@ -275,7 +279,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                           })
                         )}
                       </div>
-                    </ScrollArea>
+                    </div>
                   </PopoverContent>
                 </Popover>
                 
