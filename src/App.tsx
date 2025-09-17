@@ -132,6 +132,14 @@ const App = () => {
                 </ProtectedRoute>
               } />
               
+              <Route path="/kundenview" element={
+                <ProtectedRoute>
+                  <AppLayout>
+                    <CustomerViewPage />
+                  </AppLayout>
+                </ProtectedRoute>
+              } />
+              
               {/* Admin-only routes */}
               <Route path="/admin" element={
                 <ProtectedRoute requireAdmin>
