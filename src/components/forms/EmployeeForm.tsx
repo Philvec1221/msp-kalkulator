@@ -34,15 +34,28 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
 
   useEffect(() => {
     if (employee) {
-      setFormData({
+      console.log('👤 Loading employee data:', employee);
+      const newFormData = {
         name: employee.name,
         hourly_rate: employee.hourly_rate,
         active: employee.active,
         inactive_reason: employee.inactive_reason || ''
-      });
+      };
+      console.log('📝 Setting formData to:', newFormData);
+      setFormData(newFormData);
       // Load existing departments for this employee
       const employeeDepartments = getDepartmentsByEmployee(employee.id);
       setSelectedDepartmentIds(employeeDepartments.map(d => d.id));
+    } else {
+      // Reset for new employee
+      console.log('🆕 Resetting for new employee');
+      setFormData({
+        name: '',
+        hourly_rate: 0,
+        active: true,
+        inactive_reason: ''
+      });
+      setSelectedDepartmentIds([]);
     }
   }, [employee, getDepartmentsByEmployee]);
 
@@ -102,11 +115,14 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
   };
 
   const toggleDepartment = (departmentId: string) => {
-    setSelectedDepartmentIds(prev => 
-      prev.includes(departmentId)
+    console.log('🏢 Toggling department:', departmentId);
+    setSelectedDepartmentIds(prev => {
+      const newSelection = prev.includes(departmentId)
         ? prev.filter(id => id !== departmentId)
-        : [...prev, departmentId]
-    );
+        : [...prev, departmentId];
+      console.log('📋 Department selection updated:', newSelection);
+      return newSelection;
+    });
   };
 
   const removeDepartment = (departmentId: string) => {
@@ -171,7 +187,7 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
               id="active"
               checked={formData.active}
               onCheckedChange={(checked) => {
-                console.log('🔄 Switch clicked - changing active from', formData.active, 'to', checked);
+                console.log('🔄 Switch clicked - current formData.active:', formData.active, 'new checked:', checked);
                 setFormData(prev => {
                   const newData = { 
                     ...prev, 
@@ -243,7 +259,12 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => toggleDepartment(department.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('🏢 Adding department:', department.name);
+                        toggleDepartment(department.id);
+                      }}
                       className="h-8"
                     >
                       <Plus className="h-3 w-3 mr-1" />
