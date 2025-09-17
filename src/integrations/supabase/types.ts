@@ -324,6 +324,59 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_offers: {
+        Row: {
+          calculation_results: Json
+          clients: number
+          company_name: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          notes: string | null
+          selected_packages: Json
+          servers: number
+          updated_at: string
+          users: number
+        }
+        Insert: {
+          calculation_results?: Json
+          clients?: number
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          selected_packages?: Json
+          servers?: number
+          updated_at?: string
+          users?: number
+        }
+        Update: {
+          calculation_results?: Json
+          clients?: number
+          company_name?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          selected_packages?: Json
+          servers?: number
+          updated_at?: string
+          users?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_offers_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_licenses: {
         Row: {
           created_at: string

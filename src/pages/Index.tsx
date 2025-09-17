@@ -8,7 +8,7 @@ import { ServicesPage } from "@/pages/ServicesPage";
 import { PackagesPage } from "@/pages/PackagesPage";
 import { CalculatorPage } from "@/pages/CalculatorPage";
 import { BackupPage } from "@/pages/BackupPage";
-import { ConfigPage } from "@/pages/ConfigPage";
+import { SavedOffersPage } from "@/pages/SavedOffersPage";
 import { CustomerViewPage } from "@/pages/CustomerViewPage";
 import { CostAnalysisPage } from "@/pages/CostAnalysisPage";
 import AddonServicesPage from "@/pages/AddonServicesPage";
@@ -17,8 +17,8 @@ const Index = () => {
   const { isAdmin } = useAuth();
   
   // Default tabs based on user role
-  const [activeMainTab, setActiveMainTab] = useState(isAdmin ? "angebote" : "kalkulator");
-  const [activeSubTab, setActiveSubTab] = useState("kalkulation");
+  const [activeMainTab, setActiveMainTab] = useState(isAdmin ? "kalkulation" : "kalkulator");
+  const [activeSubTab, setActiveSubTab] = useState("berechnung");
 
   return (
     <div className="min-h-screen bg-background">
@@ -49,10 +49,10 @@ const Index = () => {
                   Verwaltung
                 </TabsTrigger>
                 <TabsTrigger 
-                  value="angebote"
+                  value="kalkulation"
                   className="data-[state=active]:bg-white data-[state=active]:text-teal-700 text-white border-0 rounded-t-lg"
                 >
-                  Angebote
+                  Kalkulation
                 </TabsTrigger>
                 <TabsTrigger 
                   value="kundenview"
@@ -111,14 +111,14 @@ const Index = () => {
               </Tabs>
             )}
             
-            {activeMainTab === "angebote" && (
+            {activeMainTab === "kalkulation" && (
               <Tabs value={activeSubTab} onValueChange={setActiveSubTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3 bg-transparent h-12">
-                  <TabsTrigger value="konfig" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                    Konfig
+                  <TabsTrigger value="berechnung" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Berechnung
                   </TabsTrigger>
-                  <TabsTrigger value="kalkulation" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
-                    Kalkulation
+                  <TabsTrigger value="gespeicherte-angebote" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
+                    Gespeicherte Angebote
                   </TabsTrigger>
                   <TabsTrigger value="kostenanalyse" className="border-b-2 border-transparent data-[state=active]:border-teal-500">
                     Kostenanalyse
@@ -143,10 +143,10 @@ const Index = () => {
             {activeMainTab === "verwaltung" && activeSubTab === "addons" && <AddonServicesPage />}
             {activeMainTab === "verwaltung" && activeSubTab === "backup" && <BackupPage />}
             
-            {/* Angebote Content */}
-            {activeMainTab === "angebote" && activeSubTab === "konfig" && <ConfigPage />}
-            {activeMainTab === "angebote" && activeSubTab === "kalkulation" && <CalculatorPage />}
-            {activeMainTab === "angebote" && activeSubTab === "kostenanalyse" && <CostAnalysisPage />}
+            {/* Kalkulation Content */}
+            {activeMainTab === "kalkulation" && activeSubTab === "berechnung" && <CalculatorPage />}
+            {activeMainTab === "kalkulation" && activeSubTab === "gespeicherte-angebote" && <SavedOffersPage />}
+            {activeMainTab === "kalkulation" && activeSubTab === "kostenanalyse" && <CostAnalysisPage />}
           </>
         )}
         

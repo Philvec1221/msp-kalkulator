@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
+import { useSavedOffers } from "@/hooks/useSavedOffers";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
 import { getPackageBadgeProps } from "@/lib/colors";
 import { usePackages } from "@/hooks/usePackages";
@@ -24,11 +25,13 @@ interface PackageData {
 
 export function CustomerViewPage() {
   const [selectedPackage, setSelectedPackage] = useState("basis");
-  const [config] = useState({
+  const [config, setConfig] = useState({
     clients: 10,
     servers: 10,
     users: 10
   });
+  const [offerData, setOfferData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   // Fetch real data from hooks
   const { services } = useServices();
@@ -37,6 +40,39 @@ export function CustomerViewPage() {
   const { employees } = useEmployees();
   const { getConfigByServiceAndPackage } = usePackageConfigs();
   const { packages: dbPackages } = usePackages();
+  const { getSavedOffer } = useSavedOffers();
+
+  // Load saved offer data from URL parameters
+  useEffect(() => {
+    const loadOfferData = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const offerId = urlParams.get('offer');
+      
+      if (offerId) {
+        const savedOffer = await getSavedOffer(offerId);
+        if (savedOffer) {
+          setConfig({
+            clients: savedOffer.clients,
+            servers: savedOffer.servers,
+            users: savedOffer.users
+          });
+          
+          // Set selected package based on saved offer
+          if (savedOffer.selected_packages && Array.isArray(savedOffer.selected_packages) && savedOffer.selected_packages.length > 0) {
+            const firstPackage = savedOffer.selected_packages[0];
+            if (typeof firstPackage === 'string') {
+              setSelectedPackage(firstPackage.toLowerCase());
+            }
+          }
+          
+          setOfferData(savedOffer);
+        }
+      }
+      setLoading(false);
+    };
+
+    loadOfferData();
+  }, [getSavedOffer]);
 
   // Calculate average hourly rate per minute
   const activeEmployees = employees.filter(emp => emp.active);
@@ -81,6 +117,15 @@ export function CustomerViewPage() {
       };
     });
   }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
+
+  // Show loading state while checking for saved offer
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-teal-500 to-cyan-500 flex items-center justify-center">
+        <div className="text-white text-xl">Laden...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-500 to-cyan-500">

@@ -6,14 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Download, Save, Eye, FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Download, Save, Eye, FileText, ExternalLink } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
+import { useSavedOffers } from "@/hooks/useSavedOffers";
 import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
 import { getPackageBadgeProps } from "@/lib/colors";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuoteData {
   customerNumber: string;
@@ -27,12 +30,19 @@ interface QuoteData {
   vkTotal: number;
 }
 
+interface SaveOfferData {
+  name: string;
+  company_name: string;
+}
+
 export function CalculatorPage() {
   const { services } = useServices();
   const { employees } = useEmployees();
   const { licenses } = useLicenses();
   const { getAllServiceLicenseRelations } = useServiceLicenses();
   const { packages } = usePackages();
+  const { createSavedOffer } = useSavedOffers();
+  const { toast } = useToast();
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
@@ -45,6 +55,12 @@ export function CalculatorPage() {
     ekTotal: 2278.00,
     vkTotal: 3417.00
   });
+
+  const [saveOfferData, setSaveOfferData] = useState<SaveOfferData>({
+    name: "",
+    company_name: ""
+  });
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const activeEmployees = employees.filter(emp => emp.active);
   const averageCostPerMinute = activeEmployees.length > 0 
@@ -79,8 +95,134 @@ export function CalculatorPage() {
     }));
   }, [totalEK, totalVK]);
 
+  const handleSaveOffer = async () => {
+    if (!saveOfferData.name.trim()) {
+      toast({
+        title: "Name erforderlich",
+        description: "Bitte geben Sie einen Namen für das Angebot ein.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const offerId = await createSavedOffer({
+      name: saveOfferData.name,
+      company_name: saveOfferData.company_name,
+      clients: quoteData.clients,
+      servers: quoteData.servers,
+      users: quoteData.users,
+      selected_packages: [quoteData.selectedPackage],
+      calculation_results: {
+        markup: quoteData.markup,
+        ekTotal: totalEK,
+        vkTotal: totalVK,
+        packageServices: packageServices.map(s => s.id)
+      }
+    });
+
+    if (offerId) {
+      setIsDialogOpen(false);
+      setSaveOfferData({ name: "", company_name: "" });
+    }
+  };
+
+  const handleSendToCustomerView = async () => {
+    if (!saveOfferData.name.trim()) {
+      setSaveOfferData(prev => ({ 
+        ...prev, 
+        name: `Angebot ${quoteData.selectedPackage} - ${new Date().toLocaleDateString('de-DE')}`
+      }));
+    }
+
+    const offerId = await createSavedOffer({
+      name: saveOfferData.name || `Angebot ${quoteData.selectedPackage} - ${new Date().toLocaleDateString('de-DE')}`,
+      company_name: saveOfferData.company_name,
+      clients: quoteData.clients,
+      servers: quoteData.servers,
+      users: quoteData.users,
+      selected_packages: [quoteData.selectedPackage],
+      calculation_results: {
+        markup: quoteData.markup,
+        ekTotal: totalEK,
+        vkTotal: totalVK,
+        packageServices: packageServices.map(s => s.id)
+      }
+    });
+
+    if (offerId) {
+      const url = `/kundenview?offer=${offerId}`;
+      window.open(url, '_blank');
+      toast({
+        title: "Kundenview geöffnet",
+        description: "Das Angebot wurde gespeichert und in der Kundenansicht geöffnet."
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Konfiguration */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="clients">Anzahl Clients</Label>
+              <Input
+                id="clients"
+                type="number"
+                value={quoteData.clients}
+                onChange={(e) => setQuoteData(prev => ({ ...prev, clients: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="servers">Anzahl Server</Label>
+              <Input
+                id="servers"
+                type="number"
+                value={quoteData.servers}
+                onChange={(e) => setQuoteData(prev => ({ ...prev, servers: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="users">Anzahl User</Label>
+              <Input
+                id="users"
+                type="number"
+                value={quoteData.users}
+                onChange={(e) => setQuoteData(prev => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Übersicht */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Übersicht</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+            <div>
+              <span className="text-sm text-muted-foreground">Clients: </span>
+              <span className="font-semibold">{quoteData.clients}</span>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Server: </span>
+              <span className="font-semibold">{quoteData.servers}</span>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">User: </span>
+              <span className="font-semibold">{quoteData.users}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       {/* Paket-Auswahl */}
       <Card>
         <CardHeader>
@@ -229,19 +371,65 @@ export function CalculatorPage() {
           </div>
 
           <div className="flex flex-wrap gap-4 justify-center pt-4">
-            <Button className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Angebot speichern
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center gap-2">
+                  <Save className="h-4 w-4" />
+                  Angebot speichern
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Angebot speichern</DialogTitle>
+                  <DialogDescription>
+                    Geben Sie einen Namen und optional eine Firma für das Angebot ein.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="offer-name">Angebot Name *</Label>
+                    <Input
+                      id="offer-name"
+                      value={saveOfferData.name}
+                      onChange={(e) => setSaveOfferData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="z.B. MSP Basis Paket - Musterfirma"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="company-name">Firma (optional)</Label>
+                    <Input
+                      id="company-name"
+                      value={saveOfferData.company_name}
+                      onChange={(e) => setSaveOfferData(prev => ({ ...prev, company_name: e.target.value }))}
+                      placeholder="z.B. Musterfirma GmbH"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Abbrechen</Button>
+                  <Button onClick={handleSaveOffer}>Speichern</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            
+            <Button 
+              variant="secondary" 
+              className="flex items-center gap-2"
+              onClick={handleSendToCustomerView}
+            >
+              <ExternalLink className="h-4 w-4" />
+              An Kundenview senden
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            
+            <Button variant="outline" className="flex items-center gap-2" disabled>
               <FileText className="h-4 w-4" />
               Druckansicht
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" disabled>
               <Eye className="h-4 w-4" />
               PDF Vorschau
             </Button>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" disabled>
               <Download className="h-4 w-4" />
               PDF Download
             </Button>
@@ -249,24 +437,62 @@ export function CalculatorPage() {
         </CardContent>
       </Card>
 
-      {/* Gespeicherte Angebote */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Berechnungsgrundlagen */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Berechnungsgrundlagen</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Durchschnittliche Kosten/Min:</span>
+              <span className="font-semibold">{averageCostPerMinute.toFixed(2)}€</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Aktive Mitarbeiter:</span>
+              <span className="font-semibold">{activeEmployees.length}</span>
+            </div>
+            
+            <p className="text-xs text-muted-foreground mt-4">
+              Diese Werte bilden die Grundlage für alle Berechnungen in der Angebotserstellung.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Berechnungshinweise */}
+        <Card>
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              Gespeicherte Angebote
+              <span className="text-yellow-600">💡</span>
+              Berechnungshinweise
             </CardTitle>
-            <span className="text-sm text-teal-600">0 Angebote</span>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
-            <p>Noch keine Angebote gespeichert.</p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="text-sm space-y-2">
+              <div className="text-blue-600">
+                • Technikerkosten = Technikzeit × EK/Min × Anzahl (je nach Abrechnungseinheit)
+              </div>
+              
+              <div className="text-blue-600">
+                • Lizenzkosten = Lizenz-EK × Anzahl (je nach Abrechnungseinheit)
+              </div>
+              
+              <div className="text-blue-600">
+                • EK = Technikerkosten + Lizenzkosten
+              </div>
+              
+              <div className="text-blue-600">
+                • VK = EK × (1 + Aufschlag%)
+              </div>
+              
+              <div className="text-blue-600">
+                • Marge = VK - EK
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
