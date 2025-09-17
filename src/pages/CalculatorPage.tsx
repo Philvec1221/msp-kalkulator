@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Download, Save, Eye, FileText, ExternalLink } from "lucide-react";
@@ -25,10 +24,8 @@ interface QuoteData {
   clients: number;
   servers: number;
   users: number;
-  selectedPackage: string;
   markup: number;
-  ekTotal: number;
-  vkTotal: number;
+  allPackages: { [packageName: string]: { ekTotal: number; vkTotal: number; services: any[] } };
 }
 
 interface SaveOfferData {
@@ -48,14 +45,12 @@ export function CalculatorPage() {
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
-    quoteTitle: "z.B. MSP Basis Paket Q1 2024",
+    quoteTitle: "IT-Services Angebot",
     clients: 10,
-    servers: 10,
-    users: 10,
-    selectedPackage: "Basis",
-    markup: 50,
-    ekTotal: 2278.00,
-    vkTotal: 3417.00
+    servers: 2,
+    users: 25,
+    markup: 25,
+    allPackages: {}
   });
 
   const [saveOfferData, setSaveOfferData] = useState<SaveOfferData>({
@@ -68,33 +63,40 @@ export function CalculatorPage() {
     ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length / 60
     : 0;
 
-  // Calculate package services based on selected package
-  const getPackageServices = () => {
-    return getServicesForPackage(services, quoteData.selectedPackage);
-  };
+  // Available package levels
+  const packageLevels = ['Basis', 'Gold', 'Allin', 'Allin Black'];
 
-
-  const packageServices = getPackageServices();
-  
-  // Calculate costs with license deduplication
-  const packageCosts = calculatePackageCosts(
-    packageServices,
-    licenses,
-    getAllServiceLicenseRelations(),
-    averageCostPerMinute,
-    { clients: quoteData.clients, servers: quoteData.servers, users: quoteData.users }
-  );
-  
-  const totalEK = packageCosts.totalCostEK;
-  const totalVK = totalEK * (1 + quoteData.markup / 100);
-
+  // Calculate all packages
   useEffect(() => {
-    setQuoteData(prev => ({
-      ...prev,
-      ekTotal: totalEK,
-      vkTotal: totalVK
-    }));
-  }, [totalEK, totalVK]);
+    if (services.length > 0 && licenses.length > 0) {
+      const allPackagesData: { [packageName: string]: { ekTotal: number; vkTotal: number; services: any[] } } = {};
+      
+      packageLevels.forEach(packageLevel => {
+        const packageServices = getServicesForPackage(services, packageLevel);
+        const packageCosts = calculatePackageCosts(
+          packageServices,
+          licenses,
+          getAllServiceLicenseRelations(),
+          averageCostPerMinute,
+          { clients: quoteData.clients, servers: quoteData.servers, users: quoteData.users }
+        );
+        
+        const totalEK = packageCosts.totalCostEK;
+        const totalVK = totalEK * (1 + quoteData.markup / 100);
+        
+        allPackagesData[packageLevel] = {
+          ekTotal: totalEK,
+          vkTotal: totalVK,
+          services: packageServices.map(s => s.id)
+        };
+      });
+      
+      setQuoteData(prev => ({
+        ...prev,
+        allPackages: allPackagesData
+      }));
+    }
+  }, [services, licenses, averageCostPerMinute, quoteData.clients, quoteData.servers, quoteData.users, quoteData.markup]);
 
   const handleSaveOffer = async () => {
     // Use existing customer number and title if no custom name is provided
@@ -102,22 +104,24 @@ export function CalculatorPage() {
 
     const offerId = await createSavedOffer({
       name: offerName,
-      company_name: quoteData.customerNumber, // Use customer number for reference
+      company_name: quoteData.customerNumber,
       clients: quoteData.clients,
       servers: quoteData.servers,
       users: quoteData.users,
-      selected_packages: [quoteData.selectedPackage],
+      selected_packages: packageLevels,
       calculation_results: {
         markup: quoteData.markup,
-        ekTotal: totalEK,
-        vkTotal: totalVK,
-        packageServices: packageServices.map(s => s.id)
+        allPackages: quoteData.allPackages
       }
     });
 
     if (offerId) {
       setIsDialogOpen(false);
       setSaveOfferData({ name: "" });
+      toast({
+        title: "Angebot gespeichert",
+        description: `Das Angebot "${offerName}" wurde erfolgreich gespeichert.`
+      });
     }
   };
 
@@ -131,12 +135,10 @@ export function CalculatorPage() {
       clients: quoteData.clients,
       servers: quoteData.servers,
       users: quoteData.users,
-      selected_packages: [quoteData.selectedPackage],
+      selected_packages: packageLevels,
       calculation_results: {
         markup: quoteData.markup,
-        ekTotal: totalEK,
-        vkTotal: totalVK,
-        packageServices: packageServices.map(s => s.id)
+        allPackages: quoteData.allPackages
       }
     });
 
@@ -154,6 +156,9 @@ export function CalculatorPage() {
     <div className="space-y-6">
       {/* Konfiguration */}
       <Card>
+        <CardHeader>
+          <CardTitle>Konfiguration</CardTitle>
+        </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
@@ -214,46 +219,44 @@ export function CalculatorPage() {
           </div>
         </CardContent>
       </Card>
-      {/* Paket-Auswahl */}
+
+      {/* Paket-Berechnungen */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <span className="text-blue-600">📦</span>
-            Paket-Auswahl
+            Paket-Berechnungen (Alle Optionen)
           </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Alle verfügbaren Pakete werden automatisch berechnet und stehen dem Kunden zur Auswahl
+          </p>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="selectedPackage">Paket wählen</Label>
-              <Select 
-                value={quoteData.selectedPackage} 
-                onValueChange={(value) => setQuoteData(prev => ({ ...prev, selectedPackage: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Paket auswählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {packages.map((pkg) => (
-                    <SelectItem key={pkg.id} value={pkg.name}>{pkg.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Bestimmt welche Services im Angebot enthalten sind
-              </p>
-            </div>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">Aktuelles Paket</p>
-              <Badge 
-                {...getPackageBadgeProps(packages || [], quoteData.selectedPackage)}
-              >
-                {quoteData.selectedPackage}
-              </Badge>
-              <p className="text-xs text-muted-foreground mt-2">
-                {packageServices.length} Services enthalten
-              </p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {packageLevels.map(packageLevel => {
+              const packageData = quoteData.allPackages[packageLevel];
+              if (!packageData) return null;
+              
+              return (
+                <div key={packageLevel} className="border rounded-lg p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Badge {...getPackageBadgeProps(packages || [], packageLevel)}>
+                      {packageLevel}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">EK: </span>
+                      <span className="font-medium">{packageData.ekTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
+                    </div>
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">VK: </span>
+                      <span className="font-semibold text-primary">{packageData.vkTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -278,12 +281,44 @@ export function CalculatorPage() {
                 className="text-center text-2xl font-bold"
               />
               <p className="text-xs text-muted-foreground">
-                Standard: 50% - kann pro Angebot angepasst werden
+                Standard: 25% - kann pro Angebot angepasst werden
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Aktueller Aufschlag</p>
               <div className="text-4xl font-bold text-orange-600">{quoteData.markup}%</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Preisübersicht */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <span className="text-green-600">💰</span>
+            Preisübersicht
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <p className="text-lg font-semibold text-muted-foreground mb-4">
+              Preisrahmen aller Pakete (mit {quoteData.markup}% Aufschlag)
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {packageLevels.map(packageLevel => {
+                const packageData = quoteData.allPackages[packageLevel];
+                if (!packageData) return null;
+                
+                return (
+                  <div key={packageLevel} className="text-center">
+                    <p className="text-xs text-muted-foreground mb-1">{packageLevel}</p>
+                    <p className="text-lg font-bold text-primary">
+                      {packageData.vkTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </CardContent>
@@ -314,14 +349,14 @@ export function CalculatorPage() {
                 id="quoteTitle"
                 value={quoteData.quoteTitle}
                 onChange={(e) => setQuoteData(prev => ({ ...prev, quoteTitle: e.target.value }))}
-                placeholder="z.B. MSP Basis Paket Q1 2024"
+                placeholder="z.B. IT-Services Angebot"
               />
             </div>
           </div>
 
           <Separator />
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
             <div>
               <span className="text-sm text-muted-foreground">Clients: </span>
               <span className="font-semibold">{quoteData.clients}</span>
@@ -335,29 +370,8 @@ export function CalculatorPage() {
               <span className="font-semibold">{quoteData.users}</span>
             </div>
             <div>
-              <span className="text-sm text-muted-foreground">Paket: </span>
-              <Badge 
-                {...getPackageBadgeProps(packages || [], quoteData.selectedPackage)}
-              >
-                {quoteData.selectedPackage}
-              </Badge>
-            </div>
-            <div>
               <span className="text-sm text-muted-foreground">Aufschlag: </span>
               <span className="font-semibold text-orange-600">{quoteData.markup}%</span>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-            <div>
-              <span className="text-sm text-muted-foreground">EK (Einkauf): </span>
-              <span className="font-semibold text-lg">{totalEK.toFixed(2)}€</span>
-            </div>
-            <div>
-              <span className="text-sm text-muted-foreground">VK (Verkauf): </span>
-              <span className="font-semibold text-lg text-blue-600">{totalVK.toFixed(2)}€</span>
             </div>
           </div>
 
@@ -373,7 +387,7 @@ export function CalculatorPage() {
                 <DialogHeader>
                   <DialogTitle>Angebot speichern</DialogTitle>
                   <DialogDescription>
-                    Speichern Sie das Angebot. Der Name wird automatisch aus Kundennummer und Titel generiert, kann aber angepasst werden.
+                    Speichern Sie das Angebot mit allen berechneten Paketen. Der Name wird automatisch aus Kundennummer und Titel generiert, kann aber angepasst werden.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -454,27 +468,15 @@ export function CalculatorPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="text-sm space-y-2">
-              <div className="text-blue-600">
-                • Technikerkosten = Technikzeit × EK/Min × Anzahl (je nach Abrechnungseinheit)
-              </div>
-              
-              <div className="text-blue-600">
-                • Lizenzkosten = Lizenz-EK × Anzahl (je nach Abrechnungseinheit)
-              </div>
-              
-              <div className="text-blue-600">
-                • EK = Technikerkosten + Lizenzkosten
-              </div>
-              
-              <div className="text-blue-600">
-                • VK = EK × (1 + Aufschlag%)
-              </div>
-              
-              <div className="text-blue-600">
-                • Marge = VK - EK
-              </div>
-            </div>
+            <p className="text-sm">
+              <strong>Kundenorientiert:</strong> Alle Pakete werden automatisch berechnet - der Kunde kann frei wählen.
+            </p>
+            <p className="text-sm">
+              <strong>Flexibel:</strong> Konfiguration und Aufschlag können jederzeit angepasst werden.
+            </p>
+            <p className="text-sm">
+              <strong>Transparent:</strong> EK- und VK-Preise für alle Pakete auf einen Blick.
+            </p>
           </CardContent>
         </Card>
       </div>

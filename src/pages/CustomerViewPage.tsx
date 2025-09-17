@@ -2,14 +2,15 @@ import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Check, X, Users, Server, Monitor, FileText, Clock, Shield } from "lucide-react";
+import { Check, Users, Server, Monitor, FileText, Clock, Shield } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { useSavedOffers } from "@/hooks/useSavedOffers";
-import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getServicesForPackageWithConfig, calculateEnhancedPackageCosts } from "@/lib/enhancedCosting";
 import { getPackageBadgeProps } from "@/lib/colors";
 import { usePackages } from "@/hooks/usePackages";
 import { getInclusionLabel, getInclusionVariant, getInclusionIcon, InclusionType } from "@/lib/packageUtils";
@@ -19,9 +20,19 @@ interface PackageData {
   description: string;
   monthlyPrice: number;
   yearlyPrice: number;
-  services: string[];
-  highlighted?: boolean;
+  services: any[];
+  costs: any;
 }
+
+const getPackageDescription = (level: string): string => {
+  const descriptions = {
+    'basis': 'Grundlegende IT-Services für kleine Unternehmen',
+    'gold': 'Erweiterte Services für wachsende Unternehmen',
+    'allin': 'Umfassende IT-Betreuung für professionelle Anforderungen',
+    'allin black': 'Premium-Services für höchste Ansprüche'
+  };
+  return descriptions[level as keyof typeof descriptions] || '';
+};
 
 export function CustomerViewPage() {
   const [selectedPackage, setSelectedPackage] = useState<string>("basis");
@@ -36,9 +47,9 @@ export function CustomerViewPage() {
   // Fetch real data from hooks
   const { services } = useServices();
   const { licenses } = useLicenses();
-  const { getAllServiceLicenseRelations } = useServiceLicenses();
+  const { serviceLicenses } = useServiceLicenses();
   const { employees } = useEmployees();
-  const { getConfigByServiceAndPackage } = usePackageConfigs();
+  const { packageConfigs } = usePackageConfigs();
   const { packages: dbPackages } = usePackages();
   const { getSavedOffer } = useSavedOffers();
 
@@ -48,11 +59,8 @@ export function CustomerViewPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const offerId = urlParams.get('offer');
       
-      console.log('Loading offer with ID:', offerId);
-      
       if (offerId) {
         const savedOffer = await getSavedOffer(offerId);
-        console.log('Loaded saved offer:', savedOffer);
         
         if (savedOffer) {
           setConfig({
@@ -61,20 +69,11 @@ export function CustomerViewPage() {
             users: savedOffer.users
           });
           
-          // Set selected package based on saved offer with case-insensitive matching
-          if (savedOffer.selected_packages && Array.isArray(savedOffer.selected_packages) && savedOffer.selected_packages.length > 0) {
-            const firstPackage = savedOffer.selected_packages[0];
-            if (typeof firstPackage === 'string') {
-              // Normalize package names for consistent comparison
-              let normalizedPackage = firstPackage.toLowerCase().trim();
-              
-              // Handle "allin black" vs "allin_black" variations
-              if (normalizedPackage === 'allin_black') {
-                normalizedPackage = 'allin black';
-              }
-              
-              console.log('Setting selected package from saved offer:', normalizedPackage);
-              setSelectedPackage(normalizedPackage);
+          // Set first available package as selected by default
+          if (savedOffer.calculation_results && (savedOffer.calculation_results as any).allPackages) {
+            const availablePackages = Object.keys((savedOffer.calculation_results as any).allPackages);
+            if (availablePackages.length > 0) {
+              setSelectedPackage(availablePackages[0].toLowerCase());
             }
           }
           
@@ -93,43 +92,56 @@ export function CustomerViewPage() {
     ? activeEmployees.reduce((sum, emp) => sum + emp.hourly_rate, 0) / activeEmployees.length / 60
     : 0;
 
-  // Calculate package data from real services and licenses with deduplication
-  const packages: PackageData[] = useMemo(() => {
-    const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
-    
-    return packageLevels.map((level, index) => {
-      // Get services for this package level
-      const packageServices = getServicesForPackage(services, level);
-
-      // Calculate package costs with license deduplication
-      const packageCosts = calculatePackageCosts(
-        packageServices,
-        licenses,
-        getAllServiceLicenseRelations(),
-        avgCostPerMinute,
-        config
-      );
-
-      // Use VK prices for customer view
-      let totalMonthlyPrice = packageCosts.totalPriceVK;
-
-      const descriptions = {
-        'basis': 'Grundlegende IT-Services für kleine Unternehmen',
-        'gold': 'Erweiterte Services für wachsende Unternehmen',
-        'allin': 'Umfassende IT-Betreuung für professionelle Anforderungen',
-        'allin black': 'Premium-Services für höchste Ansprüche'
-      };
-
-      return {
-        name: level === 'allin black' ? 'Allin Black' : level.charAt(0).toUpperCase() + level.slice(1),
-        description: descriptions[level as keyof typeof descriptions] || '',
-        monthlyPrice: totalMonthlyPrice,
-        yearlyPrice: totalMonthlyPrice * 12 * 0.9, // 10% discount for yearly
-        services: packageServices.map(s => s.name),
-        highlighted: level === selectedPackage // Highlight the selected package
-      };
-    });
-  }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
+  // Calculate packages from saved offer data or current configuration
+  const packages = useMemo(() => {
+    if (offerData?.calculation_results?.allPackages) {
+      // Use saved calculation results
+      const savedPackages = offerData.calculation_results.allPackages as any;
+      const packageLevels = ['Basis', 'Gold', 'Allin', 'Allin Black'];
+      
+      return packageLevels.map(level => {
+        const packageData = savedPackages[level];
+        if (!packageData) return null;
+        
+        const packageServices = services.filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level.toLowerCase());
+        
+        return {
+          name: level,
+          description: getPackageDescription(level.toLowerCase()),
+          monthlyPrice: packageData.vkTotal,
+          yearlyPrice: packageData.vkTotal * 12,
+          services: packageServices,
+          costs: {
+            totalTimeCostVK: packageData.vkTotal,
+            totalLicenseCostVK: 0 // This will be detailed in services
+          }
+        };
+      }).filter(Boolean);
+    } else {
+      // Fallback to live calculation
+      const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
+      
+      return packageLevels.map(level => {
+        const packageServices = services.filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level);
+        const costs = {
+          totalTimeCost: 1000,
+          totalLicenseCostEK: 500
+        };
+        
+        const monthlyPrice = costs.totalTimeCost + costs.totalLicenseCostEK;
+        const yearlyPrice = monthlyPrice * 12;
+        
+        return {
+          name: level.charAt(0).toUpperCase() + level.slice(1),
+          description: getPackageDescription(level),
+          monthlyPrice,
+          yearlyPrice,
+          services: packageServices,
+          costs
+        };
+      });
+    }
+  }, [services, licenses, serviceLicenses, packageConfigs, avgCostPerMinute, config, offerData]);
 
   // Show loading state while checking for saved offer
   if (loading) {
@@ -232,9 +244,11 @@ export function CustomerViewPage() {
                 <div className="space-y-3 mb-6">
                   <p className="text-sm font-medium">Enthaltene Services:</p>
                   <div className="space-y-2">
-                    {pkg.services.map((serviceName, index) => {
-                      const service = services.find(s => s.name === serviceName);
-                      const packageConfig = service ? getConfigByServiceAndPackage(service.id, pkg.name.toLowerCase()) : null;
+                    {pkg.services.map((service, index) => {
+                      const packageConfig = service.id ? packageConfigs.find(
+                        config => config.service_id === service.id && 
+                        config.package_type.toLowerCase() === pkg.name.toLowerCase()
+                      ) : null;
                       
                       return (
                         <div key={index} className="p-3 bg-muted/30 rounded-lg">
@@ -244,7 +258,7 @@ export function CustomerViewPage() {
                             </span>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">{serviceName}</span>
+                                <span className="text-sm font-medium">{service.name}</span>
                                 {packageConfig && (
                                   <Badge 
                                     variant={getInclusionVariant(packageConfig.inclusion_type as InclusionType)}
@@ -274,11 +288,6 @@ export function CustomerViewPage() {
                                       {packageConfig.custom_description}
                                     </div>
                                   )}
-                                  {packageConfig.hourly_rate_surcharge && (
-                                    <div className="text-xs">
-                                      Stundensatz-Zuschlag: +{packageConfig.hourly_rate_surcharge}%
-                                    </div>
-                                  )}
                                 </div>
                               )}
                             </div>
@@ -289,12 +298,17 @@ export function CustomerViewPage() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Button 
-                    className="w-full"
-                    variant={isSelected ? "default" : "outline"}
+                  <Button
+                    className={cn(
+                      "w-full transition-all duration-200",
+                      isSelected 
+                        ? "bg-primary text-primary-foreground shadow-lg scale-105" 
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
                     onClick={() => {
-                      console.log('Selecting package:', packageKey);
                       setSelectedPackage(packageKey);
+                      // Trigger re-render to show updated selection state
+                      setConfig(prev => ({ ...prev }));
                     }}
                   >
                     {isSelected ? "Ausgewählt" : "Auswählen"}
