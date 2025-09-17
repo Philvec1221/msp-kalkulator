@@ -254,7 +254,8 @@ export function useServices() {
         sort_order: index + 1
       }));
       
-      console.log('📝 Batch updating sort orders:', updates);
+      console.log('🔍 Services state before update:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
+      console.log('🔄 Creating new order with servicesCopy:', servicesCopy.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
       
       // Update all services with their new sort order
       for (const { id, sort_order } of updates) {
@@ -266,6 +267,8 @@ export function useServices() {
         ...service,
         sort_order: index + 1
       }));
+      
+      console.log('📝 Setting new services state:', updatedServices.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
       
       setServices(updatedServices);
       

@@ -200,8 +200,12 @@ export function ServicesPage() {
         const insertAfter = dropY > rect.top + rect.height / 2;
         
         console.log('🔄 Updating order - dragged:', draggedServiceId, 'target:', targetServiceId, 'insertAfter:', insertAfter);
+        console.log('🔍 Services before drop:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
         
         await updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
+        
+        console.log('🔍 Services after drop:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
+        
         toast.success("Service-Reihenfolge wurde aktualisiert");
       } catch (error) {
         console.error('❌ Error updating service order:', error);
