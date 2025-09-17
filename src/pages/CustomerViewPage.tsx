@@ -24,7 +24,7 @@ interface PackageData {
 }
 
 export function CustomerViewPage() {
-  const [selectedPackage, setSelectedPackage] = useState("basis");
+  const [selectedPackage, setSelectedPackage] = useState<string>("basis");
   const [config, setConfig] = useState({
     clients: 10,
     servers: 10,
@@ -48,8 +48,12 @@ export function CustomerViewPage() {
       const urlParams = new URLSearchParams(window.location.search);
       const offerId = urlParams.get('offer');
       
+      console.log('Loading offer with ID:', offerId);
+      
       if (offerId) {
         const savedOffer = await getSavedOffer(offerId);
+        console.log('Loaded saved offer:', savedOffer);
+        
         if (savedOffer) {
           setConfig({
             clients: savedOffer.clients,
@@ -57,11 +61,20 @@ export function CustomerViewPage() {
             users: savedOffer.users
           });
           
-          // Set selected package based on saved offer
+          // Set selected package based on saved offer with case-insensitive matching
           if (savedOffer.selected_packages && Array.isArray(savedOffer.selected_packages) && savedOffer.selected_packages.length > 0) {
             const firstPackage = savedOffer.selected_packages[0];
             if (typeof firstPackage === 'string') {
-              setSelectedPackage(firstPackage.toLowerCase());
+              // Normalize package names for consistent comparison
+              let normalizedPackage = firstPackage.toLowerCase().trim();
+              
+              // Handle "allin black" vs "allin_black" variations
+              if (normalizedPackage === 'allin_black') {
+                normalizedPackage = 'allin black';
+              }
+              
+              console.log('Setting selected package from saved offer:', normalizedPackage);
+              setSelectedPackage(normalizedPackage);
             }
           }
           
@@ -113,7 +126,7 @@ export function CustomerViewPage() {
         monthlyPrice: totalMonthlyPrice,
         yearlyPrice: totalMonthlyPrice * 12 * 0.9, // 10% discount for yearly
         services: packageServices.map(s => s.name),
-        highlighted: index === 0 // Highlight first package (Basis)
+        highlighted: level === selectedPackage // Highlight the selected package
       };
     });
   }, [services, licenses, getAllServiceLicenseRelations, avgCostPerMinute, config]);
@@ -171,20 +184,24 @@ export function CustomerViewPage() {
 
         {/* Package Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {packages.map((pkg) => (
-            <Card 
-              key={pkg.name} 
-              className={`relative ${pkg.highlighted ? 'ring-2 ring-teal-400 shadow-xl' : ''} ${
-                selectedPackage === pkg.name.toLowerCase() ? 'ring-2 ring-blue-500' : ''
-              }`}
-            >
-              {pkg.highlighted && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-green-500 text-white px-3 py-1">
-                    Gewählt
-                  </Badge>
-                </div>
-              )}
+          {packages.map((pkg) => {
+            const packageKey = pkg.name.toLowerCase();
+            const isSelected = selectedPackage === packageKey;
+            
+            return (
+              <Card 
+                key={pkg.name} 
+                className={`relative transition-all duration-200 ${
+                  isSelected ? 'ring-2 ring-blue-500 shadow-xl transform scale-105' : 'hover:shadow-lg'
+                }`}
+              >
+                {isSelected && (
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-blue-500 text-white px-3 py-1">
+                      Ausgewählt
+                    </Badge>
+                  </div>
+                )}
               <CardHeader className="text-center pb-4">
                 <div className="mb-3">
                   <Badge 
@@ -270,20 +287,23 @@ export function CustomerViewPage() {
                 <div className="space-y-2">
                   <Button 
                     className="w-full"
-                    variant={selectedPackage === pkg.name.toLowerCase() ? "default" : "outline"}
-                    onClick={() => setSelectedPackage(pkg.name.toLowerCase())}
+                    variant={isSelected ? "default" : "outline"}
+                    onClick={() => {
+                      console.log('Selecting package:', packageKey);
+                      setSelectedPackage(packageKey);
+                    }}
                   >
-                    {selectedPackage === pkg.name.toLowerCase() ? "Ausgewählt" : "Auswählen"}
+                    {isSelected ? "Ausgewählt" : "Auswählen"}
                   </Button>
                   
-                  {selectedPackage === pkg.name.toLowerCase() && (
+                  {isSelected && (
                     <Button 
                       variant="secondary"
                       size="sm"
                       className="w-full"
                       onClick={() => {
                         const params = new URLSearchParams({
-                          package: pkg.name.toLowerCase(),
+                          package: packageKey,
                           clients: config.clients.toString(),
                           servers: config.servers.toString(),
                           users: config.users.toString()
@@ -298,7 +318,8 @@ export function CustomerViewPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );
+        })}
         </div>
 
         {/* Footer Info */}
