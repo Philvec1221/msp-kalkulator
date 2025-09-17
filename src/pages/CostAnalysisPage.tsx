@@ -6,7 +6,8 @@ import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useEmployees } from "@/hooks/useEmployees";
-import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getServicesForPackageWithConfig, calculateEnhancedPackageCosts } from "@/lib/enhancedCosting";
+import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 
 interface PackageCostBreakdown {
   packageName: string;
@@ -25,8 +26,12 @@ interface PackageCostBreakdown {
 export function CostAnalysisPage() {
   const { services } = useServices();
   const { licenses } = useLicenses();
-  const { getAllServiceLicenseRelations } = useServiceLicenses();
+  const { serviceLicenses } = useServiceLicenses();
   const { employees } = useEmployees();
+  const { packageConfigs } = usePackageConfigs();
+
+  // Standard markup from calculator (100%)
+  const standardMarkup = 100;
 
   // Calculate average cost per minute from active employees
   const activeEmployees = employees.filter(emp => emp.active);
@@ -34,20 +39,22 @@ export function CostAnalysisPage() {
     ? activeEmployees.reduce((sum, emp) => sum + Number(emp.hourly_rate), 0) / activeEmployees.length / 60
     : 0;
 
-  // Calculate cost breakdown for each package with license deduplication
+  // Calculate cost breakdown for each package with enhanced costing
   const packageAnalysis: PackageCostBreakdown[] = useMemo(() => {
     const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
     const defaultConfig = { clients: 1, servers: 1, users: 1 }; // Base calculation for analysis
     
     return packageLevels.map(level => {
-      const packageServices = getServicesForPackage(services, level);
+      const packageServices = getServicesForPackageWithConfig(services, packageConfigs, level);
 
-      // Calculate package costs with deduplication
-      const packageCosts = calculatePackageCosts(
+      // Calculate package costs with enhanced costing
+      const packageCosts = calculateEnhancedPackageCosts(
         packageServices,
         licenses,
-        getAllServiceLicenseRelations(),
+        serviceLicenses,
+        packageConfigs,
         avgCostPerMinute,
+        level,
         defaultConfig
       );
 
@@ -67,19 +74,21 @@ export function CostAnalysisPage() {
         });
       });
 
-      const margin = packageCosts.totalPriceVK - packageCosts.totalCostEK;
-      const marginPercent = packageCosts.totalCostEK > 0 ? (margin / packageCosts.totalCostEK) * 100 : 0;
+      // Calculate margin based on standard markup
+      const totalVK = packageCosts.totalCostEK * (1 + standardMarkup / 100);
+      const margin = totalVK - packageCosts.totalCostEK;
+      const marginPercent = standardMarkup; // Show the standard markup percentage
 
       return {
         packageName: level.charAt(0).toUpperCase() + level.slice(1),
         totalCost: packageCosts.totalCostEK,
-        totalPrice: packageCosts.totalPriceVK,
+        totalPrice: totalVK,
         margin,
         marginPercent,
         serviceCosts
       };
     });
-  }, [services, licenses, avgCostPerMinute, getAllServiceLicenseRelations]);
+  }, [services, licenses, avgCostPerMinute, serviceLicenses, packageConfigs, standardMarkup]);
 
   const getPackageColor = (packageName: string) => {
     switch (packageName.toLowerCase()) {
