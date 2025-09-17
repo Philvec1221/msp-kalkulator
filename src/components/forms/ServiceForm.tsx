@@ -15,8 +15,10 @@ import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
+import { useServices } from "@/hooks/useServices";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 interface ServiceFormProps {
@@ -46,15 +48,32 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [isLicenseSelectOpen, setIsLicenseSelectOpen] = useState(false);
   
   const { licenses, loading: licensesLoading } = useLicenses();
-  const { serviceLicenses, updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
+  const { serviceLicenses, updateServiceLicenses, getLicensesByServiceId, getAllServiceLicenseRelations, loading: serviceLicensesLoading } = useServiceLicenses();
   const { packages } = usePackages();
   const { packageConfigs, getConfigsByService } = usePackageConfigs();
+  const { services } = useServices();
 
   // Gefilterte Lizenzen basierend auf Suchbegriff
   const filteredLicenses = (licenses || []).filter(license =>
     license.name.toLowerCase().includes(licenseSearch.toLowerCase()) ||
     license.category.toLowerCase().includes(licenseSearch.toLowerCase())
   );
+
+  // Hilfsfunktion um zu prüfen, ob eine Lizenz bereits in anderen Services verwendet wird
+  const getLicenseUsageInOtherServices = (licenseId: string) => {
+    const allRelations = getAllServiceLicenseRelations();
+    const currentServiceId = service?.id;
+    
+    return allRelations
+      .filter(rel => rel.license_id === licenseId && rel.service_id !== currentServiceId)
+      .map(rel => {
+        const relatedService = services.find(s => s.id === rel.service_id);
+        return {
+          serviceName: relatedService?.name || 'Unbekannter Service',
+          includeCost: rel.include_cost
+        };
+      });
+  };
 
   // Lade bestehende Lizenzen wenn Service bearbeitet wird
   useEffect(() => {
@@ -156,7 +175,8 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
             {service ? 'Service bearbeiten' : 'Neuer Service'}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <TooltipProvider>
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Service Name *</Label>
             <Input
@@ -286,44 +306,72 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                   <div className="mt-3 space-y-3 p-4 bg-muted/50 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Label className="text-sm font-medium">Kostenkalkulation der Lizenzen</Label>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="max-w-xs">
-                              Deaktivieren Sie "Kosten einbeziehen", wenn diese Lizenz bereits in einem anderen Service kalkuliert wird, 
-                              um Doppelzählungen zu vermeiden.
-                            </p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">
+                            Deaktivieren Sie "Kosten einbeziehen", wenn diese Lizenz bereits in einem anderen Service kalkuliert wird, 
+                            um Doppelzählungen zu vermeiden.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
+                    
+                    {/* Warnungen für bereits verwendete Lizenzen */}
+                    {selectedLicenses.some(licenseId => getLicenseUsageInOtherServices(licenseId).length > 0) && (
+                      <Alert className="border-amber-200 bg-amber-50 text-amber-800">
+                        <Info className="h-4 w-4" />
+                        <AlertDescription className="text-sm">
+                          <strong>Achtung:</strong> Einige Lizenzen werden bereits in anderen Services verwendet. 
+                          Prüfen Sie die Kostenzuordnung, um Doppelzählungen zu vermeiden.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
                     <div className="space-y-3">
                       {selectedLicenses.map(licenseId => {
                         const license = licenses.find(l => l.id === licenseId);
                         const isIncluded = includeCosts[licenseId] ?? true;
+                        const otherUsages = getLicenseUsageInOtherServices(licenseId);
+                        const hasConflict = otherUsages.length > 0;
+                        
                         return (
-                          <div key={licenseId} className={`flex items-center justify-between p-3 rounded-md border ${isIncluded ? 'bg-background border-primary/20' : 'bg-muted border-muted-foreground/20'}`}>
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">{license?.name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {isIncluded ? '✓ Kostenwirksam in diesem Service' : '○ Nur Zuordnung, Kosten werden woanders kalkuliert'}
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                              <div className="text-right">
-                                <div className="text-xs font-medium">
-                                  {isIncluded ? 'Einbeziehen' : 'Ausschließen'}
+                          <div key={licenseId} className="space-y-2">
+                            <div className={`flex items-center justify-between p-3 rounded-md border ${
+                              hasConflict 
+                                ? 'border-amber-200 bg-amber-50' 
+                                : isIncluded 
+                                  ? 'bg-background border-primary/20' 
+                                  : 'bg-muted border-muted-foreground/20'
+                            }`}>
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{license?.name}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {isIncluded ? '✓ Kostenwirksam in diesem Service' : '○ Nur Zuordnung, Kosten werden woanders kalkuliert'}
                                 </div>
+                                {hasConflict && (
+                                  <div className="text-xs text-amber-700 mt-1">
+                                    ⚠️ Bereits verwendet in: {otherUsages.map(usage => 
+                                      `${usage.serviceName} ${usage.includeCost ? '(kostenwirksam)' : '(nicht kostenwirksam)'}`
+                                    ).join(', ')}
+                                  </div>
+                                )}
                               </div>
-                              <Switch
-                                checked={isIncluded}
-                                onCheckedChange={(checked) => 
-                                  setIncludeCosts(prev => ({ ...prev, [licenseId]: checked }))
-                                }
-                              />
+                              <div className="flex items-center space-x-3">
+                                <div className="text-right">
+                                  <div className="text-xs font-medium">
+                                    {isIncluded ? 'Einbeziehen' : 'Ausschließen'}
+                                  </div>
+                                </div>
+                                <Switch
+                                  checked={isIncluded}
+                                  onCheckedChange={(checked) => 
+                                    setIncludeCosts(prev => ({ ...prev, [licenseId]: checked }))
+                                  }
+                                />
+                              </div>
                             </div>
                           </div>
                         );
@@ -481,6 +529,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
             </Button>
           </div>
         </form>
+        </TooltipProvider>
       </DialogContent>
     </Dialog>
   );
