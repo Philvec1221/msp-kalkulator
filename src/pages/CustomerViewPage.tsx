@@ -206,7 +206,7 @@ export function CustomerViewPage() {
               <Card 
                 key={pkg.name} 
                 className={`relative transition-all duration-200 ${
-                  isSelected ? 'ring-2 ring-blue-500 shadow-xl transform scale-105' : 'hover:shadow-lg'
+                  isSelected ? 'ring-2 ring-blue-500 shadow-2xl bg-blue-50/50 border-blue-200' : 'hover:shadow-lg border-border'
                 }`}
               >
                 {isSelected && (
