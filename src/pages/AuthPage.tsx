@@ -26,29 +26,49 @@ const AuthPage = () => {
   };
 
   useEffect(() => {
+    // Handle auth state changes and recovery tokens
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth event:', event, session);
+        
+        if (event === 'PASSWORD_RECOVERY') {
+          toast({
+            title: "Passwort-Recovery aktiv",
+            description: "Sie können jetzt Ihr Passwort ändern. Geben Sie Ihr neues Passwort ein.",
+          });
+        } else if (event === 'SIGNED_IN' && session) {
+          navigate("/");
+        }
+      }
+    );
+
     // Check if user is already logged in
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && session.user) {
         navigate("/");
       }
     };
     
-    // Handle password recovery from email links
-    const handleRecovery = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const type = urlParams.get('type');
-      
-      if (type === 'recovery') {
-        toast({
-          title: "Passwort zurücksetzen",
-          description: "Bitte geben Sie Ihre E-Mail und ein neues Passwort ein.",
-        });
-      }
-    };
+    // Handle URL parameters for recovery
+    const urlParams = new URLSearchParams(window.location.search);
+    const accessToken = urlParams.get('access_token');
+    const refreshToken = urlParams.get('refresh_token');
+    const type = urlParams.get('type');
     
-    checkAuth();
-    handleRecovery();
+    if (type === 'recovery' && accessToken && refreshToken) {
+      // Set the session from URL parameters
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken
+      });
+    } else {
+      checkAuth();
+    }
+    
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate, toast]);
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -98,10 +118,8 @@ const AuthPage = () => {
     setError("");
 
     try {
-      // Use the production URL for password reset to avoid localhost issues
-      const redirectUrl = window.location.hostname === 'localhost' 
-        ? 'https://msp-kalkulator.lovable.app/auth?type=recovery'
-        : `${window.location.origin}/auth?type=recovery`;
+      // Always use the production URL to avoid localhost issues
+      const redirectUrl = 'https://msp-kalkulator.lovable.app/auth';
       
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl
@@ -110,8 +128,8 @@ const AuthPage = () => {
       if (error) throw error;
 
       toast({
-        title: "Passwort-Reset gesendet!",
-        description: "Überprüfen Sie Ihre E-Mail für den Reset-Link. Der Link führt zur Produktionsseite.",
+        title: "Neue Passwort-Reset E-Mail gesendet!",
+        description: "Überprüfen Sie Ihre E-Mail für den neuen Reset-Link. Ignorieren Sie alte E-Mails.",
       });
     } catch (error: any) {
       console.error("Password reset error:", error);
