@@ -7,15 +7,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Edit, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Plus, Edit, Info, Search, X, ChevronDown, Check } from "lucide-react";
 import { Service } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
 import { usePackageConfigs } from "@/hooks/usePackageConfigs";
-import { MultiSelect } from "@/components/ui/multi-select";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface ServiceFormProps {
   service?: Service;
@@ -39,16 +41,20 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [loading, setLoading] = useState(false);
   const [showPackageConfigs, setShowPackageConfigs] = useState(false);
   
+  // License Selection State
+  const [licenseSearch, setLicenseSearch] = useState('');
+  const [isLicenseSelectOpen, setIsLicenseSelectOpen] = useState(false);
+  
   const { licenses, loading: licensesLoading } = useLicenses();
   const { serviceLicenses, updateServiceLicenses, getLicensesByServiceId, loading: serviceLicensesLoading } = useServiceLicenses();
   const { packages } = usePackages();
   const { packageConfigs, getConfigsByService } = usePackageConfigs();
 
-  // Bereite Lizenzoptionen für MultiSelect vor
-  const licenseOptions = (licenses || []).map(license => ({
-    value: license.id,
-    label: license.name
-  }));
+  // Gefilterte Lizenzen basierend auf Suchbegriff
+  const filteredLicenses = (licenses || []).filter(license =>
+    license.name.toLowerCase().includes(licenseSearch.toLowerCase()) ||
+    license.category.toLowerCase().includes(licenseSearch.toLowerCase())
+  );
 
   // Lade bestehende Lizenzen wenn Service bearbeitet wird
   useEffect(() => {
@@ -98,6 +104,40 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}:${mins.toString().padStart(2, '0')} Std`;
+  };
+
+  const handleLicenseToggle = (licenseId: string) => {
+    const isSelected = selectedLicenses.includes(licenseId);
+    const newSelection = isSelected
+      ? selectedLicenses.filter(id => id !== licenseId)
+      : [...selectedLicenses, licenseId];
+    
+    setSelectedLicenses(newSelection);
+    
+    // Für neue Lizenzen include_cost auf true setzen
+    const newCosts = { ...includeCosts };
+    newSelection.forEach(licenseId => {
+      if (!(licenseId in newCosts)) {
+        newCosts[licenseId] = true;
+      }
+    });
+    // Entfernte Lizenzen aus includeCosts entfernen
+    Object.keys(newCosts).forEach(licenseId => {
+      if (!newSelection.includes(licenseId)) {
+        delete newCosts[licenseId];
+      }
+    });
+    setIncludeCosts(newCosts);
+  };
+
+  const handleLicenseRemove = (licenseId: string) => {
+    const newSelection = selectedLicenses.filter(id => id !== licenseId);
+    setSelectedLicenses(newSelection);
+    
+    // Entfernte Lizenz aus includeCosts entfernen
+    const newCosts = { ...includeCosts };
+    delete newCosts[licenseId];
+    setIncludeCosts(newCosts);
   };
 
   return (
@@ -150,29 +190,97 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                 Keine Lizenzen verfügbar
               </div>
             ) : (
-              <>
-                <MultiSelect
-                  options={licenseOptions}
-                  selected={selectedLicenses}
-                  onChange={(newSelection) => {
-                    setSelectedLicenses(newSelection);
-                    // Für neue Lizenzen include_cost auf true setzen
-                    const newCosts = { ...includeCosts };
-                    newSelection.forEach(licenseId => {
-                      if (!(licenseId in newCosts)) {
-                        newCosts[licenseId] = true;
+              <div className="space-y-2">
+                <Popover open={isLicenseSelectOpen} onOpenChange={setIsLicenseSelectOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isLicenseSelectOpen}
+                      className="w-full justify-between"
+                    >
+                      {selectedLicenses.length === 0 
+                        ? "Lizenzen auswählen..." 
+                        : `${selectedLicenses.length} Lizenz${selectedLicenses.length === 1 ? '' : 'en'} ausgewählt`
                       }
-                    });
-                    // Entfernte Lizenzen aus includeCosts entfernen
-                    Object.keys(newCosts).forEach(licenseId => {
-                      if (!newSelection.includes(licenseId)) {
-                        delete newCosts[licenseId];
-                      }
-                    });
-                    setIncludeCosts(newCosts);
-                  }}
-                  placeholder="Lizenzen auswählen..."
-                />
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <div className="p-3 border-b">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Lizenzen suchen..."
+                          value={licenseSearch}
+                          onChange={(e) => setLicenseSearch(e.target.value)}
+                          className="pl-8"
+                        />
+                      </div>
+                    </div>
+                    <ScrollArea className="h-60">
+                      <div className="p-2 space-y-1">
+                        {filteredLicenses.length === 0 ? (
+                          <div className="text-sm text-muted-foreground text-center py-4">
+                            Keine Lizenzen gefunden
+                          </div>
+                        ) : (
+                          filteredLicenses.map((license) => {
+                            const isSelected = selectedLicenses.includes(license.id);
+                            return (
+                              <div
+                                key={license.id}
+                                className={cn(
+                                  "flex items-center space-x-2 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground",
+                                  isSelected && "bg-accent text-accent-foreground"
+                                )}
+                                onClick={() => handleLicenseToggle(license.id)}
+                              >
+                                <div className="flex items-center space-x-2 flex-1">
+                                  <Check
+                                    className={cn(
+                                      "h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex-1">
+                                    <div className="font-medium">{license.name}</div>
+                                    <div className="text-xs text-muted-foreground">
+                                      {license.category} • {license.cost_per_month}€/Monat
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
+                
+                {/* Ausgewählte Lizenzen als Badges anzeigen */}
+                {selectedLicenses.length > 0 && (
+                  <div className="flex flex-wrap gap-1 p-2 bg-muted/30 rounded-md">
+                    {selectedLicenses.map(licenseId => {
+                      const license = licenses.find(l => l.id === licenseId);
+                      if (!license) return null;
+                      return (
+                        <Badge
+                          key={licenseId}
+                          variant="secondary"
+                          className="text-xs flex items-center gap-1"
+                        >
+                          {license.name}
+                          <X
+                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                            onClick={() => handleLicenseRemove(licenseId)}
+                          />
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                )}
                 
                 {selectedLicenses.length > 0 && (
                   <div className="mt-3 space-y-3 p-4 bg-muted/50 rounded-lg">
@@ -223,7 +331,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                     </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
 
@@ -260,6 +368,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
               </Select>
             </div>
           </div>
+          
           <div className="space-y-2">
             <Label htmlFor="time_in_minutes">
               Technikzeit in Minuten * 
