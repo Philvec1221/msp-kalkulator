@@ -21,11 +21,18 @@ export function EmployeesPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [newDepartmentName, setNewDepartmentName] = useState('');
 
-  const handleSubmit = async (employeeData: any, departmentIds: string[]) => {
+  const handleSubmit = async (employeeData: any, departmentIds: string[], existingEmployee?: any) => {
     let result;
-    if (employeeData.id) {
-      result = await updateEmployee(employeeData.id, employeeData);
+    
+    console.log('handleSubmit called with:', { employeeData, departmentIds, existingEmployee });
+    
+    if (existingEmployee?.id) {
+      // Update existing employee
+      console.log('Updating employee:', existingEmployee.id);
+      result = await updateEmployee(existingEmployee.id, employeeData);
     } else {
+      // Create new employee
+      console.log('Creating new employee');
       result = await addEmployee(employeeData);
     }
     
@@ -96,7 +103,7 @@ export function EmployeesPage() {
           </p>
         </div>
         
-        <EmployeeForm onSubmit={handleSubmit} trigger={
+        <EmployeeForm onSubmit={(data, deptIds) => handleSubmit(data, deptIds)} trigger={
           <Button>+ Mitarbeiter hinzufügen</Button>
         } />
       </div>
@@ -262,7 +269,7 @@ export function EmployeesPage() {
             }
           </p>
           {employees.length === 0 && (
-            <EmployeeForm onSubmit={handleSubmit} trigger={
+            <EmployeeForm onSubmit={(data, deptIds) => handleSubmit(data, deptIds)} trigger={
               <Button>Ersten Mitarbeiter hinzufügen</Button>
             } />
           )}
@@ -310,7 +317,7 @@ export function EmployeesPage() {
                   <div className="flex justify-end space-x-2">
                     <EmployeeForm 
                       employee={employee} 
-                      onSubmit={handleSubmit} 
+                      onSubmit={(data, deptIds) => handleSubmit(data, deptIds, employee)} 
                       trigger={
                         <Button variant="outline" size="sm">
                           <Pencil className="h-4 w-4" />
