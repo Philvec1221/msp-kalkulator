@@ -14,7 +14,8 @@ import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { usePackages } from "@/hooks/usePackages";
 import { useSavedOffers } from "@/hooks/useSavedOffers";
-import { getServicesForPackage, calculatePackageCosts } from "@/lib/costing";
+import { getServicesForPackageWithConfig, calculateEnhancedPackageCosts } from "@/lib/enhancedCosting";
+import { usePackageConfigs } from "@/hooks/usePackageConfigs";
 import { getPackageBadgeProps } from "@/lib/colors";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,8 +37,9 @@ export function CalculatorPage() {
   const { services } = useServices();
   const { employees } = useEmployees();
   const { licenses } = useLicenses();
-  const { getAllServiceLicenseRelations } = useServiceLicenses();
+  const { serviceLicenses } = useServiceLicenses();
   const { packages } = usePackages();
+  const { packageConfigs } = usePackageConfigs();
   const { createSavedOffer } = useSavedOffers();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -49,7 +51,7 @@ export function CalculatorPage() {
     clients: 10,
     servers: 2,
     users: 25,
-    markup: 25,
+    markup: 100,
     allPackages: {}
   });
 
@@ -72,12 +74,14 @@ export function CalculatorPage() {
       const allPackagesData: { [packageName: string]: { ekTotal: number; vkTotal: number; services: any[] } } = {};
       
       packageLevels.forEach(packageLevel => {
-        const packageServices = getServicesForPackage(services, packageLevel);
-        const packageCosts = calculatePackageCosts(
+        const packageServices = getServicesForPackageWithConfig(services, packageConfigs, packageLevel.toLowerCase());
+        const packageCosts = calculateEnhancedPackageCosts(
           packageServices,
           licenses,
-          getAllServiceLicenseRelations(),
+          serviceLicenses,
+          packageConfigs,
           averageCostPerMinute,
+          packageLevel.toLowerCase(),
           { clients: quoteData.clients, servers: quoteData.servers, users: quoteData.users }
         );
         
@@ -278,11 +282,18 @@ export function CalculatorPage() {
                 type="number"
                 value={quoteData.markup}
                 onChange={(e) => setQuoteData(prev => ({ ...prev, markup: parseInt(e.target.value) || 0 }))}
-                className="text-center text-2xl font-bold"
+                className={`text-center text-2xl font-bold ${quoteData.markup < 75 ? 'border-red-500 text-red-600' : ''}`}
               />
-              <p className="text-xs text-muted-foreground">
-                Standard: 25% - kann pro Angebot angepasst werden
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">
+                  Standard: 100% - kann pro Angebot angepasst werden
+                </p>
+                {quoteData.markup < 75 && (
+                  <p className="text-xs text-red-600 font-medium">
+                    ⚠️ Nur nach Rücksprache und Genehmigung durch Vertriebsleitung und Geschäftsführung.
+                  </p>
+                )}
+              </div>
             </div>
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">Aktueller Aufschlag</p>
