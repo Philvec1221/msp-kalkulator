@@ -221,20 +221,12 @@ export function useServices() {
 
   const updateServiceOrder = async (draggedServiceId: string, targetServiceId: string, insertAfter: boolean) => {
     try {
-      console.log('🔄 Starting updateServiceOrder:', { draggedServiceId, targetServiceId, insertAfter });
-      
       const draggedService = services.find(s => s.id === draggedServiceId);
       const targetService = services.find(s => s.id === targetServiceId);
       
       if (!draggedService || !targetService) {
-        console.log('❌ Service not found');
         throw new Error('Service not found');
       }
-
-      console.log('📊 Services before reorder:', {
-        dragged: { id: draggedService.id, name: draggedService.name, sort_order: draggedService.sort_order },
-        target: { id: targetService.id, name: targetService.name, sort_order: targetService.sort_order }
-      });
 
       // Create a new array with the reordered services
       const servicesCopy = [...services];
@@ -254,9 +246,6 @@ export function useServices() {
         sort_order: index + 1
       }));
       
-      console.log('🔍 Services state before update:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
-      console.log('🔄 Creating new order with servicesCopy:', servicesCopy.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
-      
       // Update all services with their new sort order
       for (const { id, sort_order } of updates) {
         await reorderServices(id, sort_order);
@@ -272,12 +261,8 @@ export function useServices() {
       const freshServices = updatedServices.map(service => ({ ...service }));
       setServices(freshServices);
       
-      console.log('📝 Setting new services state:', freshServices.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
-      
-      console.log('✅ Service order updated successfully');
-      
     } catch (error) {
-      console.error('❌ Error updating service order:', error);
+      console.error('Error updating service order:', error);
       toast({
         title: "Fehler",
         description: "Service-Reihenfolge konnte nicht aktualisiert werden.",

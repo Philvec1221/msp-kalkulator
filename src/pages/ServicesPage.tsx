@@ -37,7 +37,7 @@ export function ServicesPage() {
   const [activityFilter, setActivityFilter] = useState("all");
   const [licenseFilter, setLicenseFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("created_at");
+  const [sortBy, setSortBy] = useState("sort_order");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [draggedServiceId, setDraggedServiceId] = useState<string | null>(null);
   const [isDragOverId, setIsDragOverId] = useState<string | null>(null);
@@ -157,7 +157,6 @@ export function ServicesPage() {
   };
 
   const handleDragStart = (e: React.DragEvent, serviceId: string) => {
-    console.log('🚀 Drag started:', serviceId);
     setDraggedServiceId(serviceId);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', serviceId);
@@ -189,8 +188,6 @@ export function ServicesPage() {
     e.stopPropagation();
     setIsDragOverId(null);
     
-    console.log('📍 Drop on:', targetServiceId, 'from:', draggedServiceId);
-    
     if (draggedServiceId && draggedServiceId !== targetServiceId) {
       try {
         // Determine if we should insert after based on drop position
@@ -199,16 +196,18 @@ export function ServicesPage() {
         const dropY = e.clientY;
         const insertAfter = dropY > rect.top + rect.height / 2;
         
-        console.log('🔄 Updating order - dragged:', draggedServiceId, 'target:', targetServiceId, 'insertAfter:', insertAfter);
-        console.log('🔍 Services before drop:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
-        
         await updateServiceOrder(draggedServiceId, targetServiceId, insertAfter);
         
-        console.log('🔍 Services after drop:', services.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
-        
-        toast.success("Service-Reihenfolge wurde aktualisiert");
+        // Auto-switch to sort_order view after successful drag & drop
+        if (sortBy !== "sort_order") {
+          setSortBy("sort_order");
+          setSortOrder("asc");
+          toast.success("Service-Reihenfolge wurde aktualisiert. Sortierung auf 'Reihenfolge' umgestellt.");
+        } else {
+          toast.success("Service-Reihenfolge wurde aktualisiert");
+        }
       } catch (error) {
-        console.error('❌ Error updating service order:', error);
+        console.error('Error updating service order:', error);
         // Error toast is already shown in useServices hook
       }
     }
@@ -216,7 +215,6 @@ export function ServicesPage() {
   };
 
   const handleDragEnd = () => {
-    console.log('🏁 Drag ended');
     setDraggedServiceId(null);
     setIsDragOverId(null);
   };
