@@ -111,32 +111,35 @@ export function CustomerViewPage() {
         };
       }).filter(Boolean);
     } else {
-      // Fallback to live calculation
+      // Live calculation with proper hierarchy and costing
       const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
       
       return packageLevels.map(level => {
-        const packageServices = services
-          .filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level)
-          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        const costs = {
-          totalTimeCost: 1000,
-          totalLicenseCostEK: 500
-        };
+        // Use enhanced costing with proper hierarchy logic
+        const packageServices = getServicesForPackageWithConfig(services, packageConfigs, level);
         
-        const monthlyPrice = costs.totalTimeCost + costs.totalLicenseCostEK;
-        const yearlyPrice = monthlyPrice * 12;
+        // Calculate enhanced package costs
+        const enhancedCosts = calculateEnhancedPackageCosts(
+          packageServices,
+          licenses,
+          serviceLicenses,
+          packageConfigs,
+          avgCostPerMinute,
+          level,
+          config
+        );
         
         return {
           name: level.charAt(0).toUpperCase() + level.slice(1),
           description: getPackageDescription(level),
-          monthlyPrice,
-          yearlyPrice,
+          monthlyPrice: enhancedCosts.totalPriceVK,
+          yearlyPrice: enhancedCosts.totalPriceVK * 12,
           services: packageServices,
-          costs
+          costs: enhancedCosts
         };
       });
     }
-  }, [services, licenses, serviceLicenses, packageConfigs, avgCostPerMinute, offerData]);
+  }, [services, licenses, serviceLicenses, packageConfigs, avgCostPerMinute, config, offerData]);
 
   // Show loading state while checking for saved offer
   if (loading) {

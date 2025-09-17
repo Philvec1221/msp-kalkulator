@@ -202,7 +202,7 @@ function getUniqueLicensesFromServices(
 }
 
 /**
- * Get services for a specific package level with package configuration filtering
+ * Get services for a specific package level with package configuration filtering and hierarchy logic
  */
 export function getServicesForPackageWithConfig(
   services: Service[], 
@@ -217,7 +217,7 @@ export function getServicesForPackageWithConfig(
   return services.filter(service => {
     if (!service.active) return false;
     
-    // Check if service has a package configuration for this package type
+    // Check if service has a specific package configuration for this package type
     const packageConfig = packageConfigs.find(
       config => config.service_id === service.id && 
                  config.package_type.toLowerCase() === packageLevel.toLowerCase()
@@ -228,16 +228,36 @@ export function getServicesForPackageWithConfig(
       return false;
     }
     
-    // If there's a package config, include the service (respecting inclusion_type)
+    // If there's a specific package config, include the service
     if (packageConfig) {
       return true;
     }
     
-    // Fallback to original logic for services without package configs
+    // HIERARCHY LOGIC: Services available in lower packages are automatically available in higher packages
+    // Get the minimum package level for this service
     const serviceMinLevel = (service.min_package_level || service.package_level || 'basis')
       .toLowerCase().replace(' ', '_');
     const serviceIndex = packageLevels.indexOf(serviceMinLevel);
     
-    return serviceIndex !== -1 && serviceIndex <= selectedIndex;
+    // Service is available if:
+    // 1. The service has a valid minimum package level
+    // 2. The selected package is at or above the service's minimum level
+    // 3. There's no explicit 'not_available' configuration for any lower package level
+    if (serviceIndex !== -1 && serviceIndex <= selectedIndex) {
+      // Check if the service is explicitly marked as not_available in this or any lower package
+      for (let i = serviceIndex; i <= selectedIndex; i++) {
+        const checkLevel = packageLevels[i];
+        const checkConfig = packageConfigs.find(
+          config => config.service_id === service.id && 
+                   config.package_type.toLowerCase() === checkLevel
+        );
+        if (checkConfig && checkConfig.inclusion_type === 'not_available') {
+          return false;
+        }
+      }
+      return true;
+    }
+    
+    return false;
   });
 }
