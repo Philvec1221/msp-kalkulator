@@ -69,14 +69,6 @@ export function CustomerViewPage() {
             users: savedOffer.users
           });
           
-          // Set first available package as selected by default
-          if (savedOffer.calculation_results && (savedOffer.calculation_results as any).allPackages) {
-            const availablePackages = Object.keys((savedOffer.calculation_results as any).allPackages);
-            if (availablePackages.length > 0) {
-              setSelectedPackage(availablePackages[0].toLowerCase());
-            }
-          }
-          
           setOfferData(savedOffer);
         }
       }
@@ -103,7 +95,8 @@ export function CustomerViewPage() {
         const packageData = savedPackages[level];
         if (!packageData) return null;
         
-        const packageServices = services.filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level.toLowerCase());
+        // Get services from the stored calculation results
+        const packageServices = packageData.services || [];
         
         return {
           name: level,
@@ -141,7 +134,7 @@ export function CustomerViewPage() {
         };
       });
     }
-  }, [services, licenses, serviceLicenses, packageConfigs, avgCostPerMinute, config, offerData]);
+  }, [services, licenses, serviceLicenses, packageConfigs, avgCostPerMinute, offerData]);
 
   // Show loading state while checking for saved offer
   if (loading) {
@@ -307,8 +300,6 @@ export function CustomerViewPage() {
                     )}
                     onClick={() => {
                       setSelectedPackage(packageKey);
-                      // Trigger re-render to show updated selection state
-                      setConfig(prev => ({ ...prev }));
                     }}
                   >
                     {isSelected ? "Ausgewählt" : "Auswählen"}
