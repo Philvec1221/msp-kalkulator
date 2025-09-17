@@ -48,19 +48,35 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate inactive reason if employee is inactive
+    if (!formData.active && !formData.inactive_reason.trim()) {
+      alert('Bitte geben Sie einen Grund für die Inaktivität an.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await onSubmit(formData, selectedDepartmentIds);
+      const employeeData = {
+        ...formData,
+        // Clear inactive_reason if employee is active
+        inactive_reason: formData.active ? '' : formData.inactive_reason
+      };
+
+      await onSubmit(employeeData, selectedDepartmentIds);
+      
+      // Reset form only if not editing
+      if (!employee) {
+        setFormData({
+          name: '',
+          hourly_rate: 0,
+          active: true,
+          inactive_reason: ''
+        });
+        setSelectedDepartmentIds([]);
+      }
       setOpen(false);
-      // Reset form
-      setFormData({
-        name: '',
-        hourly_rate: 0,
-        active: true,
-        inactive_reason: ''
-      });
-      setSelectedDepartmentIds([]);
     } catch (error) {
       // Error handling is done in the parent component
     } finally {
@@ -140,24 +156,41 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
           </div>
 
           <div className="flex items-center justify-between">
-            <Label htmlFor="active">Aktiv</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="active">Status</Label>
+              <Badge variant={formData.active ? "default" : "destructive"} className="text-xs">
+                {formData.active ? "Aktiv" : "Inaktiv"}
+              </Badge>
+            </div>
             <Switch
               id="active"
               checked={formData.active}
-              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, active: checked }))}
+              onCheckedChange={(checked) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  active: checked,
+                  // Clear inactive reason when setting to active
+                  inactive_reason: checked ? '' : prev.inactive_reason
+                }));
+              }}
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="inactive_reason">Grund für Inaktivität</Label>
-            <Textarea
-              id="inactive_reason"
-              value={formData.inactive_reason}
-              onChange={(e) => setFormData(prev => ({ ...prev, inactive_reason: e.target.value }))}
-              placeholder="Grund für Inaktivität..."
-              disabled={formData.active}
-            />
-          </div>
+          {!formData.active && (
+            <div className="space-y-2">
+              <Label htmlFor="inactive_reason" className="text-destructive">
+                Grund für Inaktivität *
+              </Label>
+              <Textarea
+                id="inactive_reason"
+                value={formData.inactive_reason}
+                onChange={(e) => setFormData(prev => ({ ...prev, inactive_reason: e.target.value }))}
+                placeholder="Bitte geben Sie den Grund für die Inaktivität an..."
+                className="border-destructive focus-visible:ring-destructive"
+                required={!formData.active}
+              />
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="departments">Abteilungen</Label>
