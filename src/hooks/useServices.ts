@@ -261,11 +261,13 @@ export function useServices() {
         await reorderServices(id, sort_order);
       }
       
-      // Update local state
-      setServices(servicesCopy.map((service, index) => ({
+      // Update local state with correct sort_order
+      const updatedServices = servicesCopy.map((service, index) => ({
         ...service,
         sort_order: index + 1
-      })));
+      }));
+      
+      setServices(updatedServices);
       
       console.log('✅ Service order updated successfully');
       
@@ -276,8 +278,8 @@ export function useServices() {
         description: "Service-Reihenfolge konnte nicht aktualisiert werden.",
         variant: "destructive",
       });
-      // Refetch to restore correct order
-      fetchServices();
+      // Only refetch on error to restore correct order
+      await fetchServices();
       throw error;
     }
   };
