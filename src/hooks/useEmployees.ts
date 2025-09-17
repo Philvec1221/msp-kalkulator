@@ -66,6 +66,7 @@ export function useEmployees() {
   };
 
   const updateEmployee = async (id: string, updates: Partial<Employee>) => {
+    console.log('🔄 updateEmployee called with:', { id, updates });
     try {
       const { data, error } = await supabase
         .from('employees')
@@ -74,9 +75,15 @@ export function useEmployees() {
         .select()
         .single();
 
+      console.log('📊 Supabase update result:', { data, error });
+
       if (error) throw error;
       
-      setEmployees(prev => prev.map(emp => emp.id === id ? data : emp));
+      setEmployees(prev => {
+        const updated = prev.map(emp => emp.id === id ? data : emp);
+        console.log('✅ Employee list updated, employee found:', updated.find(e => e.id === id));
+        return updated;
+      });
       toast({
         title: "Erfolg",
         description: "Mitarbeiter wurde aktualisiert.",

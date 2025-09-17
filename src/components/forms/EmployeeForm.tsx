@@ -49,8 +49,12 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('🚀 Form submission started with formData:', formData);
+    console.log('👤 Employee being edited:', employee?.id ? 'UPDATE' : 'CREATE', employee?.id);
+    
     // Validate inactive reason if employee is inactive
     if (!formData.active && !formData.inactive_reason.trim()) {
+      console.log('❌ Validation failed: inactive reason required');
       alert('Bitte geben Sie einen Grund für die Inaktivität an.');
       return;
     }
@@ -64,6 +68,7 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
         inactive_reason: formData.active ? '' : formData.inactive_reason
       };
 
+      console.log('📤 Sending to onSubmit:', { employeeData, selectedDepartmentIds });
       await onSubmit(employeeData, selectedDepartmentIds);
       
       // Reset form only if not editing
@@ -166,12 +171,17 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
               id="active"
               checked={formData.active}
               onCheckedChange={(checked) => {
-                setFormData(prev => ({ 
-                  ...prev, 
-                  active: checked,
-                  // Clear inactive reason when setting to active
-                  inactive_reason: checked ? '' : prev.inactive_reason
-                }));
+                console.log('🔄 Switch clicked - changing active from', formData.active, 'to', checked);
+                setFormData(prev => {
+                  const newData = { 
+                    ...prev, 
+                    active: checked,
+                    // Clear inactive reason when setting to active
+                    inactive_reason: checked ? '' : prev.inactive_reason
+                  };
+                  console.log('📝 Updated formData:', newData);
+                  return newData;
+                });
               }}
             />
           </div>
