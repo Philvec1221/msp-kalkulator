@@ -32,7 +32,6 @@ interface QuoteData {
 
 interface SaveOfferData {
   name: string;
-  company_name: string;
 }
 
 export function CalculatorPage() {
@@ -57,8 +56,7 @@ export function CalculatorPage() {
   });
 
   const [saveOfferData, setSaveOfferData] = useState<SaveOfferData>({
-    name: "",
-    company_name: ""
+    name: ""
   });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -96,18 +94,12 @@ export function CalculatorPage() {
   }, [totalEK, totalVK]);
 
   const handleSaveOffer = async () => {
-    if (!saveOfferData.name.trim()) {
-      toast({
-        title: "Name erforderlich",
-        description: "Bitte geben Sie einen Namen für das Angebot ein.",
-        variant: "destructive"
-      });
-      return;
-    }
+    // Use existing customer number and title if no custom name is provided
+    const offerName = saveOfferData.name.trim() || `${quoteData.customerNumber} - ${quoteData.quoteTitle}`;
 
     const offerId = await createSavedOffer({
-      name: saveOfferData.name,
-      company_name: saveOfferData.company_name,
+      name: offerName,
+      company_name: quoteData.customerNumber, // Use customer number for reference
       clients: quoteData.clients,
       servers: quoteData.servers,
       users: quoteData.users,
@@ -122,21 +114,17 @@ export function CalculatorPage() {
 
     if (offerId) {
       setIsDialogOpen(false);
-      setSaveOfferData({ name: "", company_name: "" });
+      setSaveOfferData({ name: "" });
     }
   };
 
   const handleSendToCustomerView = async () => {
-    if (!saveOfferData.name.trim()) {
-      setSaveOfferData(prev => ({ 
-        ...prev, 
-        name: `Angebot ${quoteData.selectedPackage} - ${new Date().toLocaleDateString('de-DE')}`
-      }));
-    }
+    // Auto-generate name from existing data
+    const autoName = `${quoteData.customerNumber} - ${quoteData.quoteTitle}`;
 
     const offerId = await createSavedOffer({
-      name: saveOfferData.name || `Angebot ${quoteData.selectedPackage} - ${new Date().toLocaleDateString('de-DE')}`,
-      company_name: saveOfferData.company_name,
+      name: autoName,
+      company_name: quoteData.customerNumber,
       clients: quoteData.clients,
       servers: quoteData.servers,
       users: quoteData.users,
@@ -382,27 +370,21 @@ export function CalculatorPage() {
                 <DialogHeader>
                   <DialogTitle>Angebot speichern</DialogTitle>
                   <DialogDescription>
-                    Geben Sie einen Namen und optional eine Firma für das Angebot ein.
+                    Speichern Sie das Angebot. Der Name wird automatisch aus Kundennummer und Titel generiert, kann aber angepasst werden.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="offer-name">Angebot Name *</Label>
+                    <Label htmlFor="offer-name">Angebot Name (optional)</Label>
                     <Input
                       id="offer-name"
                       value={saveOfferData.name}
                       onChange={(e) => setSaveOfferData(prev => ({ ...prev, name: e.target.value }))}
-                      placeholder="z.B. MSP Basis Paket - Musterfirma"
+                      placeholder={`${quoteData.customerNumber} - ${quoteData.quoteTitle}`}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="company-name">Firma (optional)</Label>
-                    <Input
-                      id="company-name"
-                      value={saveOfferData.company_name}
-                      onChange={(e) => setSaveOfferData(prev => ({ ...prev, company_name: e.target.value }))}
-                      placeholder="z.B. Musterfirma GmbH"
-                    />
+                    <div className="text-xs text-muted-foreground">
+                      Leer lassen für automatischen Namen: {quoteData.customerNumber} - {quoteData.quoteTitle}
+                    </div>
                   </div>
                 </div>
                 <DialogFooter>
