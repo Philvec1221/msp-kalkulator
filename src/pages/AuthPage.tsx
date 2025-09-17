@@ -33,8 +33,23 @@ const AuthPage = () => {
         navigate("/");
       }
     };
+    
+    // Handle password recovery from email links
+    const handleRecovery = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const type = urlParams.get('type');
+      
+      if (type === 'recovery') {
+        toast({
+          title: "Passwort zurücksetzen",
+          description: "Bitte geben Sie Ihre E-Mail und ein neues Passwort ein.",
+        });
+      }
+    };
+    
     checkAuth();
-  }, [navigate]);
+    handleRecovery();
+  }, [navigate, toast]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,15 +98,20 @@ const AuthPage = () => {
     setError("");
 
     try {
+      // Use the production URL for password reset to avoid localhost issues
+      const redirectUrl = window.location.hostname === 'localhost' 
+        ? 'https://msp-kalkulator.lovable.app/auth?type=recovery'
+        : `${window.location.origin}/auth?type=recovery`;
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/`
+        redirectTo: redirectUrl
       });
 
       if (error) throw error;
 
       toast({
         title: "Passwort-Reset gesendet!",
-        description: "Überprüfen Sie Ihre E-Mail für den Reset-Link.",
+        description: "Überprüfen Sie Ihre E-Mail für den Reset-Link. Der Link führt zur Produktionsseite.",
       });
     } catch (error: any) {
       console.error("Password reset error:", error);
