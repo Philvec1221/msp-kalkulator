@@ -268,9 +268,11 @@ export function useServices() {
         sort_order: index + 1
       }));
       
-      console.log('📝 Setting new services state:', updatedServices.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
+      // Force a complete re-render by creating a completely new array
+      const freshServices = updatedServices.map(service => ({ ...service }));
+      setServices(freshServices);
       
-      setServices(updatedServices);
+      console.log('📝 Setting new services state:', freshServices.map(s => ({ id: s.id, name: s.name, sort_order: s.sort_order })));
       
       console.log('✅ Service order updated successfully');
       
