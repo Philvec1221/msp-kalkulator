@@ -101,11 +101,11 @@ export function CustomerViewPage() {
         return {
           name: level,
           description: getPackageDescription(level.toLowerCase()),
-          monthlyPrice: packageData.vkTotal,
-          yearlyPrice: packageData.vkTotal * 12,
+          monthlyPrice: packageData.vkTotal || 0,
+          yearlyPrice: (packageData.vkTotal || 0) * 12,
           services: packageServices,
           costs: {
-            totalTimeCostVK: packageData.vkTotal,
+            totalTimeCostVK: packageData.vkTotal || 0,
             totalLicenseCostVK: 0 // This will be detailed in services
           }
         };

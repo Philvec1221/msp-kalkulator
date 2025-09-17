@@ -87,7 +87,7 @@ export function CalculatorPage() {
         allPackagesData[packageLevel] = {
           ekTotal: totalEK,
           vkTotal: totalVK,
-          services: packageServices.map(s => s.id)
+          services: packageServices // Store complete service objects instead of just IDs
         };
       });
       
