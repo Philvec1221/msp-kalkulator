@@ -20,11 +20,12 @@ interface EmployeeFormProps {
 export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [formData, setFormData] = useState({
-    name: employee?.name || '',
-    hourly_rate: employee?.hourly_rate || 0,
-    active: employee?.active ?? true,
-    inactive_reason: employee?.inactive_reason || ''
+    name: '',
+    hourly_rate: 0,
+    active: true,
+    inactive_reason: ''
   });
   const [selectedDepartmentIds, setSelectedDepartmentIds] = useState<string[]>([]);
   const [newDepartmentName, setNewDepartmentName] = useState('');
@@ -32,32 +33,46 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
   const { departments, addDepartment } = useDepartments();
   const { getDepartmentsByEmployee } = useEmployeeDepartments();
 
+  // Initialize form data when dialog opens and employee changes
   useEffect(() => {
-    if (employee) {
-      console.log('👤 Loading employee data:', employee);
-      const newFormData = {
-        name: employee.name,
-        hourly_rate: employee.hourly_rate,
-        active: employee.active,
-        inactive_reason: employee.inactive_reason || ''
-      };
-      console.log('📝 Setting formData to:', newFormData);
-      setFormData(newFormData);
-      // Load existing departments for this employee
-      const employeeDepartments = getDepartmentsByEmployee(employee.id);
-      setSelectedDepartmentIds(employeeDepartments.map(d => d.id));
-    } else {
-      // Reset for new employee
-      console.log('🆕 Resetting for new employee');
-      setFormData({
-        name: '',
-        hourly_rate: 0,
-        active: true,
-        inactive_reason: ''
-      });
-      setSelectedDepartmentIds([]);
+    if (open && !isInitialized) {
+      console.log('🚀 Initializing form for employee:', employee?.id || 'NEW');
+      if (employee) {
+        const newFormData = {
+          name: employee.name,
+          hourly_rate: employee.hourly_rate,
+          active: employee.active,
+          inactive_reason: employee.inactive_reason || ''
+        };
+        console.log('📝 Setting initial formData:', newFormData);
+        setFormData(newFormData);
+        
+        // Load existing departments for this employee
+        const employeeDepartments = getDepartmentsByEmployee(employee.id);
+        const departmentIds = employeeDepartments.map(d => d.id);
+        console.log('🏢 Setting initial departments:', departmentIds);
+        setSelectedDepartmentIds(departmentIds);
+      } else {
+        // Reset for new employee
+        console.log('🆕 Resetting for new employee');
+        setFormData({
+          name: '',
+          hourly_rate: 0,
+          active: true,
+          inactive_reason: ''
+        });
+        setSelectedDepartmentIds([]);
+      }
+      setIsInitialized(true);
     }
-  }, [employee, getDepartmentsByEmployee]);
+  }, [open, employee, getDepartmentsByEmployee, isInitialized]);
+
+  // Reset initialization when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setIsInitialized(false);
+    }
+  }, [open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,17 +202,18 @@ export function EmployeeForm({ employee, onSubmit, trigger }: EmployeeFormProps)
               id="active"
               checked={formData.active}
               onCheckedChange={(checked) => {
-                console.log('🔄 Switch clicked - current formData.active:', formData.active, 'new checked:', checked);
-                setFormData(prev => {
-                  const newData = { 
-                    ...prev, 
-                    active: checked,
-                    // Clear inactive reason when setting to active
-                    inactive_reason: checked ? '' : prev.inactive_reason
-                  };
-                  console.log('📝 Updated formData:', newData);
-                  return newData;
-                });
+                console.log('🔄 Switch clicked - current:', formData.active, 'new:', checked);
+                if (checked !== formData.active) {
+                  setFormData(prev => {
+                    const newData = { 
+                      ...prev, 
+                      active: checked,
+                      inactive_reason: checked ? '' : prev.inactive_reason
+                    };
+                    console.log('📝 Switch updated formData:', newData);
+                    return newData;
+                  });
+                }
               }}
             />
           </div>
