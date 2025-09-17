@@ -185,7 +185,11 @@ export function CustomerViewPage() {
         {/* Package Cards */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
           {packages.map((pkg) => {
-            const packageKey = pkg.name.toLowerCase();
+            // Normalize package name for consistent comparison
+            let packageKey = pkg.name.toLowerCase().trim();
+            if (packageKey === 'allin_black') {
+              packageKey = 'allin black';
+            }
             const isSelected = selectedPackage === packageKey;
             
             return (

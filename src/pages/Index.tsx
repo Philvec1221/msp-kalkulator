@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,10 +16,21 @@ import AddonServicesPage from "@/pages/AddonServicesPage";
 
 const Index = () => {
   const { isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   // Default tabs based on user role
   const [activeMainTab, setActiveMainTab] = useState(isAdmin ? "kalkulation" : "kalkulator");
   const [activeSubTab, setActiveSubTab] = useState("berechnung");
+
+  // Handle navigation from hash and offer parameter
+  useEffect(() => {
+    const hash = window.location.hash.substring(1); // Remove # from hash
+    const offerParam = searchParams.get('offer');
+    
+    if (hash === 'kundenview' || offerParam) {
+      setActiveMainTab('kundenview');
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-background">

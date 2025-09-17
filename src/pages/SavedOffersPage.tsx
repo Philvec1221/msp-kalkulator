@@ -8,11 +8,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useSavedOffers } from "@/hooks/useSavedOffers";
 import { Edit, Trash2, Copy, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 export function SavedOffersPage() {
   const { savedOffers, loading, deleteSavedOffer } = useSavedOffers();
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const filteredOffers = savedOffers.filter(offer => 
     offer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -20,11 +22,11 @@ export function SavedOffersPage() {
   );
 
   const handleSendToCustomerView = (offerId: string) => {
-    const url = `/kundenview?offer=${offerId}`;
-    window.open(url, '_blank');
+    // Navigate to kundenview with offer parameter
+    navigate(`/?offer=${offerId}#kundenview`);
     toast({
       title: "Kundenview geöffnet",
-      description: "Das Angebot wurde in der Kundenansicht geöffnet.",
+      description: "Zur Kundenansicht gewechselt.",
     });
   };
 

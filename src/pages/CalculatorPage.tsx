@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Download, Save, Eye, FileText, ExternalLink } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useServices } from "@/hooks/useServices";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useLicenses } from "@/hooks/useLicenses";
@@ -42,6 +43,8 @@ export function CalculatorPage() {
   const { packages } = usePackages();
   const { createSavedOffer } = useSavedOffers();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
@@ -138,11 +141,11 @@ export function CalculatorPage() {
     });
 
     if (offerId) {
-      const url = `/kundenview?offer=${offerId}`;
-      window.open(url, '_blank');
+      // Navigate to kundenview with offer parameter
+      navigate(`/?offer=${offerId}#kundenview`);
       toast({
         title: "Kundenview geöffnet",
-        description: "Das Angebot wurde gespeichert und in der Kundenansicht geöffnet."
+        description: "Das Angebot wurde gespeichert und zur Kundenansicht gewechselt."
       });
     }
   };
