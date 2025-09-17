@@ -218,9 +218,9 @@ export function ServicesPage() {
   };
 
   const moveServiceUp = async (serviceId: string) => {
-    const currentIndex = filteredServices.findIndex(s => s.id === serviceId);
+    const currentIndex = services.findIndex(s => s.id === serviceId);
     if (currentIndex > 0) {
-      const targetService = filteredServices[currentIndex - 1];
+      const targetService = services[currentIndex - 1];
       try {
         await updateServiceOrder(serviceId, targetService.id, false);
         toast.success("Service nach oben verschoben");
@@ -232,9 +232,9 @@ export function ServicesPage() {
   };
 
   const moveServiceDown = async (serviceId: string) => {
-    const currentIndex = filteredServices.findIndex(s => s.id === serviceId);
-    if (currentIndex < filteredServices.length - 1) {
-      const targetService = filteredServices[currentIndex + 1];
+    const currentIndex = services.findIndex(s => s.id === serviceId);
+    if (currentIndex < services.length - 1) {
+      const targetService = services[currentIndex + 1];
       try {
         await updateServiceOrder(serviceId, targetService.id, true);
         toast.success("Service nach unten verschoben");

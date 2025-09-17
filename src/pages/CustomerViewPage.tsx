@@ -115,7 +115,9 @@ export function CustomerViewPage() {
       const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
       
       return packageLevels.map(level => {
-        const packageServices = services.filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level);
+        const packageServices = services
+          .filter(s => s.active && s.package_level && s.package_level.toLowerCase() === level)
+          .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0) || new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
         const costs = {
           totalTimeCost: 1000,
           totalLicenseCostEK: 500

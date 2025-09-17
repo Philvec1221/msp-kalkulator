@@ -28,6 +28,7 @@ export function useServices() {
       const { data, error } = await supabase
         .from('services')
         .select('*')
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: true });
 
       if (error) throw error;
