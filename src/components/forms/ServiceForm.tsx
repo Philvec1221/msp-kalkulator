@@ -396,7 +396,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="fix">Fix</SelectItem>
-                  <SelectItem value="pro_user">pro User</SelectItem>
+                  <SelectItem value="pro_user">pro Benutzer</SelectItem>
                   <SelectItem value="pro_server">pro Server</SelectItem>
                   <SelectItem value="pro_client">pro Client</SelectItem>
                   <SelectItem value="pro_device">pro Device</SelectItem>

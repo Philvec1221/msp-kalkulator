@@ -123,7 +123,7 @@ export function ServicesPage() {
   const getBillingTypeDisplay = (billingType: string) => {
     const types = {
       'fix': 'fix',
-      'pro_user': 'pro User',
+      'pro_user': 'pro Benutzer',
       'pro_server': 'pro Server', 
       'pro_client': 'pro Client'
     };
@@ -377,7 +377,7 @@ export function ServicesPage() {
                   <SelectContent>
                     <SelectItem value="all">Alle Typen</SelectItem>
                     <SelectItem value="fix">Fix</SelectItem>
-                    <SelectItem value="pro_user">pro User</SelectItem>
+                    <SelectItem value="pro_user">pro Benutzer</SelectItem>
                     <SelectItem value="pro_server">pro Server</SelectItem>
                     <SelectItem value="pro_client">pro Client</SelectItem>
                   </SelectContent>

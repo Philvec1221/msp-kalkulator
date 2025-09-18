@@ -192,7 +192,7 @@ bei Buchung Managed Total Secure Microsoft 365 Business Premium - EU bereits ent
                     <SelectItem value="fix">Fix</SelectItem>
                     <SelectItem value="pro_client">Pro Client</SelectItem>
                     <SelectItem value="pro_server">Pro Server</SelectItem>
-                    <SelectItem value="pro_user">Pro User</SelectItem>
+                    <SelectItem value="pro_user">Pro Benutzer</SelectItem>
                     <SelectItem value="pro_device">Pro Device</SelectItem>
                   </SelectContent>
                 </Select>

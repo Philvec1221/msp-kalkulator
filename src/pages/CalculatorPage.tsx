@@ -188,7 +188,7 @@ export function CalculatorPage() {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="users">Anzahl User</Label>
+              <Label htmlFor="users">Anzahl Benutzer</Label>
               <Input
                 id="users"
                 type="number"
@@ -217,7 +217,7 @@ export function CalculatorPage() {
               <span className="font-semibold">{quoteData.servers}</span>
             </div>
             <div>
-              <span className="text-sm text-muted-foreground">User: </span>
+              <span className="text-sm text-muted-foreground">Benutzer: </span>
               <span className="font-semibold">{quoteData.users}</span>
             </div>
           </div>
@@ -377,7 +377,7 @@ export function CalculatorPage() {
               <span className="font-semibold">{quoteData.servers}</span>
             </div>
             <div>
-              <span className="text-sm text-muted-foreground">User: </span>
+              <span className="text-sm text-muted-foreground">Benutzer: </span>
               <span className="font-semibold">{quoteData.users}</span>
             </div>
             <div>

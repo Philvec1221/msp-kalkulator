@@ -111,7 +111,7 @@ export function LicenseForm({ license, onSubmit, trigger }: LicenseFormProps) {
                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Fix">Fix</SelectItem>
-                  <SelectItem value="pro User">pro User</SelectItem>
+                  <SelectItem value="pro Benutzer">pro Benutzer</SelectItem>
                   <SelectItem value="pro Client">pro Client</SelectItem>
                   <SelectItem value="pro Server">pro Server</SelectItem>
                   <SelectItem value="per TB">per TB</SelectItem>

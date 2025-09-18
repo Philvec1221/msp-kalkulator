@@ -177,6 +177,7 @@ function getUniqueLicensesFromServices(
             quantity = config.servers;
             break;
           case 'pro_user':
+          case 'pro_benutzer':
           case 'per_user':
             quantity = config.users;
             break;

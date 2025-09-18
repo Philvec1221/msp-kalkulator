@@ -113,7 +113,7 @@ export function SavedOffersPage() {
                           {offer.servers} Server
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          {offer.users} User
+                          {offer.users} Benutzer
                         </Badge>
                       </div>
                     </TableCell>
