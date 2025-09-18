@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
 import { useServiceLicenses } from "@/hooks/useServiceLicenses";
+import { useEmployees } from "@/hooks/useEmployees";
 import { ServiceForm } from "@/components/forms/ServiceForm";
 import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ export function ServicesPage() {
   const { packages } = usePackages();
   const { licenses } = useLicenses();
   const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
+  const { employees } = useEmployees();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
   const [billingTypeFilter, setBillingTypeFilter] = useState("all");
@@ -46,6 +48,60 @@ export function ServicesPage() {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}:${mins.toString().padStart(2, '0')} Std`;
+  };
+
+  // Calculate average cost per minute from all active employees
+  const avgCostPerMinute = employees
+    .filter(emp => emp.active)
+    .reduce((sum, emp) => sum + emp.hourly_rate, 0) / 
+    (employees.filter(emp => emp.active).length || 1) / 60;
+
+  // Default configuration for service cost calculation
+  const defaultConfig = { workstations: 10, servers: 2, users: 25 };
+
+  // Calculate service costs (technical time + cost-effective licenses)
+  const calculateServiceCosts = (service: any) => {
+    // Technical time cost
+    const timeCost = service.time_in_minutes * avgCostPerMinute;
+    
+    // License costs - only include cost-effective licenses
+    const serviceLicenseIds = getLicensesByServiceId(service.id) || [];
+    const licenseCost = serviceLicenseIds.reduce((total, licenseId) => {
+      const license = licenses.find(l => l.id === licenseId);
+      const serviceLicense = serviceLicenses.find(sl => 
+        sl.service_id === service.id && sl.license_id === licenseId
+      );
+      
+      if (!license || !serviceLicense?.include_cost) return total;
+      
+      // Calculate quantity based on billing unit
+      let quantity = 1;
+      switch (license.billing_unit?.toLowerCase()) {
+        case 'pro user':
+        case 'benutzer':
+          quantity = defaultConfig.users;
+          break;
+        case 'pro server':
+        case 'server':
+          quantity = defaultConfig.servers;
+          break;
+        case 'pro client':
+        case 'client':
+        case 'arbeitsplatz':
+          quantity = defaultConfig.workstations;
+          break;
+        default:
+          quantity = 1; // Fix billing
+      }
+      
+      return total + (license.cost_per_month * quantity);
+    }, 0);
+    
+    return {
+      timeCost,
+      licenseCost,
+      totalCost: timeCost + licenseCost
+    };
   };
 
   const filteredServices = services
@@ -608,9 +664,22 @@ export function ServicesPage() {
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span className="text-muted-foreground">
-                            Technikzeit: {formatTime(service.time_in_minutes)}
+                            Technikzeit pro Monat: {formatTime(service.time_in_minutes)}
                           </span>
                         </div>
+                        {(() => {
+                          const serviceCosts = calculateServiceCosts(service);
+                          return (
+                            <div className="flex items-center gap-1">
+                              <span className="text-muted-foreground">
+                                EK gesamt pro Monat: <strong>{serviceCosts.totalCost.toFixed(2)} €</strong>
+                              </span>
+                              <span className="text-xs text-muted-foreground/70">
+                                (Technikzeit: {serviceCosts.timeCost.toFixed(2)} € + Lizenzen: {serviceCosts.licenseCost.toFixed(2)} €)
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   </div>
