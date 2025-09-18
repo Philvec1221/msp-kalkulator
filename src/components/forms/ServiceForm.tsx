@@ -365,9 +365,9 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
                                 </div>
                                 {hasConflict && (
                                   <div className="text-xs text-amber-700 mt-1">
-                                    ⚠️ Bereits verwendet in: {otherUsages.map(usage => 
-                                      `${usage.serviceName} ${usage.includeCost ? '(kostenwirksam)' : '(nicht kostenwirksam)'}`
-                                    ).join(', ')}
+                                     ⚠️ Bereits verwendet in: {otherUsages.slice(0, 3).map(usage => 
+                                       `${usage.serviceName} ${usage.includeCost ? '(kostenwirksam)' : '(nicht kostenwirksam)'}`
+                                     ).join(', ')}{otherUsages.length > 3 ? ` + ${otherUsages.length - 3} weitere` : ''}
                                   </div>
                                 )}
                               </div>
