@@ -37,7 +37,7 @@ const getPackageDescription = (level: string): string => {
 export function CustomerViewPage() {
   const [selectedPackage, setSelectedPackage] = useState<string>("basis");
   const [config, setConfig] = useState({
-    clients: 10,
+    workstations: 10,
     servers: 10,
     users: 10
   });
@@ -64,7 +64,7 @@ export function CustomerViewPage() {
         
         if (savedOffer) {
           setConfig({
-            clients: savedOffer.clients,
+            workstations: savedOffer.workstations,
             servers: savedOffer.servers,
             users: savedOffer.users
           });
@@ -167,8 +167,8 @@ export function CustomerViewPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center p-6 bg-blue-50 rounded-lg">
                 <Monitor className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-                <div className="text-3xl font-bold text-blue-600">{config.clients}</div>
-                <div className="text-sm text-muted-foreground">Clients</div>
+                <div className="text-3xl font-bold text-blue-600">{config.workstations}</div>
+                <div className="text-sm text-muted-foreground">Arbeitsplätze</div>
               </div>
               <div className="text-center p-6 bg-green-50 rounded-lg">
                 <Server className="h-8 w-8 text-green-600 mx-auto mb-3" />
@@ -322,7 +322,7 @@ export function CustomerViewPage() {
                       onClick={() => {
                         const params = new URLSearchParams({
                           package: packageKey,
-                          clients: config.clients.toString(),
+                          workstations: config.workstations.toString(),
                           servers: config.servers.toString(),
                           users: config.users.toString()
                         });

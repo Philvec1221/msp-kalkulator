@@ -7,7 +7,7 @@ interface SavedOffer {
   id: string;
   name: string;
   company_name?: string;
-  clients: number;
+  workstations: number;
   servers: number;
   users: number;
   selected_packages: Json;
@@ -21,7 +21,7 @@ interface SavedOffer {
 interface CreateSavedOfferData {
   name: string;
   company_name?: string;
-  clients: number;
+  workstations: number;
   servers: number;
   users: number;
   selected_packages: any[];

@@ -327,7 +327,6 @@ export type Database = {
       saved_offers: {
         Row: {
           calculation_results: Json
-          clients: number
           company_name: string | null
           created_at: string
           created_by: string | null
@@ -338,10 +337,10 @@ export type Database = {
           servers: number
           updated_at: string
           users: number
+          workstations: number
         }
         Insert: {
           calculation_results?: Json
-          clients?: number
           company_name?: string | null
           created_at?: string
           created_by?: string | null
@@ -352,10 +351,10 @@ export type Database = {
           servers?: number
           updated_at?: string
           users?: number
+          workstations?: number
         }
         Update: {
           calculation_results?: Json
-          clients?: number
           company_name?: string | null
           created_at?: string
           created_by?: string | null
@@ -366,6 +365,7 @@ export type Database = {
           servers?: number
           updated_at?: string
           users?: number
+          workstations?: number
         }
         Relationships: [
           {

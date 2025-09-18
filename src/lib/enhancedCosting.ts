@@ -44,7 +44,7 @@ export function calculateEnhancedPackageCosts(
   packageConfigs: PackageConfig[],
   avgCostPerMinute: number,
   packageType: string,
-  config: { clients: number; servers: number; users: number }
+  config: { workstations: number; servers: number; users: number }
 ): EnhancedPackageCostCalculation {
   
   // Get unique licenses for this package (same as original logic)
@@ -80,7 +80,7 @@ export function calculateEnhancedPackageCosts(
     let quantity = 1;
     switch (service.billing_type) {
       case 'pro_client':
-        quantity = config.clients;
+        quantity = config.workstations;
         break;
       case 'pro_server':
         quantity = config.servers;
@@ -151,7 +151,7 @@ function getUniqueLicensesFromServices(
   services: Service[],
   licenses: License[],
   serviceLicenses: ServiceLicense[],
-  config: { clients: number; servers: number; users: number }
+  config: { workstations: number; servers: number; users: number }
 ): UniqueLicense[] {
   const licenseMap = new Map<string, UniqueLicense>();
 
@@ -170,7 +170,7 @@ function getUniqueLicensesFromServices(
         switch (license.billing_unit?.toLowerCase()) {
           case 'pro_client':
           case 'per_client':
-            quantity = config.clients;
+            quantity = config.workstations;
             break;
           case 'pro_server':
           case 'per_server':

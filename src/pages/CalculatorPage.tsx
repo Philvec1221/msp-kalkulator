@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 interface QuoteData {
   customerNumber: string;
   quoteTitle: string;
-  clients: number;
+  workstations: number;
   servers: number;
   users: number;
   markup: number;
@@ -48,7 +48,7 @@ export function CalculatorPage() {
   const [quoteData, setQuoteData] = useState<QuoteData>({
     customerNumber: "z.B. K-2024-001",
     quoteTitle: "IT-Services Angebot",
-    clients: 10,
+    workstations: 10,
     servers: 2,
     users: 25,
     markup: 100,
@@ -82,7 +82,7 @@ export function CalculatorPage() {
           packageConfigs,
           averageCostPerMinute,
           packageLevel.toLowerCase(),
-          { clients: quoteData.clients, servers: quoteData.servers, users: quoteData.users }
+          { workstations: quoteData.workstations, servers: quoteData.servers, users: quoteData.users }
         );
         
         const totalEK = packageCosts.totalCostEK;
@@ -100,7 +100,7 @@ export function CalculatorPage() {
         allPackages: allPackagesData
       }));
     }
-  }, [services, licenses, averageCostPerMinute, quoteData.clients, quoteData.servers, quoteData.users, quoteData.markup]);
+  }, [services, licenses, averageCostPerMinute, quoteData.workstations, quoteData.servers, quoteData.users, quoteData.markup]);
 
   const handleSaveOffer = async () => {
     // Use existing customer number and title if no custom name is provided
@@ -109,7 +109,7 @@ export function CalculatorPage() {
     const offerId = await createSavedOffer({
       name: offerName,
       company_name: quoteData.customerNumber,
-      clients: quoteData.clients,
+      workstations: quoteData.workstations,
       servers: quoteData.servers,
       users: quoteData.users,
       selected_packages: packageLevels,
@@ -136,7 +136,7 @@ export function CalculatorPage() {
     const offerId = await createSavedOffer({
       name: autoName,
       company_name: quoteData.customerNumber,
-      clients: quoteData.clients,
+      workstations: quoteData.workstations,
       servers: quoteData.servers,
       users: quoteData.users,
       selected_packages: packageLevels,
@@ -166,12 +166,12 @@ export function CalculatorPage() {
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="clients">Anzahl Clients</Label>
+              <Label htmlFor="workstations">Anzahl Arbeitsplätze</Label>
               <Input
-                id="clients"
+                id="workstations"
                 type="number"
-                value={quoteData.clients}
-                onChange={(e) => setQuoteData(prev => ({ ...prev, clients: parseInt(e.target.value) || 0 }))}
+                value={quoteData.workstations}
+                onChange={(e) => setQuoteData(prev => ({ ...prev, workstations: parseInt(e.target.value) || 0 }))}
                 className="text-center"
               />
             </div>
@@ -209,8 +209,8 @@ export function CalculatorPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
-              <span className="text-sm text-muted-foreground">Clients: </span>
-              <span className="font-semibold">{quoteData.clients}</span>
+              <span className="text-sm text-muted-foreground">Arbeitsplätze: </span>
+              <span className="font-semibold">{quoteData.workstations}</span>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Server: </span>
@@ -369,8 +369,8 @@ export function CalculatorPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
             <div>
-              <span className="text-sm text-muted-foreground">Clients: </span>
-              <span className="font-semibold">{quoteData.clients}</span>
+              <span className="text-sm text-muted-foreground">Arbeitsplätze: </span>
+              <span className="font-semibold">{quoteData.workstations}</span>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Server: </span>

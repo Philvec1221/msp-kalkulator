@@ -20,7 +20,7 @@ export default function ContractAppendixPage() {
 
   // Get URL parameters
   const packageName = searchParams.get("package") || "basis";
-  const clients = parseInt(searchParams.get("clients") || "10");
+  const workstations = parseInt(searchParams.get("workstations") || "10");
   const servers = parseInt(searchParams.get("servers") || "10");
   const users = parseInt(searchParams.get("users") || "10");
 
@@ -84,7 +84,7 @@ export default function ContractAppendixPage() {
     let content = `VERTRAGSANHANG - ${formattedName.toUpperCase()}\n\n`;
     content += `Paketbeschreibung:\n${description}\n\n`;
     content += `Konfiguration:\n`;
-    content += `- Clients: ${clients}\n`;
+    content += `- Arbeitsplätze: ${workstations}\n`;
     content += `- Server: ${servers}\n`;
     content += `- Benutzer: ${users}\n\n`;
     content += `ENTHALTENE SERVICES:\n\n`;
@@ -201,8 +201,8 @@ export default function ContractAppendixPage() {
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div className="text-center p-3 bg-muted rounded">
-                <div className="font-semibold text-lg">{clients}</div>
-                <div className="text-muted-foreground">Clients</div>
+                <div className="font-semibold text-lg">{workstations}</div>
+                <div className="text-muted-foreground">Arbeitsplätze</div>
               </div>
               <div className="text-center p-3 bg-muted rounded">
                 <div className="font-semibold text-lg">{servers}</div>

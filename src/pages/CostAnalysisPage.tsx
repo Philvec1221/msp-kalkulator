@@ -42,7 +42,7 @@ export function CostAnalysisPage() {
   // Calculate cost breakdown for each package with enhanced costing
   const packageAnalysis: PackageCostBreakdown[] = useMemo(() => {
     const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
-    const defaultConfig = { clients: 1, servers: 1, users: 1 }; // Base calculation for analysis
+    const defaultConfig = { workstations: 1, servers: 1, users: 1 }; // Base calculation for analysis
     
     return packageLevels.map(level => {
       const packageServices = getServicesForPackageWithConfig(services, packageConfigs, level);

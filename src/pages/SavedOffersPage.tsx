@@ -107,7 +107,7 @@ export function SavedOffersPage() {
                     <TableCell>
                       <div className="flex gap-1">
                         <Badge variant="outline" className="text-xs">
-                          {offer.clients} Clients
+                          {offer.workstations} Arbeitsplätze
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {offer.servers} Server
