@@ -162,7 +162,7 @@ export function ServicesPage() {
       'fix': 'fix',
       'pro_user': 'pro Benutzer',
       'pro_server': 'pro Server', 
-      'pro_client': 'pro Client'
+      'pro_client': 'pro Device'
     };
     return types[billingType as keyof typeof types] || billingType;
   };
@@ -416,7 +416,7 @@ export function ServicesPage() {
                     <SelectItem value="fix">Fix</SelectItem>
                     <SelectItem value="pro_user">pro Benutzer</SelectItem>
                     <SelectItem value="pro_server">pro Server</SelectItem>
-                    <SelectItem value="pro_client">pro Client</SelectItem>
+                    <SelectItem value="pro_client">pro Device</SelectItem>
                   </SelectContent>
                 </Select>
 

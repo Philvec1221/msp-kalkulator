@@ -53,7 +53,7 @@ export default function ContractAppendixPage() {
   const getBillingTypeDescription = (billingType: string) => {
     switch (billingType) {
       case 'fix': return 'Pauschal';
-      case 'pro_client': return 'Pro Client';
+      case 'pro_client': return 'Pro Device';
       case 'pro_server': return 'Pro Server';
       case 'pro_user': return 'Pro Benutzer';
       case 'pro_device': return 'Pro Gerät';
