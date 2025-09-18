@@ -11,6 +11,7 @@ import { useServiceLicenses } from "@/hooks/useServiceLicenses";
 import { useServicePackages } from "@/hooks/useServicePackages";
 import { useToast } from "@/hooks/use-toast";
 import { formatDescription } from "@/lib/formatDescription";
+import { getBillingTypeDisplay } from "@/lib/billingUtils";
 
 export default function ContractAppendixPage() {
   const [searchParams] = useSearchParams();
@@ -50,16 +51,7 @@ export default function ContractAppendixPage() {
     return name === 'allin black' ? 'Allin Black' : name.charAt(0).toUpperCase() + name.slice(1);
   };
 
-  const getBillingTypeDescription = (billingType: string) => {
-    switch (billingType) {
-      case 'fix': return 'Pauschal';
-      case 'pro_client': return 'Pro Device';
-      case 'pro_server': return 'Pro Server';
-      case 'pro_user': return 'Pro Benutzer';
-      case 'pro_device': return 'Pro Gerät';
-      default: return billingType;
-    }
-  };
+  // Moved to shared utility
 
   const getServiceLicenses = (serviceId: string) => {
     const serviceLicenseRelations = serviceLicenses.filter(sl => sl.service_id === serviceId);
@@ -94,7 +86,7 @@ export default function ContractAppendixPage() {
       if (service.description) {
         content += `   Beschreibung: ${service.description}\n`;
       }
-      content += `   Abrechnung: ${getBillingTypeDescription(service.billing_type || 'fix')}\n`;
+      content += `   Abrechnung: ${getBillingTypeDisplay(service.billing_type || 'fix')}\n`;
       content += `   Zeitaufwand: ${service.time_in_minutes} Minuten\n`;
       
       const serviceLicenseList = getServiceLicenses(service.id);
@@ -266,7 +258,7 @@ export default function ContractAppendixPage() {
                         <div className="flex items-center gap-2 text-sm">
                           <span className="font-medium">Abrechnung:</span>
                           <Badge variant="outline">
-                            {getBillingTypeDescription(service.billing_type || 'fix')}
+                            {getBillingTypeDisplay(service.billing_type || 'fix')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-2 text-sm">

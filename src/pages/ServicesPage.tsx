@@ -14,6 +14,7 @@ import { BulkImportDialog } from "@/components/forms/BulkImportDialog";
 import { toast } from "sonner";
 import { formatDescription } from "@/lib/formatDescription";
 import { getPackageBadgeProps } from "@/lib/colors";
+import { getBillingTypeDisplay, getBillingTypeBadgeVariant } from "@/lib/billingUtils";
 import { usePackages } from "@/hooks/usePackages";
 import {
   AlertDialog,
@@ -157,15 +158,7 @@ export function ServicesPage() {
       return 0;
     });
 
-  const getBillingTypeDisplay = (billingType: string) => {
-    const types = {
-      'fix': 'fix',
-      'pro_user': 'pro Benutzer',
-      'pro_server': 'pro Server', 
-      'pro_client': 'pro Device'
-    };
-    return types[billingType as keyof typeof types] || billingType;
-  };
+  // Moved to shared utility
 
   const getPackageLevelDisplay = (packageLevel: string) => {
     const levels = {
@@ -183,15 +176,7 @@ export function ServicesPage() {
     return getPackageBadgeProps(packages || [], packageLevel);
   };
 
-  const getBillingTypeBadgeVariant = (billingType: string) => {
-    switch (billingType) {
-      case 'pro_server': return 'default';
-      case 'pro_user': return 'secondary';
-      case 'pro_client': return 'outline';
-      case 'fix': return 'destructive';
-      default: return 'default';
-    }
-  };
+  // Moved to shared utility
 
   const handleDragStart = (e: React.DragEvent, serviceId: string) => {
     setDraggedServiceId(serviceId);
