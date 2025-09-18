@@ -3,7 +3,7 @@ export type BillingType = 'fix' | 'pro_user' | 'pro_server' | 'pro_device' | 'pr
 export const getBillingTypeDisplay = (billingType: string): string => {
   const types: Record<string, string> = {
     'fix': 'Pauschal',
-    'pro_user': 'Pro Benutzer',
+    'pro_user': 'Pro User',
     'pro_server': 'Pro Server',
     'pro_device': 'Pro Gerät',
     'pro_client': 'Pro Device', // Legacy support
@@ -14,14 +14,6 @@ export const getBillingTypeDisplay = (billingType: string): string => {
 };
 
 export const getBillingTypeBadgeVariant = (billingType: string): "default" | "secondary" | "destructive" | "outline" => {
-  const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-    'fix': 'destructive',
-    'pro_user': 'secondary', 
-    'pro_server': 'default',
-    'pro_device': 'outline',
-    'pro_client': 'outline', // Legacy support
-    'pro_site': 'secondary',
-    'per_tb': 'default'
-  };
-  return variants[billingType] || 'default';
+  // Use consistent "secondary" variant for all billing types to ensure uniform appearance
+  return 'secondary';
 };

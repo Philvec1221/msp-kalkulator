@@ -578,7 +578,10 @@ export function ServicesPage() {
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-semibold text-lg">{service.name}</h3>
                         <div className="flex gap-2">
-                          <Badge variant={getBillingTypeBadgeVariant(service.billing_type)}>
+                          <Badge 
+                            variant={getBillingTypeBadgeVariant(service.billing_type)}
+                            className="whitespace-nowrap min-w-fit"
+                          >
                             {getBillingTypeDisplay(service.billing_type)}
                           </Badge>
                           <Badge 
