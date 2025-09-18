@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Calculator, DollarSign, Clock, Users, Layers } from "lucide-react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
@@ -30,6 +32,13 @@ export function CostAnalysisPage() {
   const { employees } = useEmployees();
   const { packageConfigs } = usePackageConfigs();
 
+  // Configuration state - matching CalculatorPage defaults
+  const [config, setConfig] = useState({
+    workstations: 10,
+    servers: 2,
+    users: 25
+  });
+
   // Standard markup from calculator (100%)
   const standardMarkup = 100;
 
@@ -42,7 +51,6 @@ export function CostAnalysisPage() {
   // Calculate cost breakdown for each package with enhanced costing
   const packageAnalysis: PackageCostBreakdown[] = useMemo(() => {
     const packageLevels = ['basis', 'gold', 'allin', 'allin black'];
-    const defaultConfig = { workstations: 1, servers: 1, users: 1 }; // Base calculation for analysis
     
     return packageLevels.map(level => {
       const packageServices = getServicesForPackageWithConfig(services, packageConfigs, level);
@@ -55,7 +63,7 @@ export function CostAnalysisPage() {
         packageConfigs,
         avgCostPerMinute,
         level,
-        defaultConfig
+        config
       );
 
       // Build service costs breakdown
@@ -88,7 +96,7 @@ export function CostAnalysisPage() {
         serviceCosts
       };
     });
-  }, [services, licenses, avgCostPerMinute, serviceLicenses, packageConfigs, standardMarkup]);
+  }, [services, licenses, avgCostPerMinute, serviceLicenses, packageConfigs, standardMarkup, config]);
 
   const getPackageColor = (packageName: string) => {
     switch (packageName.toLowerCase()) {
@@ -107,6 +115,56 @@ export function CostAnalysisPage() {
         <h1 className="text-3xl font-bold text-foreground mb-2">Interne Kostenanalyse</h1>
         <p className="text-muted-foreground">Detaillierte Aufschlüsselung der Kosten und Margen pro Paket</p>
       </div>
+
+      {/* Configuration Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Konfiguration für Kostenanalyse</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="workstations">Anzahl Arbeitsplätze</Label>
+              <Input
+                id="workstations"
+                type="number"
+                value={config.workstations}
+                onChange={(e) => setConfig(prev => ({ ...prev, workstations: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="servers">Anzahl Server</Label>
+              <Input
+                id="servers"
+                type="number"
+                value={config.servers}
+                onChange={(e) => setConfig(prev => ({ ...prev, servers: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="users">Anzahl Benutzer</Label>
+              <Input
+                id="users"
+                type="number"
+                value={config.users}
+                onChange={(e) => setConfig(prev => ({ ...prev, users: parseInt(e.target.value) || 0 }))}
+                className="text-center"
+              />
+            </div>
+          </div>
+          
+          {/* Configuration Overview */}
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+            <div className="text-sm text-muted-foreground">
+              <strong>Aktuelle Konfiguration:</strong> {config.workstations} Arbeitsplätze, {config.servers} Server, {config.users} Benutzer
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
