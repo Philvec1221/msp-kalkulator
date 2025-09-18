@@ -9,7 +9,7 @@ export interface Service {
   description: string | null;
   product_name: string | null;
   time_in_minutes: number;
-  billing_type: 'fix' | 'pro_client' | 'pro_server' | 'pro_user' | 'pro_device';
+  billing_type: 'fix' | 'pro_user' | 'pro_server' | 'pro_device' | 'pro_site' | 'per_tb';
   package_level: string;
   min_package_level?: string;
   active: boolean;

@@ -29,12 +29,20 @@ interface ServiceFormProps {
 
 export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
   const [open, setOpen] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string;
+    description: string;
+    product_name: string;
+    time_in_minutes: number;
+    billing_type: 'fix' | 'pro_user' | 'pro_server' | 'pro_device' | 'pro_site' | 'per_tb';
+    package_level: string;
+    active: boolean;
+  }>({
     name: service?.name || '',
     description: service?.description || '',
     product_name: service?.product_name || '',
     time_in_minutes: service?.time_in_minutes || 0,
-    billing_type: service?.billing_type || 'fix',
+    billing_type: (service?.billing_type as 'fix' | 'pro_user' | 'pro_server' | 'pro_device' | 'pro_site' | 'per_tb') || 'fix',
     package_level: service?.package_level || 'Basis',
     active: service?.active ?? true,
   });
@@ -108,7 +116,7 @@ export function ServiceForm({ service, onSubmit, trigger }: ServiceFormProps) {
       
       setOpen(false);
       if (!service) {
-        setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix', package_level: 'Basis', active: true });
+        setFormData({ name: '', description: '', product_name: '', time_in_minutes: 0, billing_type: 'fix' as const, package_level: 'Basis', active: true });
         setSelectedLicenses([]);
         setIncludeCosts({});
       }

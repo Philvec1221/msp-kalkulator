@@ -76,7 +76,7 @@ export function BulkImportDialog({ onImportComplete }: BulkImportDialogProps) {
           description: service.description || null,
           product_name: null,
           time_in_minutes: parseInt(defaultTime),
-          billing_type: defaultBillingType as 'fix' | 'pro_client' | 'pro_server' | 'pro_user' | 'pro_device',
+          billing_type: defaultBillingType as 'fix' | 'pro_user' | 'pro_server' | 'pro_device' | 'pro_site' | 'per_tb',
           package_level: defaultPackageLevel,
           active: true,
         });

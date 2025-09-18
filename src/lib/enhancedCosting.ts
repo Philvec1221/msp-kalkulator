@@ -79,7 +79,7 @@ export function calculateEnhancedPackageCosts(
     // Calculate base time cost
     let quantity = 1;
     switch (service.billing_type) {
-      case 'pro_client':
+      case 'pro_device':
         quantity = config.workstations;
         break;
       case 'pro_server':
@@ -87,6 +87,12 @@ export function calculateEnhancedPackageCosts(
         break;
       case 'pro_user':
         quantity = config.users;
+        break;
+      case 'pro_site':
+        quantity = 1; // Per site - assuming one site
+        break;
+      case 'per_tb':
+        quantity = 1; // Per TB - default to 1, could be configurable later
         break;
       case 'fix':
       default:
