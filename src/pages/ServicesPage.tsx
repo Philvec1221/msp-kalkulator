@@ -59,12 +59,12 @@ export function ServicesPage() {
   // Default configuration for service cost calculation
   const defaultConfig = { workstations: 10, servers: 2, users: 25 };
 
-  // Calculate service costs (technical time + cost-effective licenses)
+  // Calculate service costs (technical time + base license costs)
   const calculateServiceCosts = (service: any) => {
     // Technical time cost
     const timeCost = service.time_in_minutes * avgCostPerMinute;
     
-    // License costs - only include cost-effective licenses
+    // License costs - only base costs per license unit (no customer quantity multiplication)
     const serviceLicenseIds = getLicensesByServiceId(service.id) || [];
     const licenseCost = serviceLicenseIds.reduce((total, licenseId) => {
       const license = licenses.find(l => l.id === licenseId);
@@ -74,27 +74,8 @@ export function ServicesPage() {
       
       if (!license || !serviceLicense?.include_cost) return total;
       
-      // Calculate quantity based on billing unit
-      let quantity = 1;
-      switch (license.billing_unit?.toLowerCase()) {
-        case 'pro user':
-        case 'benutzer':
-          quantity = defaultConfig.users;
-          break;
-        case 'pro server':
-        case 'server':
-          quantity = defaultConfig.servers;
-          break;
-        case 'pro client':
-        case 'client':
-        case 'arbeitsplatz':
-          quantity = defaultConfig.workstations;
-          break;
-        default:
-          quantity = 1; // Fix billing
-      }
-      
-      return total + (license.cost_per_month * quantity);
+      // Use base cost per month (cost per unit for "pro X" licenses, full cost for "Fix" licenses)
+      return total + license.cost_per_month;
     }, 0);
     
     return {
