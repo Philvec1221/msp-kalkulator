@@ -32,7 +32,7 @@ export function ServicesPage() {
   const { services, loading, addService, updateService, deleteService, updateServiceOrder } = useServices();
   const { packages } = usePackages();
   const { licenses } = useLicenses();
-  const { serviceLicenses, getLicensesByServiceId } = useServiceLicenses();
+  const { serviceLicenses, getLicensesByServiceId, refetch: refetchServiceLicenses } = useServiceLicenses();
   const { employees } = useEmployees();
   const [searchTerm, setSearchTerm] = useState("");
   const [packageFilter, setPackageFilter] = useState("all");
@@ -655,7 +655,11 @@ export function ServicesPage() {
                   <div className="flex items-center gap-2">
                     <ServiceForm
                       service={service}
-                      onSubmit={(data) => updateService(service.id, data)}
+                      onSubmit={async (data) => {
+                        await updateService(service.id, data);
+                        // Refresh service licenses after updating service
+                        await refetchServiceLicenses();
+                      }}
                       trigger={
                         <Button variant="ghost" size="sm">
                           <Edit className="h-4 w-4" />
