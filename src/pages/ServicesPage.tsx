@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical, ChevronUp, ChevronDown, X, ArrowUpDown, Star, Zap } from "lucide-react";
+import { Settings, Edit, Trash, Search, Filter, Clock, GripVertical, ChevronUp, ChevronDown, X, ArrowUpDown, Star, Zap, Play, Pause, CheckCircle2 } from "lucide-react";
 import { useState } from "react";
 import { useServices } from "@/hooks/useServices";
 import { useLicenses } from "@/hooks/useLicenses";
@@ -16,6 +16,7 @@ import { formatDescription } from "@/lib/formatDescription";
 import { getPackageBadgeProps } from "@/lib/colors";
 import { getBillingTypeDisplay, getBillingTypeBadgeVariant } from "@/lib/billingUtils";
 import { usePackages } from "@/hooks/usePackages";
+import { ServiceStatusBadge } from "@/components/ui/service-status-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function ServicesPage() {
-  const { services, loading, addService, updateService, deleteService, updateServiceOrder } = useServices();
+  const { services, loading, addService, updateService, deleteService, updateServiceOrder, toggleServiceActive } = useServices();
   const { packages } = usePackages();
   const { licenses } = useLicenses();
   const { serviceLicenses, getLicensesByServiceId, refetch: refetchServiceLicenses } = useServiceLicenses();
@@ -533,6 +534,8 @@ export function ServicesPage() {
                 draggedServiceId === service.id ? 'opacity-50 scale-95' : ''
               } ${isDragOverId === service.id && draggedServiceId !== service.id ? 'ring-2 ring-primary ring-offset-2 bg-primary/5' : ''} ${
                 draggedServiceId && draggedServiceId !== service.id ? 'border-primary/30' : ''
+              } ${
+                !service.active ? 'opacity-60 bg-muted/30 border-muted-foreground/30' : 'hover:shadow-md'
               }`}
             >
               <CardContent className="p-6">
@@ -546,7 +549,11 @@ export function ServicesPage() {
                         className="flex flex-col gap-1 cursor-grab active:cursor-grabbing"
                         title="Zum Verschieben ziehen"
                       >
-                        <GripVertical className="h-4 w-4 text-muted-foreground hover:text-primary transition-colors" />
+                        <GripVertical className={`h-4 w-4 transition-colors ${
+                          service.active 
+                            ? 'text-muted-foreground hover:text-primary' 
+                            : 'text-muted-foreground/50'
+                        }`} />
                       </div>
                       <div className="flex flex-col gap-1">
                         <Button
@@ -570,14 +577,27 @@ export function ServicesPage() {
                           <ChevronDown className="h-3 w-3" />
                         </Button>
                       </div>
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Settings className="h-4 w-4 text-primary" />
+                      <div className={`p-2 rounded-lg transition-colors ${
+                        service.active 
+                          ? 'bg-primary/10' 
+                          : 'bg-muted-foreground/10'
+                      }`}>
+                        <Settings className={`h-4 w-4 transition-colors ${
+                          service.active 
+                            ? 'text-primary' 
+                            : 'text-muted-foreground'
+                        }`} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-semibold text-lg">{service.name}</h3>
+                        <h3 className={`font-semibold text-lg transition-colors ${
+                          service.active ? 'text-foreground' : 'text-muted-foreground'
+                        }`}>
+                          {service.name}
+                        </h3>
                         <div className="flex gap-2">
+                          <ServiceStatusBadge active={service.active} />
                           <Badge 
                             variant={getBillingTypeBadgeVariant(service.billing_type)}
                             className="whitespace-nowrap min-w-fit"
@@ -592,7 +612,9 @@ export function ServicesPage() {
                         </div>
                       </div>
                       {service.description && (
-                        <div className="text-sm text-muted-foreground mb-3">
+                        <div className={`text-sm mb-3 transition-colors ${
+                          service.active ? 'text-muted-foreground' : 'text-muted-foreground/70'
+                        }`}>
                           {formatDescription(service.description)}
                         </div>
                       )}
@@ -614,7 +636,9 @@ export function ServicesPage() {
                                     <Badge 
                                       key={license.id} 
                                       variant={includeCost ? "outline" : "secondary"} 
-                                      className={`text-xs ${!includeCost ? 'opacity-60' : ''}`}
+                                      className={`text-xs ${!includeCost ? 'opacity-60' : ''} ${
+                                        !service.active ? 'opacity-50' : ''
+                                      }`}
                                       title={includeCost ? 'Kosten werden einbezogen' : 'Kosten werden ausgeschlossen'}
                                     >
                                       {license.name}
@@ -631,8 +655,12 @@ export function ServicesPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">
+                          <Clock className={`h-4 w-4 transition-colors ${
+                            service.active ? 'text-muted-foreground' : 'text-muted-foreground/50'
+                          }`} />
+                          <span className={`transition-colors ${
+                            service.active ? 'text-muted-foreground' : 'text-muted-foreground/70'
+                          }`}>
                             Technikzeit pro Monat: {formatTime(service.time_in_minutes)}
                           </span>
                         </div>
@@ -640,10 +668,14 @@ export function ServicesPage() {
                           const serviceCosts = calculateServiceCosts(service);
                           return (
                             <div className="flex items-center gap-1">
-                              <span className="text-muted-foreground">
+                              <span className={`transition-colors ${
+                                service.active ? 'text-muted-foreground' : 'text-muted-foreground/70'
+                              }`}>
                                 EK gesamt pro Monat: <strong>{serviceCosts.totalCost.toFixed(2)} €</strong>
                               </span>
-                              <span className="text-xs text-muted-foreground/70">
+                              <span className={`text-xs transition-colors ${
+                                service.active ? 'text-muted-foreground/70' : 'text-muted-foreground/50'
+                              }`}>
                                 (Technikzeit: {serviceCosts.timeCost.toFixed(2)} € + Lizenzen: {serviceCosts.licenseCost.toFixed(2)} €)
                               </span>
                             </div>
@@ -653,6 +685,25 @@ export function ServicesPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant={service.active ? "outline" : "default"}
+                      size="sm"
+                      onClick={() => toggleServiceActive(service.id)}
+                      title={service.active ? "Service deaktivieren" : "Service aktivieren"}
+                      className="transition-all duration-200"
+                    >
+                      {service.active ? (
+                        <>
+                          <Pause className="h-4 w-4 mr-1" />
+                          Deaktivieren
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-1" />
+                          Aktivieren
+                        </>
+                      )}
+                    </Button>
                     <ServiceForm
                       service={service}
                       onSubmit={async (data) => {

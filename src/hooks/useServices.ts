@@ -206,6 +206,29 @@ export function useServices() {
     }
   };
 
+  const toggleServiceActive = async (id: string) => {
+    try {
+      const service = services.find(s => s.id === id);
+      if (!service) throw new Error('Service nicht gefunden');
+      
+      const newActiveStatus = !service.active;
+      await updateService(id, { active: newActiveStatus });
+      
+      toast({
+        title: "Erfolg",
+        description: `Service wurde ${newActiveStatus ? 'aktiviert' : 'deaktiviert'}.`,
+      });
+    } catch (error) {
+      console.error('Error toggling service status:', error);
+      toast({
+        title: "Fehler",
+        description: "Service-Status konnte nicht geändert werden.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchServices();
   }, []);
@@ -280,6 +303,7 @@ export function useServices() {
     addService,
     updateService,
     deleteService,
+    toggleServiceActive,
     updateServiceOrder,
     refetch: fetchServices
   };
