@@ -10,7 +10,7 @@ export function ServiceStatusBadge({ active, className }: ServiceStatusBadgeProp
   return (
     <Badge
       variant={active ? "default" : "secondary"}
-      className={`flex items-center gap-1 ${className}`}
+      className={`flex items-center gap-1 whitespace-nowrap shrink-0 text-xs ${className}`}
     >
       {active ? (
         <>

@@ -590,22 +590,23 @@ export function ServicesPage() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className={`font-semibold text-lg transition-colors ${
+                      <div className="flex items-start gap-3 mb-2">
+                        <h3 className={`font-semibold text-lg transition-colors flex-shrink-0 ${
                           service.active ? 'text-foreground' : 'text-muted-foreground'
                         }`}>
                           {service.name}
                         </h3>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap items-center">
                           <ServiceStatusBadge active={service.active} />
                           <Badge 
                             variant={getBillingTypeBadgeVariant(service.billing_type)}
-                            className="whitespace-nowrap min-w-fit"
+                            className="whitespace-nowrap shrink-0 text-xs"
                           >
                             {getBillingTypeDisplay(service.billing_type)}
                           </Badge>
                           <Badge 
                             {...getPackageBadgePropsForService(service.package_level)}
+                            className="whitespace-nowrap shrink-0 text-xs"
                           >
                             {getPackageLevelDisplay(service.package_level)}
                           </Badge>
