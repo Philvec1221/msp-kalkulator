@@ -253,39 +253,41 @@ export function CustomerViewPage() {
                         
                         return (
                           <div key={index} className="p-3 bg-muted/30 rounded-lg">
-                            <div className="flex items-start gap-2 mb-2">
-                              <span className="text-lg">
+                            <div className="flex items-start gap-2">
+                              <span className="text-lg shrink-0">
                                 {packageConfig ? getInclusionIcon(packageConfig.inclusion_type as InclusionType) : '✓'}
                               </span>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-sm font-medium">{service.name}</span>
-                                  {packageConfig && (
+                              <div className="flex-1 min-w-0">
+                                <div className="mb-1">
+                                  <span className="text-sm font-medium break-words">{service.name}</span>
+                                </div>
+                                {packageConfig && (
+                                  <div className="mb-2">
                                     <Badge 
                                       variant={getInclusionVariant(packageConfig.inclusion_type as InclusionType)}
-                                      className="text-xs"
+                                      className="text-xs whitespace-nowrap"
                                     >
                                       {getInclusionLabel(packageConfig.inclusion_type as InclusionType)}
                                     </Badge>
-                                  )}
-                                </div>
+                                  </div>
+                                )}
                                 
                                 {packageConfig && (
                                   <div className="space-y-1 text-xs text-muted-foreground">
                                     {packageConfig.sla_response_time && (
                                       <div className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        <span>Reaktionszeit: {packageConfig.sla_response_time}</span>
+                                        <Clock className="h-3 w-3 shrink-0" />
+                                        <span className="break-words">Reaktionszeit: {packageConfig.sla_response_time}</span>
                                       </div>
                                     )}
                                     {packageConfig.sla_availability && (
                                       <div className="flex items-center gap-1">
-                                        <Shield className="h-3 w-3" />
-                                        <span>Verfügbarkeit: {packageConfig.sla_availability}</span>
+                                        <Shield className="h-3 w-3 shrink-0" />
+                                        <span className="break-words">Verfügbarkeit: {packageConfig.sla_availability}</span>
                                       </div>
                                     )}
                                     {packageConfig.custom_description && (
-                                      <div className="text-xs italic">
+                                      <div className="text-xs italic break-words">
                                         {packageConfig.custom_description}
                                       </div>
                                     )}
