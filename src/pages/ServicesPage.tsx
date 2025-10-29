@@ -590,27 +590,25 @@ export function ServicesPage() {
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-3 mb-2">
-                        <h3 className={`font-semibold text-lg transition-colors flex-shrink-0 ${
-                          service.active ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          {service.name}
-                        </h3>
-                        <div className="flex gap-2 flex-wrap items-center">
-                          <ServiceStatusBadge active={service.active} />
-                          <Badge 
-                            variant={getBillingTypeBadgeVariant(service.billing_type)}
-                            className="whitespace-nowrap shrink-0 text-xs"
-                          >
-                            {getBillingTypeDisplay(service.billing_type)}
-                          </Badge>
-                          <Badge 
-                            {...getPackageBadgePropsForService(service.package_level)}
-                            className="whitespace-nowrap shrink-0 text-xs"
-                          >
-                            {getPackageLevelDisplay(service.package_level)}
-                          </Badge>
-                        </div>
+                      <h3 className={`font-semibold text-lg transition-colors mb-2 ${
+                        service.active ? 'text-foreground' : 'text-muted-foreground'
+                      }`}>
+                        {service.name}
+                      </h3>
+                      <div className="flex gap-2 flex-wrap items-center mb-2">
+                        <ServiceStatusBadge active={service.active} />
+                        <Badge 
+                          variant={getBillingTypeBadgeVariant(service.billing_type)}
+                          className="whitespace-nowrap shrink-0 text-xs"
+                        >
+                          {getBillingTypeDisplay(service.billing_type)}
+                        </Badge>
+                        <Badge 
+                          {...getPackageBadgePropsForService(service.package_level)}
+                          className="whitespace-nowrap shrink-0 text-xs"
+                        >
+                          {getPackageLevelDisplay(service.package_level)}
+                        </Badge>
                       </div>
                       {service.description && (
                         <div className={`text-sm mb-3 transition-colors ${
